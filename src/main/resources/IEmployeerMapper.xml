@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+    在MyBatis中，Mapper中的namespace用于绑定Dao接口的，即面向接口编程。
+    它的好处在于当使用了namespace之后就可以不用写接口实现类，业务逻辑会直接通过这个绑定寻找到相对应的SQL语句进行对应的数据处理，例如：
+    Employeer employeer = (Employeer) session.selectOIEmployeerMapperpper.findEmployeerByID", id);
+	Employeer employeer = session.getMapcom.whz.mapperinterface.IEmployeerMapperpper.class).findEmployeerByID(id);
+    -->
+<mapper namespace="com.whz.mapperinterface.IEmployeerMapper">
+
+    <!--
+        id：在命名空间中唯一的标识符，可以被用来引用这条语句，同时这个id也绑定了接口的中的方法名称。
+        parameterType：将会传入这条语句的参数类的完全限定名或别名（绑定接口方法的入参），如果有多个入参可以使用@Param注解的方式，如：findEmployeerByDepartmentAndWorktype
+     -->
+    <select id="findEmployeerByID" parameterType="int" resultType="alias_Employeer">
+        select * from `t_employeer`
+        where employeer_id = #{id}
+    </select>
+
+    <!--使用@Param注解的形式-->
+    <select id="findEmployeerByDepartmentAndWorktype" resultType="alias_Employeer">
+        select * from `t_employeer`
+        where employeer_department = #{department} and employeer_worktype = #{worktype}
+    </select>
+
+
+    <select id="findEmployeerByCondition" parameterType="map" resultType="map">
+        select *
+        from `t_employeer`
+        <trim suffixOverrides="and">
+            <where>
+                <if test="name!=null"> employeer_name = #{name} and </if>
+                <if test="age!=null"> employeer_age = #{age} and </if>
+                <if test="department!=null"> employeer_department = #{department} and </if>
+                <if test="worktype!=null"> employeer_worktype = #{worktype} </if>
+            </where>
+        </trim>
+    </select>
+
+    <!-- 插入 -->
+    <!-- useGeneratedKeys设置为"true"表明要MyBatis获取由数据库自动生成的主键；keyProperty="id"指定把获取到的主键值注入到Employeer的id属性 -->
+    <insert id="addEmployeer" parameterType="alias_Employeer" useGeneratedKeys="true" keyProperty="eid">
+        insert into `t_employeer`(employeer_name,employeer_age,employeer_department,employeer_worktype)
+        values(#{employeer_name},#{employeer_age},#{employeer_department},#{employeer_worktype})
+    </insert>
+
+    <!-- 删除  -->
+    <delete id="deleteEmployeer" parameterType="int">
+        delete from `t_employeer`
+        where eid = #{eid}
+    </delete>
+
+    <!-- 修改 -->
+    <update id="updateEmployeer" parameterType="alias_Employeer">
+        update t_employeer
+        set employeer_name = #{employeer_name},employeer_age= #{employeer_age},employeer_department = #{employeer_department},employeer_worktype = #{employeer_worktype}
+        where eid = #{eid}
+    </update>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--    <parameterMap id="" type=""></parameterMap>
+    <sql></sql>
+    <resultMap></resultMap>
+    <cache></cache>
+    <cache-ref></cache-ref>-->
+
+<!--    <select
+            id="select1"
+            parameterType="int"
+            parameterMap=""
+            resultType="employeer"
+            resultMap=""
+            flushCache=""
+            useCache=""
+            timeout=""
+            fetchSize=""
+            statementType=""
+            resultSetType=""
+            resultOrdered=""
+            resultSets=""
+            databaseId=""
+    >
+        select * from `t_employeer`
+        wheidr_id eidr_id}
+    </select>-->
+
+</mapper>
