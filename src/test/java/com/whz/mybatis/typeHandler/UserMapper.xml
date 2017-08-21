@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.whz.mybatis.typeHandler.UserMapper">
+
+    <resultMap id="userResultMap" type="com.whz.mybatis.typeHandler.User">
+        <result typeHandler="com.whz.mybatis.typeHandler.MyDateTypeHandler"
+                column="registedTime" jdbcType="VARCHAR"
+                property="regTime" javaType="java.util.Date"/>
+    </resultMap>
+    <select id="getAllUsers" resultMap="userResultMap">
+        select * from user
+    </select>
+
+    <select id="getUserById" resultMap="userResultMap">
+        select * from user where id = #{id}
+    </select>
+
+    <!--方法一：-->
+    <insert id="insertUser1" parameterType="com.whz.mybatis.typeHandler.User">
+        INSERT INTO user(userName,password,registedTime)
+        VALUES (#{username},#{password},#{regTime,javaType=Date,jdbcType=VARCHAR,typeHandler=com.whz.mybatis.typeHandler.MyDateTypeHandler})
+    </insert>
+    <!--方法二：-->
+    <insert id="insertUser2">
+        INSERT INTO user(username,password,regTime)
+        VALUES (#{username},#{password},#{regTime,javaType=Date,jdbcType=VARCHAR})
+    </insert>
+    <!--方法三：-->
+    <insert id="insertUser3">
+        INSERT INTO user(username,password,regTime)
+        VALUES (#{username},#{password},#{regTime,typeHandler=com.whz.mybatis.typeHandler.MyDateTypeHandler})
+    </insert>
+
+
+
+</mapper>
