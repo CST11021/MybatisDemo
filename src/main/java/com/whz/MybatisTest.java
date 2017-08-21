@@ -20,11 +20,22 @@ public class MybatisTest {
 	private static InputStream inputStream;
 	static {
 		try {
-//			reader = Resources.getResourceAsReader("mybatis-config.xml");
-//			sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+
+			/*
+			mybatis初始化要经过简单的以下几步：
+			1. 调用SqlSessionFactoryBuilder对象的build(inputStream)方法；
+			2. SqlSessionFactoryBuilder会根据输入流inputStream等信息创建XMLConfigBuilder对象;
+			3. SqlSessionFactoryBuilder调用XMLConfigBuilder对象的parse()方法；
+			4. XMLConfigBuilder对象返回Configuration对象；
+			5. SqlSessionFactoryBuilder根据Configuration对象创建一个DefaultSessionFactory对象；
+			6. SqlSessionFactoryBuilder返回 DefaultSessionFactory对象给Client，供Client使用。
+			 */
 
 			inputStream = Resources.getResourceAsStream("mybatis-config.xml");
 			sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+
+			//reader = Resources.getResourceAsReader("mybatis-config.xml");
+			//sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
