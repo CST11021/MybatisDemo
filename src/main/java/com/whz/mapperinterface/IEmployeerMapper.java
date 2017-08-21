@@ -10,6 +10,9 @@ import java.util.Map;
 
 public interface IEmployeerMapper {
 
+
+    List<Employeer> findAllEmployeer();
+
     // 根据id查找Employeer
     Employeer findEmployeerByID(@Param("department") int id);
     // 根据部分和工作类型查找

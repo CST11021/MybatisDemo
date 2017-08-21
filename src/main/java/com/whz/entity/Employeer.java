@@ -15,7 +15,7 @@ public class Employeer {
 	public Integer getEmployeer_id() {
 		return employeer_id;
 	}
-	public void setEmployeer_id(Integer employeer_id) {
+	public void setEmployeer_id1(Integer employeer_id) {
 		this.employeer_id = employeer_id;
 	}
 	public String getEmployeer_name() {

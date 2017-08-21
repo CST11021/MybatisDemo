@@ -34,6 +34,7 @@ import java.util.Set;
 public class MapperRegistry {
 
   private final Configuration config;
+  // key 为 XxxMapper.xml 中对应的接口类型，我们知道 Mapper 接口是没有实现类的，这里的MapperProxyFactory 就是用来为该接口创建实现的代理工厂类
   private final Map<Class<?>, MapperProxyFactory<?>> knownMappers = new HashMap<Class<?>, MapperProxyFactory<?>>();
 
   public MapperRegistry(Configuration config) {

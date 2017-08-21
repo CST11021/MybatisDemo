@@ -5,12 +5,12 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_employeer`;
 CREATE TABLE `t_employeer` (
-  `eid` int(11) NOT NULL AUTO_INCREMENT,
+  `employeer_id` int(11) NOT NULL AUTO_INCREMENT,
   `employeer_name` varchar(255) DEFAULT NULL,
   `employeer_age` int(11) DEFAULT NULL,
   `employeer_department` varchar(255) DEFAULT NULL,
   `employeer_worktype` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`eid`)
+  PRIMARY KEY (`employeer_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
 

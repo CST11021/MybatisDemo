@@ -8,31 +8,46 @@
     <artifactId>MybatisDemo</artifactId>
     <version>1.0-SNAPSHOT</version>
     <build>
-        <!--<sourceDirectory>-->
-            <!--mybatis3.4.4/src/main/java-->
-        <!--</sourceDirectory>-->
 
-        <!--<resources>-->
-            <!--<resource>-->
-                <!--<directory>mybatis3.4.4/src/main/java</directory>-->
-            <!--</resource>-->
-        <!--</resources>-->
+        <!--默认资源目录-->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
+        <!--默认测试资源目录-->
+        <testResources>
+            <testResource>
+                <directory>src/main/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>src/test/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                </includes>
+            </testResource>
+        </testResources>
 
         <plugins>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>1.1</version>
-
                 <executions>
-                    <!-- 配置多个源文件夹 -->
+
+                    <!-- 配置多个目录的源码 -->
                     <execution>
                         <id>add-source</id>
                         <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
+                        <goals><goal>add-source</goal></goals>
                         <configuration>
                             <sources>
                                 <!-- 在此加入源文件夹 -->
@@ -41,9 +56,21 @@
                             </sources>
                         </configuration>
                     </execution>
+
+                    <!-- 配置多个测试的源码路径 -->
+                    <execution>
+                        <id>add-testSource</id>
+                        <phase>generate-test-sources</phase>
+                        <goals><goal>add-test-source</goal></goals>
+                        <configuration>
+                            <sources>
+                                <source>src/test/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

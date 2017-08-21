@@ -9,6 +9,11 @@
     -->
 <mapper namespace="com.whz.mapperinterface.IEmployeerMapper">
 
+    <!--查询所有数据-->
+    <select id="findAllEmployeer" resultType="alias_Employeer">
+        select * from `t_employeer`
+    </select>
+
     <!--
         id：在命名空间中唯一的标识符，可以被用来引用这条语句，同时这个id也绑定了接口的中的方法名称。
         parameterType：将会传入这条语句的参数类的完全限定名或别名（绑定接口方法的入参），如果有多个入参可以使用@Param注解的方式，如：findEmployeerByDepartmentAndWorktype
@@ -48,14 +53,17 @@
     <!-- 删除  -->
     <delete id="deleteEmployeer" parameterType="int">
         delete from `t_employeer`
-        where eid = #{eid}
+        where employeer_id = #{employeer_id}
     </delete>
 
-    <!-- 修改 -->
+    <!-- 修改：注意这里用的 #{employeer_id} 必须是 Employeer 类的属性名，而不是根据setXxx()方法来解析的-->
     <update id="updateEmployeer" parameterType="alias_Employeer">
         update t_employeer
-        set employeer_name = #{employeer_name},employeer_age= #{employeer_age},employeer_department = #{employeer_department},employeer_worktype = #{employeer_worktype}
-        where eid = #{eid}
+        set employeer_name = #{employeer_name}
+          ,employeer_age= #{employeer_age}
+          ,employeer_department = #{employeer_department}
+          ,employeer_worktype = #{employeer_worktype}
+        where employeer_id = #{employeer_id}
     </update>
 
 

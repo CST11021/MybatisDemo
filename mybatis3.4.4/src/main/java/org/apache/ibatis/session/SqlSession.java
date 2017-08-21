@@ -31,9 +31,18 @@ import org.apache.ibatis.executor.BatchResult;
  *
  * @author Clinton Begin
  */
+
+/*
+Mapper执行的过程是通过Executor、StatementHandler、ParameterHandler和ResultHandler来完成数据库操作和结果返回。
+
+  Executor代表执行，由它来调用StatementHandler、ParameterHandler、ResultHandler等来执行对应的SQL
+  StatementHandler的作用是使用数据库的Statement(PreparedStatement)执行操作，它是四大对象的核心，起到承上启下的作用。
+  ParameterHandler用于SQL对参数的处理
+  ResultHandler是进行最后数据集（ResultSet）的封装返回处理的
+ */
 public interface SqlSession extends Closeable {
 
-  // 返回一条结果集
+  // 返回一条结果集，statement表示要调用的接口方法的全限定名
   <T> T selectOne(String statement);
   <T> T selectOne(String statement, Object parameter);
 

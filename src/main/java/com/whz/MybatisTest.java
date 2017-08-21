@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MybatisTest {
+
 	private static SqlSessionFactory sqlSessionFactory;
 	private static Reader reader;
 	private static InputStream inputStream;
@@ -34,6 +35,7 @@ public class MybatisTest {
 			inputStream = Resources.getResourceAsStream("mybatis-config.xml");
 			sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
 
+			System.out.println();
 			//reader = Resources.getResourceAsReader("mybatis-config.xml");
 			//sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 		} catch (Exception e) {
@@ -41,31 +43,23 @@ public class MybatisTest {
 		}
 	}
 
-	@Test
-	public void testEmployeerById(){
-		SqlSession session = null;
-		try {
-			session = sqlSessionFactory.openSession();
-			Employeer employeer = (Employeer) session.selectOne("com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
-			//Employeer employeer = session.getMapper(com.whz.mapperinterface.IEmployeerMapper.class).findEmployeerByID(id);
-		} finally {
-			session.close();
-		}
-	}
 
 	@Test
+	public void testEmployeerById(){
+		SqlSession session = sqlSessionFactory.openSession();
+		Employeer employeer = session.selectOne("findEmployeerByID", 5);
+		//Employeer employeer = session.selectOne("com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
+		//Employeer employeer = session.getMapper(com.whz.mapperinterface.IEmployeerMapper.class).findEmployeerByID(id);
+		session.close();
+	}
+	@Test
 	public void testFindEmployeerByDepartmentAndWorktype() {
-		SqlSession session = null;
-		try {
-			session = sqlSessionFactory.openSession();
+		SqlSession session = sqlSessionFactory.openSession();
 			List<Employeer> employeerList = session.getMapper(IEmployeerMapper.class)
 					.findEmployeerByDepartmentAndWorktype("产品一部","开发工程师");
 			System.out.println(employeerList);
-		} finally {
 			session.close();
-		}
 	}
-
 	@Test
 	public void testFindEmployeerByCondition() {
 		SqlSession session = null;
@@ -114,78 +108,57 @@ public class MybatisTest {
 		addEmployeer(employeer3);
 		addEmployeer(employeer4);
 	}
+	private void addEmployeer(Employeer employeer){
+		SqlSession session = null;
+		try {
+			session = sqlSessionFactory.openSession();
+			//返回值是记录条数
+			int resultCount = session.insert("com.whz.mapperinterface.IEmployeerMapper.addEmployeer", employeer );
+			System.out.printf("当前插入的employeer_id :%d    当前插入数据库中条数:%d " , employeer.getEmployeer_id() ,resultCount);  //获取插入对象的id
+			System.out.println("");
+			session.commit() ;
+		} finally {
+			session.close();
+		}
+
+	}
+
 	@Test
 	public void updateTest(){
 		Employeer employeer2 = new Employeer();
-		employeer2.setEmployeer_id(2);
+		employeer2.setEmployeer_id1(2);
 		employeer2.setEmployeer_age(21);
 		employeer2.setEmployeer_department("产品三部");
 
 		updateEmployeer(employeer2);
 	}
+	private void updateEmployeer(Employeer employeer){
+		SqlSession session = null;
+		try {
+			session = sqlSessionFactory.openSession();
+			session.update("com.whz.mapperinterface.IEmployeerMapper.updateEmployeer",employeer);
+			session.commit() ;
+		} finally {
+			session.close();
+		}
+
+	}
+
 	@Test
 	public void deleteTest(){
-		deleteEmployeer(1);
+		deleteEmployeer(11);
 	}
-
-
-
-
-	public static void addEmployeer(Employeer employeer){
+	private void deleteEmployeer(int id){
 		SqlSession session = null;
 		try {
 			session = sqlSessionFactory.openSession();
-			 //返回值是记录条数  
-            int resultCount = session.insert("com.whz.mapperinterface.IEmployeerMapper.addEmployeer", employeer );
-            System.out.printf("当前插入的employeer_id :%d    当前插入数据库中条数:%d " , employeer.getEmployeer_id() ,resultCount);  //获取插入对象的id
-            System.out.println("");
-            session.commit() ;  		
-		} finally {
-			session.close();
-		}
-		
-	}
-
-	public static void deleteEmployeer(int id){
-		SqlSession session = null;
-		try {
-			session = sqlSessionFactory.openSession();
-			 //返回值是记录条数  
-			 int resultCount=session.delete("com.whz.mapperinterface.IEmployeerMapper.deleteEmployeer",id);
-			  System.out.println("当前删除数据库中条数: "+resultCount);  //获取插入对象的id  
-            session.commit() ;  		
+			//返回值是记录条数
+			int resultCount=session.delete("com.whz.mapperinterface.IEmployeerMapper.deleteEmployeer",id);
+			System.out.println("当前删除数据库中条数: "+resultCount);  //获取插入对象的id
+			session.commit() ;
 		} finally {
 			session.close();
 		}
 	}
 
-	public static void updateEmployeer(Employeer employeer){
-		SqlSession session = null;
-		try {
-			session = sqlSessionFactory.openSession(); 
-            session.update("com.whz.mapperinterface.IEmployeerMapper.updateEmployeer",employeer);
-            session.commit() ;  		
-		} finally {
-			session.close();
-		}
-		
-	}
-
-	public static void main(String[] args) {
-
-
-
-		//查找
-		//findEmployeerById(1);
-
-		//删除
-		//	deleteEmployeer(1);
-
-		//更改
-/*		employeer2.setEid(2);
-		employeer2.setEmployeer_age(21);
-		employeer2.setEmployeer_department("产品三部");
-		updateEmployeer(employeer2);*/
-
-	}
 }
