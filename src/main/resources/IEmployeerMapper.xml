@@ -9,9 +9,11 @@
     -->
 <mapper namespace="com.whz.mapperinterface.IEmployeerMapper">
 
+    <sql id="selectAllEmployeer">select * from `t_employeer`</sql>
+
     <!-- 解析的时候会把 select、insert、delete和update都封装成一个 MappedStatement 对象，然后以id作为key，保存到 Configuration 对象的 mappedStatements 属性中-->
     <select id="findAllEmployeer" resultType="alias_Employeer">
-        select * from `t_employeer`
+        <include refid="selectAllEmployeer"/>
     </select>
 
     <!--

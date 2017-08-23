@@ -56,7 +56,9 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     private XPathParser parser;
     private MapperBuilderAssistant builderAssistant;
+    // 表示sql碎片，解析<mapper>标签内的<sql>标签后，会将解析结果保存到 sqlFragments 中，
     private Map<String, XNode> sqlFragments;
+    // 表示要解析的配置文件路径
     private String resource;
 
     @Deprecated
@@ -87,6 +89,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     // 解析XxxMapper.xml文件的入口
     public void parse() {
         if (!configuration.isResourceLoaded(resource)) {
+            // 开始解析<mapper>节点
             configurationElement(parser.evalNode("/mapper"));
             configuration.addLoadedResource(resource);
 
@@ -97,49 +100,6 @@ public class XMLMapperBuilder extends BaseBuilder {
         parsePendingResultMaps();
         parsePendingCacheRefs();
         parsePendingStatements();
-    }
-
-    public XNode getSqlFragment(String refid) {
-        return sqlFragments.get(refid);
-    }
-
-    private void configurationElement(XNode context) {
-        try {
-            String namespace = context.getStringAttribute("namespace");
-            if (namespace == null || namespace.equals("")) {
-                throw new BuilderException("Mapper's namespace cannot be empty");
-            }
-            builderAssistant.setCurrentNamespace(namespace);
-            cacheRefElement(context.evalNode("cache-ref"));
-            cacheElement(context.evalNode("cache"));
-            // 解析<parameterMap>标签
-            parameterMapElement(context.evalNodes("/mapper/parameterMap"));
-            // 解析<resultMap> 标签
-            resultMapElements(context.evalNodes("/mapper/resultMap"));
-            sqlElement(context.evalNodes("/mapper/sql"));
-            // 解析 select|insert|update|delete 标签
-            buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
-        } catch (Exception e) {
-            throw new BuilderException("Error parsing Mapper XML. Cause: " + e, e);
-        }
-    }
-
-    private void buildStatementFromContext(List<XNode> list) {
-        if (configuration.getDatabaseId() != null) {
-            buildStatementFromContext(list, configuration.getDatabaseId());
-        }
-        buildStatementFromContext(list, null);
-    }
-
-    private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
-        for (XNode context : list) {
-            final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context, requiredDatabaseId);
-            try {
-                statementParser.parseStatementNode();
-            } catch (IncompleteElementException e) {
-                configuration.addIncompleteStatement(statementParser);
-            }
-        }
     }
 
     private void parsePendingResultMaps() {
@@ -156,7 +116,6 @@ public class XMLMapperBuilder extends BaseBuilder {
             }
         }
     }
-
     private void parsePendingCacheRefs() {
         Collection<CacheRefResolver> incompleteCacheRefs = configuration.getIncompleteCacheRefs();
         synchronized (incompleteCacheRefs) {
@@ -171,7 +130,6 @@ public class XMLMapperBuilder extends BaseBuilder {
             }
         }
     }
-
     private void parsePendingStatements() {
         Collection<XMLStatementBuilder> incompleteStatements = configuration.getIncompleteStatements();
         synchronized (incompleteStatements) {
@@ -186,7 +144,80 @@ public class XMLMapperBuilder extends BaseBuilder {
             }
         }
     }
+    // 绑定命名空间
+    private void bindMapperForNamespace() {
+        String namespace = builderAssistant.getCurrentNamespace();
+        if (namespace != null) {
+            Class<?> boundType = null;
+            try {
+                boundType = Resources.classForName(namespace);
+            } catch (ClassNotFoundException e) {
+                //ignore, bound type is not required
+            }
+            if (boundType != null) {
+                if (!configuration.hasMapper(boundType)) {
+                    // Spring may not know the real resource name so we set a flag to prevent loading again this resource
+                    // from the mapper interface look at MapperAnnotationBuilder#loadXmlResource
+                    configuration.addLoadedResource("namespace:" + namespace);
+                    configuration.addMapper(boundType);
+                }
+            }
+        }
+    }
+    // 根据id查找SQL碎片
+    public XNode getSqlFragment(String refid) {
+        return sqlFragments.get(refid);
+    }
 
+
+
+    /* ----------------------------------------- 解析<mapper>节点 --------------------------------------- */
+    // 解析<mapper>节点
+    private void configurationElement(XNode context) {
+        try {
+            // 例如：<mapper namespace="com.whz.mapperinterface.IEmployeerMapper"> 获取该配置的命名空间
+            String namespace = context.getStringAttribute("namespace");
+            if (namespace == null || namespace.equals("")) {
+                throw new BuilderException("Mapper's namespace cannot be empty");
+            }
+            builderAssistant.setCurrentNamespace(namespace);
+            // 解析<cache-ref>标签
+            cacheRefElement(context.evalNode("cache-ref"));
+            // 解析<cache>标签，缓存配置相关
+            cacheElement(context.evalNode("cache"));
+            // 解析<parameterMap>标签
+            parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+            // 解析<resultMap> 标签
+            resultMapElements(context.evalNodes("/mapper/resultMap"));
+            // 解析<mapper>标签内的<sql>标签
+            sqlElement(context.evalNodes("/mapper/sql"));
+            // 解析 select|insert|update|delete 标签
+            buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
+        } catch (Exception e) {
+            throw new BuilderException("Error parsing Mapper XML. Cause: " + e, e);
+        }
+    }
+    // 解析 select|insert|update|delete 标签，这些标签的解析过程会委托给 XMLStatementBuilder 来解析
+    private void buildStatementFromContext(List<XNode> list) {
+        if (configuration.getDatabaseId() != null) {
+            buildStatementFromContext(list, configuration.getDatabaseId());
+        }
+        buildStatementFromContext(list, null);
+    }
+    private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
+        // 这里list表示所有 select|insert|update|delete 的配置
+        for (XNode context : list) {
+            // 使用XMLStatementBuilder 对象类解析这些标签
+            final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context, requiredDatabaseId);
+            try {
+                statementParser.parseStatementNode();
+            } catch (IncompleteElementException e) {
+                configuration.addIncompleteStatement(statementParser);
+            }
+        }
+    }
+
+    // 解析<cache-ref>标签
     private void cacheRefElement(XNode context) {
         if (context != null) {
             configuration.addCacheRef(builderAssistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
@@ -198,7 +229,7 @@ public class XMLMapperBuilder extends BaseBuilder {
             }
         }
     }
-
+    // 解析<cache>标签，缓存配置相关
     private void cacheElement(XNode context) throws Exception {
         if (context != null) {
             String type = context.getStringAttribute("type", "PERPETUAL");
@@ -213,7 +244,7 @@ public class XMLMapperBuilder extends BaseBuilder {
             builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
         }
     }
-
+    // 解析<parameterMap>标签
     private void parameterMapElement(List<XNode> list) throws Exception {
         for (XNode parameterMapNode : list) {
             String id = parameterMapNode.getStringAttribute("id");
@@ -240,7 +271,6 @@ public class XMLMapperBuilder extends BaseBuilder {
             builderAssistant.addParameterMap(id, parameterClass, parameterMappings);
         }
     }
-
     // 解析<resultMap> 标签
     private void resultMapElements(List<XNode> list) throws Exception {
         for (XNode resultMapNode : list) {
@@ -291,7 +321,6 @@ public class XMLMapperBuilder extends BaseBuilder {
             throw e;
         }
     }
-
     private void processConstructorElement(XNode resultChild, Class<?> resultType, List<ResultMapping> resultMappings) throws Exception {
         List<XNode> argChildren = resultChild.getChildren();
         for (XNode argChild : argChildren) {
@@ -303,7 +332,6 @@ public class XMLMapperBuilder extends BaseBuilder {
             resultMappings.add(buildResultMappingFromContext(argChild, resultType, flags));
         }
     }
-
     private Discriminator processDiscriminatorElement(XNode context, Class<?> resultType, List<ResultMapping> resultMappings) throws Exception {
         String column = context.getStringAttribute("column");
         String javaType = context.getStringAttribute("javaType");
@@ -321,45 +349,6 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
         return builderAssistant.buildDiscriminator(resultType, column, javaTypeClass, jdbcTypeEnum, typeHandlerClass, discriminatorMap);
     }
-
-    private void sqlElement(List<XNode> list) throws Exception {
-        if (configuration.getDatabaseId() != null) {
-            sqlElement(list, configuration.getDatabaseId());
-        }
-        sqlElement(list, null);
-    }
-
-    private void sqlElement(List<XNode> list, String requiredDatabaseId) throws Exception {
-        for (XNode context : list) {
-            String databaseId = context.getStringAttribute("databaseId");
-            String id = context.getStringAttribute("id");
-            id = builderAssistant.applyCurrentNamespace(id, false);
-            if (databaseIdMatchesCurrent(id, databaseId, requiredDatabaseId)) {
-                sqlFragments.put(id, context);
-            }
-        }
-    }
-
-    private boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
-        if (requiredDatabaseId != null) {
-            if (!requiredDatabaseId.equals(databaseId)) {
-                return false;
-            }
-        } else {
-            if (databaseId != null) {
-                return false;
-            }
-            // skip this fragment if there is a previous one with a not null databaseId
-            if (this.sqlFragments.containsKey(id)) {
-                XNode context = this.sqlFragments.get(id);
-                if (context.getStringAttribute("databaseId") != null) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     private ResultMapping buildResultMappingFromContext(XNode context, Class<?> resultType, List<ResultFlag> flags) throws Exception {
         String property;
         if (flags.contains(ResultFlag.CONSTRUCTOR)) {
@@ -385,7 +374,6 @@ public class XMLMapperBuilder extends BaseBuilder {
         JdbcType jdbcTypeEnum = resolveJdbcType(jdbcType);
         return builderAssistant.buildResultMapping(resultType, property, column, javaTypeClass, jdbcTypeEnum, nestedSelect, nestedResultMap, notNullColumn, columnPrefix, typeHandlerClass, flags, resultSet, foreignColumn, lazy);
     }
-
     private String processNestedResultMappings(XNode context, List<ResultMapping> resultMappings) throws Exception {
         if ("association".equals(context.getName())
                 || "collection".equals(context.getName())
@@ -398,25 +386,43 @@ public class XMLMapperBuilder extends BaseBuilder {
         return null;
     }
 
-    private void bindMapperForNamespace() {
-        String namespace = builderAssistant.getCurrentNamespace();
-        if (namespace != null) {
-            Class<?> boundType = null;
-            try {
-                boundType = Resources.classForName(namespace);
-            } catch (ClassNotFoundException e) {
-                //ignore, bound type is not required
-            }
-            if (boundType != null) {
-                if (!configuration.hasMapper(boundType)) {
-                    // Spring may not know the real resource name so we set a flag
-                    // to prevent loading again this resource from the mapper interface
-                    // look at MapperAnnotationBuilder#loadXmlResource
-                    configuration.addLoadedResource("namespace:" + namespace);
-                    configuration.addMapper(boundType);
-                }
+    // 解析<mapper>标签内的<sql>标签
+    private void sqlElement(List<XNode> list) throws Exception {
+        if (configuration.getDatabaseId() != null) {
+            sqlElement(list, configuration.getDatabaseId());
+        }
+        sqlElement(list, null);
+    }
+    private void sqlElement(List<XNode> list, String requiredDatabaseId) throws Exception {
+        for (XNode context : list) {
+            String databaseId = context.getStringAttribute("databaseId");
+            String id = context.getStringAttribute("id");
+            id = builderAssistant.applyCurrentNamespace(id, false);
+            if (databaseIdMatchesCurrent(id, databaseId, requiredDatabaseId)) {
+                sqlFragments.put(id, context);
             }
         }
     }
+    private boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
+        if (requiredDatabaseId != null) {
+            if (!requiredDatabaseId.equals(databaseId)) {
+                return false;
+            }
+        } else {
+            if (databaseId != null) {
+                return false;
+            }
+            // skip this fragment if there is a previous one with a not null databaseId
+            if (this.sqlFragments.containsKey(id)) {
+                XNode context = this.sqlFragments.get(id);
+                if (context.getStringAttribute("databaseId") != null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /* ----------------------------------------- 解析<mapper>节点 --------------------------------------- */
 
 }

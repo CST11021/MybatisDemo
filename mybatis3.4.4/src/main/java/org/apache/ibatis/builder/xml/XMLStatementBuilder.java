@@ -36,16 +36,19 @@ import org.apache.ibatis.session.Configuration;
 /**
  * @author Clinton Begin
  */
+
+// 该类用来解析具体的 select|insert|update|delete 标签
 public class XMLStatementBuilder extends BaseBuilder {
 
     private MapperBuilderAssistant builderAssistant;
+    // 表示 select|insert|update|delete 这些节点
     private XNode context;
     private String requiredDatabaseId;
+
 
     public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context) {
         this(configuration, builderAssistant, context, null);
     }
-
     public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context, String databaseId) {
         super(configuration);
         this.builderAssistant = builderAssistant;
@@ -53,6 +56,8 @@ public class XMLStatementBuilder extends BaseBuilder {
         this.requiredDatabaseId = databaseId;
     }
 
+
+    // 解析select|insert|update|delete 标签的入口方法
     public void parseStatementNode() {
         String id = context.getStringAttribute("id");
         String databaseId = context.getStringAttribute("databaseId");
@@ -84,6 +89,7 @@ public class XMLStatementBuilder extends BaseBuilder {
         boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
 
         // Include Fragments before parsing
+        // 处理<include>标签引用的SQL碎片
         XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
         includeParser.applyIncludes(context.getNode());
 
@@ -91,6 +97,7 @@ public class XMLStatementBuilder extends BaseBuilder {
         processSelectKeyNodes(id, parameterTypeClass, langDriver);
 
         // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
+        // 将sql语句解析完后，封装到 SqlSource 对象中，另外，那些动态的sql语句也都在这里进行处理的
         SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
         String resultSets = context.getStringAttribute("resultSets");
         String keyProperty = context.getStringAttribute("keyProperty");
@@ -111,7 +118,6 @@ public class XMLStatementBuilder extends BaseBuilder {
                 resultSetTypeEnum, flushCache, useCache, resultOrdered,
                 keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets);
     }
-
     private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
         List<XNode> selectKeyNodes = context.evalNodes("selectKey");
         if (configuration.getDatabaseId() != null) {
@@ -120,7 +126,6 @@ public class XMLStatementBuilder extends BaseBuilder {
         parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, null);
         removeSelectKeyNodes(selectKeyNodes);
     }
-
     private void parseSelectKeyNodes(String parentId, List<XNode> list, Class<?> parameterTypeClass, LanguageDriver langDriver, String skRequiredDatabaseId) {
         for (XNode nodeToHandle : list) {
             String id = parentId + SelectKeyGenerator.SELECT_KEY_SUFFIX;
@@ -130,7 +135,6 @@ public class XMLStatementBuilder extends BaseBuilder {
             }
         }
     }
-
     private void parseSelectKeyNode(String id, XNode nodeToHandle, Class<?> parameterTypeClass, LanguageDriver langDriver, String databaseId) {
         String resultType = nodeToHandle.getStringAttribute("resultType");
         Class<?> resultTypeClass = resolveClass(resultType);
@@ -163,13 +167,11 @@ public class XMLStatementBuilder extends BaseBuilder {
         MappedStatement keyStatement = configuration.getMappedStatement(id, false);
         configuration.addKeyGenerator(id, new SelectKeyGenerator(keyStatement, executeBefore));
     }
-
     private void removeSelectKeyNodes(List<XNode> selectKeyNodes) {
         for (XNode nodeToHandle : selectKeyNodes) {
             nodeToHandle.getParent().getNode().removeChild(nodeToHandle.getNode());
         }
     }
-
     private boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
         if (requiredDatabaseId != null) {
             if (!requiredDatabaseId.equals(databaseId)) {
@@ -190,7 +192,6 @@ public class XMLStatementBuilder extends BaseBuilder {
         }
         return true;
     }
-
     private LanguageDriver getLanguageDriver(String lang) {
         Class<?> langClass = null;
         if (lang != null) {

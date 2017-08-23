@@ -134,6 +134,7 @@ public class Configuration {
     protected final Map<String, ResultMap> resultMaps = new StrictMap<ResultMap>("Result Maps collection");
     protected final Map<String, ParameterMap> parameterMaps = new StrictMap<ParameterMap>("Parameter Maps collection");
     protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<KeyGenerator>("Key Generators collection");
+    // sql碎片，<mapper/>里可以配置一些模式式的sql语句，mybatis解析完后会将其保存到 sqlFragments 属性中
     protected final Map<String, XNode> sqlFragments = new StrictMap<XNode>("XML fragments parsed from previous mappers");
 
     protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<XMLStatementBuilder>();

@@ -59,27 +59,21 @@ public class XMLConfigBuilder extends BaseBuilder {
     public XMLConfigBuilder(Reader reader) {
         this(reader, null, null);
     }
-
     public XMLConfigBuilder(Reader reader, String environment) {
         this(reader, environment, null);
     }
-
     public XMLConfigBuilder(Reader reader, String environment, Properties props) {
         this(new XPathParser(reader, true, props, new XMLMapperEntityResolver()), environment, props);
     }
-
     public XMLConfigBuilder(InputStream inputStream) {
         this(inputStream, null, null);
     }
-
     public XMLConfigBuilder(InputStream inputStream, String environment) {
         this(inputStream, environment, null);
     }
-
     public XMLConfigBuilder(InputStream inputStream, String environment, Properties props) {
         this(new XPathParser(inputStream, true, props, new XMLMapperEntityResolver()), environment, props);
     }
-
     private XMLConfigBuilder(XPathParser parser, String environment, Properties props) {
         super(new Configuration());
         ErrorContext.instance().resource("SQL Mapper Configuration");
@@ -166,12 +160,16 @@ public class XMLConfigBuilder extends BaseBuilder {
                 if ("package".equals(child.getName())) {
                     String typeAliasPackage = child.getStringAttribute("name");
                     configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage);
-                } else {
+                }
+                // 解析<typeAliases/>标签
+                else {
                     String alias = child.getStringAttribute("alias");
                     String type = child.getStringAttribute("type");
                     try {
+                        // 解析type配置对应的类型
                         Class<?> clazz = Resources.classForName(type);
                         if (alias == null) {
+                            // 如果没有定义别名，也会注册进来，Mybatis会使用默认的别名
                             typeAliasRegistry.registerAlias(clazz);
                         } else {
                             typeAliasRegistry.registerAlias(alias, clazz);
@@ -184,6 +182,7 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    // 解析<plugins>插件配置
     private void pluginElement(XNode parent) throws Exception {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
@@ -207,6 +206,7 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    // 解析<objectWrapperFactory/>标签
     private void objectWrapperFactoryElement(XNode context) throws Exception {
         if (context != null) {
             String type = context.getStringAttribute("type");
@@ -215,6 +215,7 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    // 解析<reflectorFactory/>标签
     private void reflectorFactoryElement(XNode context) throws Exception {
         if (context != null) {
             String type = context.getStringAttribute("type");
@@ -281,14 +282,21 @@ public class XMLConfigBuilder extends BaseBuilder {
     private void environmentsElement(XNode context) throws Exception {
         if (context != null) {
             if (environment == null) {
+                // 一开始默认使用<environments default="development"> 配置中的default属性
                 environment = context.getStringAttribute("default");
             }
             for (XNode child : context.getChildren()) {
+                // 获取<environment id="development"> 这个配置的id属性
                 String id = child.getStringAttribute("id");
+                // 判断配置的这个id 属性和上面的default 属性是否一样
                 if (isSpecifiedEnvironment(id)) {
+                    // 解析<transactionManager>标签
                     TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
+                    // 解析<dataSource>标签
                     DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
                     DataSource dataSource = dsFactory.getDataSource();
+
+                    // 这里使用了建造者模式来构建一个 Environment 对象
                     Environment.Builder environmentBuilder = new Environment.Builder(id)
                             .transactionFactory(txFactory)
                             .dataSource(dataSource);
@@ -296,6 +304,28 @@ public class XMLConfigBuilder extends BaseBuilder {
                 }
             }
         }
+    }
+    // 解析<environments/>标签内的<transactionManager/>标签
+    private TransactionFactory transactionManagerElement(XNode context) throws Exception {
+        if (context != null) {
+            String type = context.getStringAttribute("type");
+            Properties props = context.getChildrenAsProperties();
+            TransactionFactory factory = (TransactionFactory) resolveClass(type).newInstance();
+            factory.setProperties(props);
+            return factory;
+        }
+        throw new BuilderException("Environment declaration requires a TransactionFactory.");
+    }
+    // 解析<environments/>标签内的<dataSource/>标签
+    private DataSourceFactory dataSourceElement(XNode context) throws Exception {
+        if (context != null) {
+            String type = context.getStringAttribute("type");
+            Properties props = context.getChildrenAsProperties();
+            DataSourceFactory factory = (DataSourceFactory) resolveClass(type).newInstance();
+            factory.setProperties(props);
+            return factory;
+        }
+        throw new BuilderException("Environment declaration requires a DataSourceFactory.");
     }
 
     // 解析<databaseIdProvider>标签
@@ -318,28 +348,7 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
-    private TransactionFactory transactionManagerElement(XNode context) throws Exception {
-        if (context != null) {
-            String type = context.getStringAttribute("type");
-            Properties props = context.getChildrenAsProperties();
-            TransactionFactory factory = (TransactionFactory) resolveClass(type).newInstance();
-            factory.setProperties(props);
-            return factory;
-        }
-        throw new BuilderException("Environment declaration requires a TransactionFactory.");
-    }
-
-    private DataSourceFactory dataSourceElement(XNode context) throws Exception {
-        if (context != null) {
-            String type = context.getStringAttribute("type");
-            Properties props = context.getChildrenAsProperties();
-            DataSourceFactory factory = (DataSourceFactory) resolveClass(type).newInstance();
-            factory.setProperties(props);
-            return factory;
-        }
-        throw new BuilderException("Environment declaration requires a DataSourceFactory.");
-    }
-
+    // 解析<typeHandlers/>标签
     private void typeHandlerElement(XNode parent) throws Exception {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
@@ -367,7 +376,7 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
-    // 解析<mappers>标签，这里会去解析每个POJO对应的Mapper
+    // 解析<mappers>标签，这里会去解析每个POJO对应的Mapper，该方法中会将XxxMapper.xml配置文件委托给 XMLMapperBuilder 来解析
     private void mapperElement(XNode parent) throws Exception {
         if (parent != null) {
             // 遍历每个<mapper>标签和<package>标签
@@ -409,6 +418,15 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+
+    /**
+    <environments default="development">
+		<environment id="development">
+			...
+		</environment>
+	</environments>
+	*/
+    // 如上，这里的入参 id 表示上面配置中的 id 属性配置，该方法用来判断这个id和上面配置的default属性是相同
     private boolean isSpecifiedEnvironment(String id) {
         if (environment == null) {
             throw new BuilderException("No environment specified.");
