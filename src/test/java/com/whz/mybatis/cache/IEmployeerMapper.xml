@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.whz.mybatis.cache.IEmployeerMapper">
+
+    <!-- 开启二级缓存 -->
+    <!--回收策略为先进先出-->
+    <!--自动刷新时间60s-->
+    <!--最多缓存512个引用对象-->
+    <!--只读-->
+    <!--每个namespace的mapper都会有自己的一个缓存的空间，如果两个mapper的namespace相同，执行mapper查询到的数据将存储到相同的二级缓存.-->
+    <cache eviction="FIFO"
+           flushInterval="60000"
+           size="512"
+           readOnly="true"/>
+
+    <select id="findAllEmployeer" resultType="alias_Employeer">
+        select * from `t_employeer`
+    </select>
+
+    <select id="findEmployeerByID" parameterType="int" resultType="alias_Employeer">
+        select * from `t_employeer`
+        where employeer_id = #{id}
+    </select>
+
+    <!--如果不需要二级缓存，可以在设置禁用二级缓存-->
+    <select id="findEmployeerByIDWithoutCache" parameterType="int" resultType="alias_Employeer" useCache="false">
+        select * from `t_employeer`
+        where employeer_id = #{id}
+    </select>
+
+    <insert id="addEmployeer" parameterType="alias_Employeer" useGeneratedKeys="true" keyProperty="employeer_id">
+        insert into `t_employeer`(employeer_name,employeer_age,employeer_department,employeer_worktype)
+        values(#{employeer_name},#{employeer_age},#{employeer_department},#{employeer_worktype})
+    </insert>
+
+    <insert id="addEmployeerWithoutFlushCache" flushCache="false" parameterType="alias_Employeer" useGeneratedKeys="true" keyProperty="employeer_id">
+        insert into `t_employeer`(employeer_name,employeer_age,employeer_department,employeer_worktype)
+        values(#{employeer_name},#{employeer_age},#{employeer_department},#{employeer_worktype})
+    </insert>
+
+
+    <delete id="deleteEmployeer" parameterType="int">
+        delete from `t_employeer`
+        where employeer_id = #{employeer_id}
+    </delete>
+
+    <!-- 修改：注意这里用的 #{employeer_id} 必须是 Employeer 类的属性名，而不是根据setXxx()方法来解析的-->
+    <update id="updateEmployeer" parameterType="alias_Employeer">
+        update t_employeer
+        set employeer_name = #{employeer_name}
+          ,employeer_age= #{employeer_age}
+          ,employeer_department = #{employeer_department}
+          ,employeer_worktype = #{employeer_worktype}
+        where employeer_id = #{employeer_id}
+    </update>
+
+</mapper>
