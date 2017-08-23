@@ -131,11 +131,11 @@ public abstract class BaseExecutor implements Executor {
 
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
+        // 将SQL参数包装成一个BoundSql对象
         BoundSql boundSql = ms.getBoundSql(parameter);
         CacheKey key = createCacheKey(ms, parameter, rowBounds, boundSql);
         return query(ms, parameter, rowBounds, resultHandler, key, boundSql);
     }
-
     @SuppressWarnings("unchecked")
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
@@ -153,6 +153,7 @@ public abstract class BaseExecutor implements Executor {
             if (list != null) {
                 handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
             } else {
+                // 核心方法：执行器执行查询操作委托给了 queryFromDatabase() 方法
                 list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
             }
         } finally {
@@ -171,7 +172,6 @@ public abstract class BaseExecutor implements Executor {
         }
         return list;
     }
-
     @Override
     public <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException {
         BoundSql boundSql = ms.getBoundSql(parameter);
@@ -314,6 +314,7 @@ public abstract class BaseExecutor implements Executor {
         }
     }
 
+    // 执行器准备好所有准备工作后，最终会委托该方法进行查询操作，根据执行器的类型，会将查询的实现逻辑通过doQuery() 留给子类实现
     private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
         List<E> list;
         localCache.putObject(key, EXECUTION_PLACEHOLDER);

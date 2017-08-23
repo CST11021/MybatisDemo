@@ -238,7 +238,7 @@ public class DefaultSqlSession implements SqlSession {
 
 
 
-
+    // 事务提交
     @Override
     public void commit() {
         commit(false);
@@ -254,7 +254,11 @@ public class DefaultSqlSession implements SqlSession {
             ErrorContext.instance().reset();
         }
     }
+    private boolean isCommitOrRollbackRequired(boolean force) {
+        return (!autoCommit && dirty) || force;
+    }
 
+    // 事务回滚
     @Override
     public void rollback() {
         rollback(false);
@@ -270,6 +274,7 @@ public class DefaultSqlSession implements SqlSession {
             ErrorContext.instance().reset();
         }
     }
+
 
     @Override
     public List<BatchResult> flushStatements() {
@@ -311,11 +316,14 @@ public class DefaultSqlSession implements SqlSession {
         return configuration;
     }
 
+    // 从 mapperRegistry 注册表中获取一个Mapper实例，
+    // 如：IEmployeerMapper iEmployeerMapper = sqlSession.getMapper(IEmployeerMapper.class);
     @Override
     public <T> T getMapper(Class<T> type) {
         return configuration.<T>getMapper(type, this);
     }
 
+    // 获取一个连接对象
     @Override
     public Connection getConnection() {
         try {
@@ -324,7 +332,7 @@ public class DefaultSqlSession implements SqlSession {
             throw ExceptionFactory.wrapException("Error getting a new connection.  Cause: " + e, e);
         }
     }
-
+    // 清理会话缓存
     @Override
     public void clearCache() {
         executor.clearLocalCache();
@@ -337,10 +345,10 @@ public class DefaultSqlSession implements SqlSession {
         cursorList.add(cursor);
     }
 
-    private boolean isCommitOrRollbackRequired(boolean force) {
-        return (!autoCommit && dirty) || force;
-    }
 
+
+
+    // object 表示SQL语句中占位符的参数，如果object是集合类型，就封装为一个StrictMap对象返回；否则直接返回object参数
     private Object wrapCollection(final Object object) {
         if (object instanceof Collection) {
             StrictMap<Object> map = new StrictMap<Object>();
@@ -356,11 +364,8 @@ public class DefaultSqlSession implements SqlSession {
         }
         return object;
     }
-
     public static class StrictMap<V> extends HashMap<String, V> {
-
         private static final long serialVersionUID = -5741767162221585340L;
-
         @Override
         public V get(Object key) {
             if (!super.containsKey(key)) {
@@ -368,7 +373,6 @@ public class DefaultSqlSession implements SqlSession {
             }
             return super.get(key);
         }
-
     }
 
 }

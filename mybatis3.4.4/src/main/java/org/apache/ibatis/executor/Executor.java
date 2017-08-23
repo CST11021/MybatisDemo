@@ -36,6 +36,9 @@ import org.apache.ibatis.transaction.Transaction;
 SIMPLE，简单执行，它是默认的执行器
 REUSE，是一种执行重用预处理语句。
 BATCH，执行器重用语句和批量更新，它是针对批量专用的执行器
+
+
+执行进行数据操作是，需要准备好：MappedStatement、parameter、rowBounds以及一个ResultHandler对象
  */
 public interface Executor {
 
@@ -54,6 +57,7 @@ public interface Executor {
     List<BatchResult> flushStatements() throws SQLException;
     void commit(boolean required) throws SQLException;
     void rollback(boolean required) throws SQLException;
+    // 创建一个CacheKey对象
     CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql);
     boolean isCached(MappedStatement ms, CacheKey key);
     void clearLocalCache();

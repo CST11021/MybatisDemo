@@ -44,6 +44,23 @@ public class MybatisTest {
 	}
 
 
+	// 测试一级会话缓存，如果使用同一个SqlSession对象进行两个相同的查询操作，则第二会走缓存
+	@Test
+	public void testSessionCache1() {
+
+		SqlSession sqlSession = sqlSessionFactory.openSession();
+		IEmployeerMapper iEmployeerMapper = sqlSession.getMapper(IEmployeerMapper.class);
+		List<Employeer> employeers = iEmployeerMapper.findAllEmployeer();
+
+//		SqlSession sqlSession1 = sqlSessionFactory.openSession();
+		sqlSession.clearCache();
+		IEmployeerMapper iEmployeerMapper1 = sqlSession.getMapper(IEmployeerMapper.class);
+		List<Employeer> employeers1 = iEmployeerMapper1.findAllEmployeer();
+
+//		System.out.println(employeers);
+		System.out.println(employeers1);
+	}
+
 	@Test
 	public void testEmployeerById(){
 		SqlSession session = sqlSessionFactory.openSession();
