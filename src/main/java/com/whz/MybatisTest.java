@@ -23,13 +23,16 @@ public class MybatisTest {
 		try {
 
 			/*
-			mybatis初始化要经过简单的以下几步：
-			1. 调用SqlSessionFactoryBuilder对象的build(inputStream)方法；
-			2. SqlSessionFactoryBuilder会根据输入流inputStream等信息创建XMLConfigBuilder对象;
-			3. SqlSessionFactoryBuilder调用XMLConfigBuilder对象的parse()方法；
-			4. XMLConfigBuilder对象返回Configuration对象；
-			5. SqlSessionFactoryBuilder根据Configuration对象创建一个DefaultSessionFactory对象；
-			6. SqlSessionFactoryBuilder返回 DefaultSessionFactory对象给Client，供Client使用。
+			1.mybatis初始化要经过简单的以下几步：
+			2使用Resources类去加载配置文件，返回一个InputStream流对象；
+
+			3.SqlSessionFactoryBuilder使用build(inputStream)方法创建一个SqlSessionFactory：build()方法内部使用XMLConfigBuilder对象进行解析，
+			然后返回一个Configuration对象，然后，SqlSessionFactoryBuilder在根据Configuration对象创建XMLConfigBuilder对象;
+
+			4.SqlSessionFactory调用openSession方法创建一个SqlSession实例，创建是会根据ExecutorType、TransactionIsolationLevel和autoCommit三个参数进行创建
+
+			5.接下来SqlSession就可以进行一系列的增删改查操作了：SqlSession内部委托给了Executor的doUpdate、doQuery和doQueryCursor进行
+
 			 */
 
 			inputStream = Resources.getResourceAsStream("mybatis-config.xml");
