@@ -271,7 +271,7 @@ public class XMLMapperBuilder extends BaseBuilder {
             builderAssistant.addParameterMap(id, parameterClass, parameterMappings);
         }
     }
-    // 解析<resultMap> 标签
+    // 解析所有的<resultMap> 标签
     private void resultMapElements(List<XNode> list) throws Exception {
         for (XNode resultMapNode : list) {
             try {
@@ -281,7 +281,6 @@ public class XMLMapperBuilder extends BaseBuilder {
             }
         }
     }
-    // 解析一个<resultMap>标签
     private ResultMap resultMapElement(XNode resultMapNode) throws Exception {
         return resultMapElement(resultMapNode, Collections.<ResultMapping>emptyList());
     }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.whz.mybatis.resultMap.UserMapper">
+
+    <!--如上resultMap配置了autoMapping， 那么mybatis会自动把查询出来的name、id、no都赋值给Person， 如果autoMappng设为false，-->
+    <!--则不会自动映射， 需要你在resultMap中手动配置result-->
+    <resultMap id="userResultMap" type="com.whz.mybatis.resultMap.User" >
+        <id property="id" column="id" />  <!-- id相当于resultmap的引用的唯一标识-->
+        <result property="username" column="username" />  <!-- property对应javabean的属性名，column对应数据库字段名 -->
+        <result property="regTime" column="registedTime" />
+    </resultMap>
+    <select id="getAllUsers" resultMap="userResultMap">
+        select * from user
+    </select>
+
+    <select id="getUserById" resultMap="userResultMap">
+        select * from user where id = #{id}
+    </select>
+
+    <insert id="insertUser1" parameterType="com.whz.mybatis.resultMap.User">
+        INSERT INTO user(userName,password,registedTime)
+        VALUES (#{username},#{password},#{regTime})
+    </insert>
+
+</mapper>

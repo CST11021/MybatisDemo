@@ -36,6 +36,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 /**
  * @author Clinton Begin
  */
+// BaseStatementHandler 的主要作用是提供一个prepare()方法，创建一个Statement对象，具体的实现通过instantiateStatement()模板方法方法留给了子类实现
 public abstract class BaseStatementHandler implements StatementHandler {
 
     protected final Configuration configuration;
@@ -59,6 +60,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
         this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
         this.objectFactory = configuration.getObjectFactory();
 
+        // 如果还没有创建好boundSql对象，则
         if (boundSql == null) { // issue #435, get the key before calculating the statement
             generateKeys(parameterObject);
             boundSql = mappedStatement.getBoundSql(parameterObject);
@@ -70,16 +72,19 @@ public abstract class BaseStatementHandler implements StatementHandler {
         this.resultSetHandler = configuration.newResultSetHandler(executor, mappedStatement, rowBounds, parameterHandler, resultHandler, boundSql);
     }
 
-    @Override
-    public BoundSql getBoundSql() {
-        return boundSql;
+    // 如果<setting>标签中有设置 useGeneratedKeys 为 true（默认为false），则调用该方法获取一个 KeyGenerator 的实现
+    protected void generateKeys(Object parameter) {
+        KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
+        ErrorContext.instance().store();
+        // statement 在执行sql 前，会调用该方法，自动生成一个主键
+        keyGenerator.processBefore(executor, mappedStatement, null, parameter);
+        ErrorContext.instance().recall();
     }
 
-    @Override
-    public ParameterHandler getParameterHandler() {
-        return parameterHandler;
-    }
 
+
+    // 创建一个Statement 对象，实例化的动作留给子类实现，根据子类创建不同的Statement实例，比如：PrepareStatementHandler
+    // 使用 connection.prepareStatement(sql)的方式创建；SimpleStatementHandler 通过 connection.createStatement() 方式创建
     @Override
     public Statement prepare(Connection connection, Integer transactionTimeout) throws SQLException {
         ErrorContext.instance().sql(boundSql.getSql());
@@ -97,9 +102,8 @@ public abstract class BaseStatementHandler implements StatementHandler {
             throw new ExecutorException("Error preparing statement.  Cause: " + e, e);
         }
     }
-
     protected abstract Statement instantiateStatement(Connection connection) throws SQLException;
-
+    // 设置实务超时时间
     protected void setStatementTimeout(Statement stmt, Integer transactionTimeout) throws SQLException {
         Integer queryTimeout = null;
         if (mappedStatement.getTimeout() != null) {
@@ -112,7 +116,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
         }
         StatementUtil.applyTransactionTimeout(stmt, queryTimeout, transactionTimeout);
     }
-
+    // 设置 Statement 的 fetchSize 属性
     protected void setFetchSize(Statement stmt) throws SQLException {
         Integer fetchSize = mappedStatement.getFetchSize();
         if (fetchSize != null) {
@@ -124,7 +128,6 @@ public abstract class BaseStatementHandler implements StatementHandler {
             stmt.setFetchSize(defaultFetchSize);
         }
     }
-
     protected void closeStatement(Statement statement) {
         try {
             if (statement != null) {
@@ -135,11 +138,16 @@ public abstract class BaseStatementHandler implements StatementHandler {
         }
     }
 
-    protected void generateKeys(Object parameter) {
-        KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
-        ErrorContext.instance().store();
-        keyGenerator.processBefore(executor, mappedStatement, null, parameter);
-        ErrorContext.instance().recall();
+
+
+
+    @Override
+    public BoundSql getBoundSql() {
+        return boundSql;
+    }
+    @Override
+    public ParameterHandler getParameterHandler() {
+        return parameterHandler;
     }
 
 }

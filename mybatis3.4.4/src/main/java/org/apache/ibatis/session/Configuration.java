@@ -330,6 +330,7 @@ public class Configuration {
         return resultSetHandler;
     }
 
+    // 根据执行器类型、MappedStatement对象、sql占位符参数、分页信息、resultHandler对象和封装了sql语句的BoundSql对象，创建一个 StatementHandler 对象
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
         StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
         statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);

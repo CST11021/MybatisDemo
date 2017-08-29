@@ -24,10 +24,10 @@ public class MybatisTest {
 
 			/*
 			1.mybatis初始化要经过简单的以下几步：
-			2使用Resources类去加载配置文件，返回一个InputStream流对象；
+			2.使用Resources类去加载配置文件，返回一个InputStream流对象；
 
 			3.SqlSessionFactoryBuilder使用build(inputStream)方法创建一个SqlSessionFactory：build()方法内部使用XMLConfigBuilder对象进行解析，
-			然后返回一个Configuration对象，然后，SqlSessionFactoryBuilder在根据Configuration对象创建XMLConfigBuilder对象;
+			然后返回一个Configuration对象，然后，SqlSessionFactoryBuilder再根据Configuration对象创建SqlSessionFactory对象;
 
 			4.SqlSessionFactory调用openSession方法创建一个SqlSession实例，创建是会根据ExecutorType、TransactionIsolationLevel和autoCommit三个参数进行创建
 

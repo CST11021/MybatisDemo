@@ -31,6 +31,7 @@ import org.apache.ibatis.session.ResultHandler;
 // StatementHandler 是对JDBC的 Statement 做进一步的封装，所有的数据库操作，最终其实都是由 Statement 来完成的
 public interface StatementHandler {
 
+    // 创建一个Statement 对象
     Statement prepare(Connection connection, Integer transactionTimeout) throws SQLException;
 
     void parameterize(Statement statement) throws SQLException;

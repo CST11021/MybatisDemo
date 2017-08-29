@@ -56,7 +56,10 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
     // 表示 <mapper namespace="xxx"> 配置的命名空间
     private String currentNamespace;
+    // 表示对应的配置文件
     private String resource;
+
+
     private Cache currentCache;
     private boolean unresolvedCacheRef; // issue #676
 

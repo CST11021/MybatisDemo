@@ -78,6 +78,7 @@ public class XMLStatementBuilder extends BaseBuilder {
 
         Class<?> resultTypeClass = resolveClass(resultType);
         String resultSetType = context.getStringAttribute("resultSetType");
+        // 如果有配置 statementType 属性，则创建指定类型的 MappedStatement ，否则使用 PREPARED 作为默认的类型
         StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
         ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
 

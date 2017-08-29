@@ -31,12 +31,15 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 /**
  * @author Clinton Begin
  */
+// 该类主要用来处理别名映射关系的
 public abstract class BaseBuilder {
     // 配置信息在内存中以Configuration对象保存
     protected final Configuration configuration;
     // 用于保存配置的别名
     protected final TypeAliasRegistry typeAliasRegistry;
+    // typeHandler注册表
     protected final TypeHandlerRegistry typeHandlerRegistry;
+
 
     public BaseBuilder(Configuration configuration) {
         this.configuration = configuration;
@@ -44,27 +47,29 @@ public abstract class BaseBuilder {
         this.typeHandlerRegistry = this.configuration.getTypeHandlerRegistry();
     }
 
-    public Configuration getConfiguration() {
-        return configuration;
-    }
+
+
+
+
 
     protected Pattern parseExpression(String regex, String defaultValue) {
         return Pattern.compile(regex == null ? defaultValue : regex);
     }
 
+    // 将value解析为对应类型的值，如果value为空，则使用默认值
     protected Boolean booleanValueOf(String value, Boolean defaultValue) {
         return value == null ? defaultValue : Boolean.valueOf(value);
     }
-
     protected Integer integerValueOf(String value, Integer defaultValue) {
         return value == null ? defaultValue : Integer.valueOf(value);
     }
-
     protected Set<String> stringSetValueOf(String value, String defaultValue) {
         value = (value == null ? defaultValue : value);
         return new HashSet<String>(Arrays.asList(value.split(",")));
     }
 
+
+    // 解析这个别名对应的jdbcType
     protected JdbcType resolveJdbcType(String alias) {
         if (alias == null) {
             return null;
@@ -76,6 +81,7 @@ public abstract class BaseBuilder {
         }
     }
 
+    // 解析这个结果集别名对应的，ResultSet类型，如：ResultSet.TYPE_FORWARD_ONLY、ResultSet.TYPE_SCROLL_INSENSITIVE、ResultSet.TYPE_SCROLL_SENSITIVE
     protected ResultSetType resolveResultSetType(String alias) {
         if (alias == null) {
             return null;
@@ -147,7 +153,11 @@ public abstract class BaseBuilder {
         return handler;
     }
 
+    // 解析这个别名对应的类型
     protected Class<?> resolveAlias(String alias) {
         return typeAliasRegistry.resolveAlias(alias);
+    }
+    public Configuration getConfiguration() {
+        return configuration;
     }
 }

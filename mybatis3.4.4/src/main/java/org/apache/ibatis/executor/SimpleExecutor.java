@@ -61,8 +61,11 @@ public class SimpleExecutor extends BaseExecutor {
         Statement stmt = null;
         try {
             Configuration configuration = ms.getConfiguration();
+            // 根据配置信息获取一个StatementHandler的一个实现
             StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
+            // 通过委托 StatementHandler 创建一个 statement 对象
             stmt = prepareStatement(handler, ms.getStatementLog());
+            // 委托给 StatementHandler 来执行查询操作
             return handler.<E>query(stmt, resultHandler);
         } finally {
             closeStatement(stmt);
@@ -79,7 +82,8 @@ public class SimpleExecutor extends BaseExecutor {
 
 
 
-    // 以上的三个核心方法，内部都是通过该方法来获取一个底层JDBC的 Statement 对象，最终的数据库操作方法是交由 Statement 对象来完成的
+    // 以上的三个核心方法，内部都是通过该方法来获取一个底层JDBC的 Statement 对象，最终的数据库操作方法是交由 Statement 对
+    // 象来完成的。另外，mybatis会根据配置信息创建不同的StatementHandler对象，StatementHandler 主要是用来创建 Statement 对象的。
     private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
         Statement stmt;
         Connection connection = getConnection(statementLog);
