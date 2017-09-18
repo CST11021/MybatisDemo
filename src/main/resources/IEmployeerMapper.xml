@@ -16,6 +16,17 @@
         <include refid="selectAllEmployeer"/>
     </select>
 
+    <select id="findAllEmployeerByPage" resultType="alias_Employeer">
+        SELECT * FROM `t_employeer`
+        <if test="orderByField != null">
+            ORDER BY ${orderByField} ASC, employeer_id DESC
+        </if>
+        <if test="index != null and index gt -1 and pageSize != null and pageSize gt 0">
+            limit #{index}, #{pageSize}
+        </if>
+    </select>
+
+
     <!--
         id：在命名空间中唯一的标识符，可以被用来引用这条语句，同时这个id也绑定了接口的中的方法名称。
         parameterType：将会传入这条语句的参数类的完全限定名或别名（绑定接口方法的入参），如果有多个入参可以使用@Param注解的方式，如：findEmployeerByDepartmentAndWorktype
@@ -32,9 +43,7 @@
     </select>
 
 
-    <select id="findEmployeerByCondition" parameterType="map" resultType="map">
-        select *
-        from `t_employeer`
+    <sql id="whereCondition">
         <trim suffixOverrides="and">
             <where>
                 <if test="name!=null"> employeer_name = #{name} and </if>
@@ -43,11 +52,48 @@
                 <if test="worktype!=null"> employeer_worktype = #{worktype} </if>
             </where>
         </trim>
+    </sql>
+    <select id="findEmployeerByCondition1" parameterType="map" resultType="map">
+        select * from `t_employeer`
+        <include refid="whereCondition"/>
     </select>
+    <select id="findEmployeerByCondition2" parameterType="map" resultType="alias_Employeer">
+        select * from `t_employeer`
+        <include refid="whereCondition"/>
+    </select>
+    <!--使用这种方法时，<if test="xxx"/>里的xxx必须对应持久化对象的字段名称（而不是setXxx方法）-->
+    <select id="findEmployeerByCondition3" parameterType="alias_Employeer" resultType="alias_Employeer">
+        select * from `t_employeer`
+        <trim suffixOverrides="and">
+            <where>
+                <if test="employeer_name!=null"> employeer_name = #{employeer_name} and </if>
+                <if test="employeer_name!=null"> employeer_age = #{age} and </if>
+                <if test="employeer_name!=null"> employeer_department = #{employeer_name} and </if>
+                <if test="employeer_name!=null"> employeer_worktype = #{employeer_name} </if>
+            </where>
+        </trim>
+    </select>
+
+    <select id="findEmployeerByCondition4" resultType="alias_Employeer">
+        select * from `t_employeer`
+        <trim suffixOverrides="and">
+            <where>
+                <if test="employeer_name!=null"> employeer_name = #{employeer_name} and </if>
+                <if test="employeer_name!=null"> employeer_age = #{age} and </if>
+                <if test="employeer_name!=null"> employeer_department = #{employeer_name} and </if>
+                <if test="employeer_name!=null"> employeer_worktype = #{employeer_name} </if>
+            </where>
+            limit #{index}, #{pageSize}
+        </trim>
+    </select>
+
 
     <!-- 插入 -->
     <!-- useGeneratedKeys设置为"true"表明要MyBatis获取由数据库自动生成的主键；keyProperty="id"指定把获取到的主键值注入到Employeer的id属性 -->
-    <insert id="addEmployeer" parameterType="alias_Employeer" useGeneratedKeys="true" keyProperty="employeer_id">
+    <insert id="addEmployeer" parameterType="alias_Employeer">
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="employeer_id">
+            SELECT LAST_INSERT_ID() AS employeer_id
+        </selectKey>
         insert into `t_employeer`(employeer_name,employeer_age,employeer_department,employeer_worktype)
         values(#{employeer_name},#{employeer_age},#{employeer_department},#{employeer_worktype})
     </insert>

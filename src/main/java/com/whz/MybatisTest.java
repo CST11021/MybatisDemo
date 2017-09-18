@@ -65,6 +65,17 @@ public class MybatisTest {
 	}
 
 	@Test
+	public void testFindAllEmployeerByPage() {
+		SqlSession session = null;
+		try {
+			session = sqlSessionFactory.openSession();
+			List<Employeer> employeerList = session.getMapper(IEmployeerMapper.class).findAllEmployeerByPage(0,5, "employeer_age");
+			System.out.println(employeerList);
+		} finally {
+			session.close();
+		}
+	}
+	@Test
 	public void testEmployeerById(){
 		SqlSession session = sqlSessionFactory.openSession();
 		Employeer employeer = session.selectOne("findEmployeerByID", 5);
@@ -81,19 +92,62 @@ public class MybatisTest {
 			session.close();
 	}
 	@Test
-	public void testFindEmployeerByCondition() {
+	public void testFindEmployeerByCondition1() {
 		SqlSession session = null;
 		try {
 			session = sqlSessionFactory.openSession();
 			Map condition = new HashMap<String,String>();
 			condition.put("age",30);
 			List<Map> employeerList = session.getMapper(IEmployeerMapper.class)
-					.findEmployeerByCondition(condition);
+					.findEmployeerByCondition1(condition);
 			System.out.println(employeerList);
 		} finally {
 			session.close();
 		}
 	}
+	@Test
+	public void testFindEmployeerByCondition2() {
+		SqlSession session = null;
+		try {
+			session = sqlSessionFactory.openSession();
+			Map condition = new HashMap<String,String>();
+			condition.put("age",30);
+			List<Employeer> employeerList = session.getMapper(IEmployeerMapper.class)
+					.findEmployeerByCondition2(condition);
+			System.out.println(employeerList);
+		} finally {
+			session.close();
+		}
+	}
+	@Test
+	public void testFindEmployeerByCondition3() {
+		SqlSession session = null;
+		try {
+			session = sqlSessionFactory.openSession();
+			Employeer condition = new Employeer();
+			condition.setEmployeer_age(30);
+			List<Employeer> employeerList = session.getMapper(IEmployeerMapper.class)
+					.findEmployeerByCondition3(condition);
+			System.out.println(employeerList);
+		} finally {
+			session.close();
+		}
+	}
+	@Test
+	public void testFindEmployeerByCondition4() {
+		SqlSession session = null;
+		try {
+			session = sqlSessionFactory.openSession();
+			Employeer condition = new Employeer();
+			condition.setEmployeer_age(30);
+			List<Employeer> employeerList = session.getMapper(IEmployeerMapper.class)
+					.findEmployeerByCondition4(condition, 0, 3);
+			System.out.println(employeerList);
+		} finally {
+			session.close();
+		}
+	}
+
 
 	@Test
 	public void addTest(){
@@ -179,6 +233,26 @@ public class MybatisTest {
 		} finally {
 			session.close();
 		}
+	}
+
+	@Test
+	public void test() throws Exception {
+
+		Employeer employeer = new Employeer();
+		employeer.setEmployeer_age(56);
+		employeer.setEmployeer_name("王五");
+
+		SqlSession session = null;
+		try {
+			session = sqlSessionFactory.openSession();
+			//返回值是记录条数
+			int resultCount = session.insert("com.whz.mapperinterface.IEmployeerMapper.addEmployeer", employeer );
+			System.out.printf("当前插入的employeer_id :%d    当前插入数据库中条数:%d " , employeer.getEmployeer_id() ,resultCount);  //获取插入对象的id
+			session.commit() ;
+		} finally {
+			session.close();
+		}
+
 	}
 
 }
