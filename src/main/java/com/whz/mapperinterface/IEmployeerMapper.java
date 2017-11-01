@@ -12,15 +12,18 @@ public interface IEmployeerMapper {
 
 
     List<Employeer> findAllEmployeer();
-
+    List<Employeer> findAllEmployeerByPage(@Param("index") int index, @Param("pageSize") int pageSize, @Param("orderByField") String orderByField);
     // 根据id查找Employeer
     Employeer findEmployeerByID(@Param("department") int id);
     // 根据部分和工作类型查找
     List<Employeer> findEmployeerByDepartmentAndWorktype(@Param("department") String department, @Param("worktype")String worktype);
 
-    List<Map> findEmployeerByCondition(Map condition);
+    List<Map> findEmployeerByCondition1(Map condition);
+    List<Employeer> findEmployeerByCondition2(Map condition);
+    List<Employeer> findEmployeerByCondition3(Employeer condition);
+    List<Employeer> findEmployeerByCondition4(Employeer condition, @Param("index") int index, @Param("pageSize") int pageSize);
 
-    void addEmployeer(Employeer employeer);
+    int addEmployeer(Employeer employeer);
     void deleteEmployeer(int id);
     void updateEmployeer(Employeer employeer);
 
