@@ -615,6 +615,7 @@ public class Configuration {
         }
 
         // 注意这个put方法，他会注入两个不同的key，一个是权限定名，一个是简称
+        @Override
         @SuppressWarnings("unchecked")
         public V put(String key, V value) {
             if (containsKey(key)) {
@@ -630,6 +631,7 @@ public class Configuration {
             }
             return super.put(key, value);
         }
+        @Override
         public V get(Object key) {
             V value = super.get(key);
             if (value == null) {

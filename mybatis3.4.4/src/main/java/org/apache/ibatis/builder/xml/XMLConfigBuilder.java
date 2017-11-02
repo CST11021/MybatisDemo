@@ -46,7 +46,7 @@ import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
 
-// 用于解析mybatis配置文件，并创建一个内存表示的Configuration对象
+// 用于解析mybatis配置文件，并创建一个内存表示的 Configuration 对象
 public class XMLConfigBuilder extends BaseBuilder {
 
     //每个XMLConfigBuilder对象只能使用一次，该字段用于表示该对象是否被使用过

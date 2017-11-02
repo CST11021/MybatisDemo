@@ -46,6 +46,10 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
         this.configuration = configuration;
     }
 
+    @Override
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 
     /* ---------------------- 以下的这些 openSession 方法最终都委托给openSessionFromDataSource 或 openSessionFromConnection 来创建 SqlSession -------------------*/
     @Override
@@ -80,6 +84,9 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     public SqlSession openSession(ExecutorType execType, Connection connection) {
         return openSessionFromConnection(execType, connection);
     }
+    /* ---------------------- 以上的这些 openSession 方法最终都委托给openSessionFromDataSource 或 openSessionFromConnection 来创建 SqlSession -------------------*/
+
+
     // 返回一个DefaultSqlSession 实例
     private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level, boolean autoCommit) {
         Transaction tx = null;
@@ -119,20 +126,6 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
             ErrorContext.instance().reset();
         }
     }
-
-    /* ---------------------- 以上的这些 openSession 方法最终都委托给openSessionFromDataSource 或 openSessionFromConnection 来创建 SqlSession -------------------*/
-
-
-
-
-    @Override
-    public Configuration getConfiguration() {
-        return configuration;
-    }
-
-
-
-
     // 根据 Environment 配置返回一个 TransactionFactory 实例，如果没有配置，则实例化一个 ManagedTransactionFactory 实例
     private TransactionFactory getTransactionFactoryFromEnvironment(Environment environment) {
         if (environment == null || environment.getTransactionFactory() == null) {
@@ -140,7 +133,6 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
         }
         return environment.getTransactionFactory();
     }
-
     private void closeTransaction(Transaction tx) {
         if (tx != null) {
             try {

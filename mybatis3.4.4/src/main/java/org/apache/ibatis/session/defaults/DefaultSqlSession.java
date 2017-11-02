@@ -48,12 +48,16 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class DefaultSqlSession implements SqlSession {
 
+    // 表示配置信息
     private Configuration configuration;
+    // SqlSession最终都将委托执行器类执行数据库操作
     private Executor executor;
+    // 是否自动提交
     private boolean autoCommit;
-    private boolean dirty;
-    private List<Cursor<?>> cursorList;
 
+    private boolean dirty;
+
+    private List<Cursor<?>> cursorList;
 
 
     public DefaultSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
@@ -67,7 +71,7 @@ public class DefaultSqlSession implements SqlSession {
     }
 
 
-    /* ------------------ 内部实现委托给了执行的 update() 方法 ---------------------------------- */
+    /* ------------------ 一、内部实现委托给了执行的 update() 方法 ---------------------------------- */
     @Override
     public int insert(String statement) {
         return insert(statement, null);
@@ -107,11 +111,7 @@ public class DefaultSqlSession implements SqlSession {
 
 
 
-
-
-
-
-    /* ------------------ 内部实现委托给了执行的 query() 方法 ---------------------------------- */
+    /* ------------------ 二、内部实现委托给了执行器的 query() 方法 ---------------------------------- */
     @Override
     public <K, V> Map<K, V> selectMap(String statement, String mapKey) {
         return this.selectMap(statement, null, mapKey, RowBounds.DEFAULT);
@@ -171,7 +171,10 @@ public class DefaultSqlSession implements SqlSession {
 
 
 
-    /* ------------------ 内部实现委托给了执行的 query() 方法 ---------------------------------- */
+
+
+
+    /* ------------------ 三、内部实现委托给了执行器的 query() 方法 ---------------------------------- */
     @Override
     public void select(String statement, Object parameter, ResultHandler handler) {
         select(statement, parameter, RowBounds.DEFAULT, handler);
@@ -198,10 +201,7 @@ public class DefaultSqlSession implements SqlSession {
 
 
 
-
-
-
-    /* ------------------ 内部实现委托给了执行的 queryCursor() 方法 ---------------------------------- */
+    /* ------------------ 四、内部实现委托给了执行器的 queryCursor() 方法 ---------------------------------- */
     @Override
     public <T> Cursor<T> selectCursor(String statement) {
         return selectCursor(statement, null);
@@ -224,14 +224,6 @@ public class DefaultSqlSession implements SqlSession {
             ErrorContext.instance().reset();
         }
     }
-
-
-
-
-
-
-
-
 
 
 

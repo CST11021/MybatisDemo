@@ -27,9 +27,10 @@ public class MybatisTest {
 			2.使用Resources类去加载配置文件，返回一个InputStream流对象；
 
 			3.SqlSessionFactoryBuilder使用build(inputStream)方法创建一个SqlSessionFactory：build()方法内部使用XMLConfigBuilder对象进行解析，
-			然后返回一个Configuration对象，然后，SqlSessionFactoryBuilder再根据Configuration对象创建SqlSessionFactory对象;
+			 然后返回一个Configuration对象，然后，SqlSessionFactoryBuilder再根据Configuration对象创建SqlSessionFactory的对象
+			（SqlSessionFactoryBuilder创建时，都是用DefaultSqlSessionFactory实现类，且该实现类创建的SqlSession时，都使用DefaultSqlSession实现类）;
 
-			4.SqlSessionFactory调用openSession方法创建一个SqlSession实例，创建是会根据ExecutorType、TransactionIsolationLevel和autoCommit三个参数进行创建
+			4.SqlSessionFactory 调用openSession方法创建一个SqlSession（）实例，创建是会根据ExecutorType、TransactionIsolationLevel和autoCommit三个参数进行创建
 
 			5.接下来SqlSession就可以进行一系列的增删改查操作了：SqlSession内部委托给了Executor的doUpdate、doQuery和doQueryCursor进行
 
@@ -80,7 +81,7 @@ public class MybatisTest {
 		SqlSession session = sqlSessionFactory.openSession();
 		Employeer employeer = session.selectOne("findEmployeerByID", 5);
 		//Employeer employeer = session.selectOne("com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
-		//Employeer employeer = session.getMapper(com.whz.mapperinterface.IEmployeerMapper.class).findEmployeerByID(id);
+		//Employeer employeer = session.getMapper(com.whz.mapperinterface.IEmployeerMapper.class).findEmployeerByID(5);
 		session.close();
 	}
 	@Test

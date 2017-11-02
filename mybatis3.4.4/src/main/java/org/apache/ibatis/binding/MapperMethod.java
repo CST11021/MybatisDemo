@@ -216,10 +216,11 @@ public class MapperMethod {
         private final SqlCommandType type;
 
         public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
+
             final String methodName = method.getName();
             final Class<?> declaringClass = method.getDeclaringClass();
-            MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass,
-                    configuration);
+
+            MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass, configuration);
             if (ms == null) {
                 if (method.getAnnotation(Flush.class) != null) {
                     name = null;
@@ -243,7 +244,10 @@ public class MapperMethod {
         public SqlCommandType getType() {
             return type;
         }
+
+        // 根据接口名和方法名返回对应的 MapperdStatement 对象
         private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName, Class<?> declaringClass, Configuration configuration) {
+            // statementId由接口名称 + 方法名组成
             String statementId = mapperInterface.getName() + "." + methodName;
             if (configuration.hasStatement(statementId)) {
                 return configuration.getMappedStatement(statementId);
@@ -271,6 +275,7 @@ public class MapperMethod {
         private final boolean returnsVoid;
         private final boolean returnsCursor;
 
+        // 表示返回类型，如果是返回值是如List<Employee>的泛型，则returnType表示Employee.class
         private final Class<?> returnType;
         private final String mapKey;
         private final Integer resultHandlerIndex;
@@ -278,6 +283,7 @@ public class MapperMethod {
         private final ParamNameResolver paramNameResolver;
 
         public MethodSignature(Configuration configuration, Class<?> mapperInterface, Method method) {
+            // 接口方法的返回类型
             Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, mapperInterface);
             if (resolvedReturnType instanceof Class<?>) {
                 this.returnType = (Class<?>) resolvedReturnType;
@@ -343,6 +349,27 @@ public class MapperMethod {
             }
             return index;
         }
+        /**
+        @MapKey注解的使用
+        需求场景：批量从数据库查出若干条数据，包括id和name两个字段。希望可以把结果直接用Map接收，然后通过map.get(id)方便地获取name的值。
+
+        问题：
+            如果使用下面的代码，则如果查询结果是多条就会报错，因为MyBatis是把结果以（"id":123）、("name":"Jack")的形式保存在Map中的。所以如果返回结果一条包括了id和name的记录就没问题；如果返回多条记录，即有多个（"id":123）、（"id":124），则MyBatis就傻掉不知如何处理了。
+        Map<String, Object> m = abcDao.getNamesByIds(idList);
+        解决的方法是在外面再用一个Map：
+        Map<Integer, Map<String, Object>> m = abcDao.getNamesByIds(idList);
+        然后，在这个dao的方法上面加一个注解：
+        @MapKey("id")
+        public Map<Integer, Map<String, Object>> getNamesByIds(List<Map<String, Object>> list);
+        这个注解表示最外层Map的key为查询结果中字段名为“id”的值。
+        Mapper.xml中的配置如下：
+            <select id="getNamesByIds" resultType="java.util.Map">
+                SELECT id, name FROM tb_abc WHERE id IN
+                <foreach item="item" collection="list" open="(" separator="," close=")">
+                        #{item.id}
+                </foreach>
+            </select>
+         */
         private String getMapKey(Method method) {
             String mapKey = null;
             if (Map.class.isAssignableFrom(method.getReturnType())) {

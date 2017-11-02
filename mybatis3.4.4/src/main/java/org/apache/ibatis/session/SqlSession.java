@@ -81,17 +81,17 @@ public interface SqlSession extends Closeable {
   // Flushes batch statements.
   List<BatchResult> flushStatements();
 
-  // Closes the session
+  // 关闭session
   @Override
   void close();
 
-  // Clears local session cache
+  // 清除session缓存（mybatis一级缓存）
   void clearCache();
 
   // Retrieves current configuration
   Configuration getConfiguration();
 
-  // Retrieves a mapper.
+  // 根据 type 获取Mapper接口
   <T> T getMapper(Class<T> type);
 
   // Retrieves inner database connection
