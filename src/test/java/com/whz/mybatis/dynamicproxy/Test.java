@@ -37,7 +37,7 @@ public class Test {
         proxy.sub(1, 1);
     }
 
-    ///2、测试JDK动态代理（为接口创建代理对象）
+    // 2、测试JDK动态代理（为接口创建代理对象）
     @org.junit.Test
     public void testJDK_DynamicProxy2() {
         Class<Calculator> targetInterface = Calculator.class;
@@ -49,5 +49,10 @@ public class Test {
         System.out.println(proxy.add(1, 1));
         System.out.println(proxy.sub(1, 1));
     }
+
+    // 补充：java动态代理是利用反射机制生成一个实现代理接口的匿名类，在调用具体方法前调用InvokeHandler来处理，
+    // 该匿名类中使用了装饰器的设计思想为目标类织入增强逻辑；
+    //
+    // 而cglib动态代理是利用asm开源包，对代理对象类的class文件加载进来，通过修改其字节码生成子类来处理。
 
 }
