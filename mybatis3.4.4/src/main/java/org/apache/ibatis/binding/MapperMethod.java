@@ -42,7 +42,10 @@ import java.util.*;
 // 表示Mapper接口中的方法，即对应配置文件中一个个select、update、insert和delete操作
 public class MapperMethod {
 
+    // 封装Mapper接口方法名称和数据操作类型
     private final SqlCommand command;
+
+    // 封装Mapper接口方法的一些参数信息，比如返回值类型、占位符入参类型和索引等
     private final MethodSignature method;
 
     public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
@@ -51,7 +54,7 @@ public class MapperMethod {
     }
 
 
-    // 根据会话对象和SQL占位符参数，执行SQL语句操作
+    // 接口的代理对象会调用该方法，根据会话对象和SQL占位符参数，执行SQL语句操作
     public Object execute(SqlSession sqlSession, Object[] args) {
         Object result;
         switch (command.getType()) {

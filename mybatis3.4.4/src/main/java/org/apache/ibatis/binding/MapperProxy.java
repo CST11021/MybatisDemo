@@ -53,7 +53,10 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         try {
             // method.getDeclaringClass()方法返回表示声明由此Method对象表示的方法的类的Class对象
+            // JDK动态代理的接口代理和类代理有所区别，具体请参照测试模块的代理测试用例
             if (Object.class.equals(method.getDeclaringClass())) {
+                // 我们知道，所有的类都继承自Object ，当JDK动态代理为目标接口（注意：不是目标类） proxy 创建代理对象时，
+                // 会首先调用一次Object#toString方法，所以这里需要进行判断
                 return method.invoke(this, args);
             }
             // 判断该方法是否被default修饰
@@ -65,6 +68,9 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
                 // 第一种：Employeer employeer = session.selectOne("findEmployeerByID", 5);
                 // 第二种：Employeer employeer = session.selectOne("com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
                 // 第三种：Employeer employeer = session.getMapper(com.whz.mapperinterface.IEmployeerMapper.class).findEmployeerByID(5);
+
+                // 补充说明一下：其实第一、二种方法的执行效率会比第三种效率来得高，因为生成的代理对象最终还会调用第一、二
+                // 种方法执行
                 return invokeDefaultMethod(proxy, method, args);
             }
         } catch (Throwable t) {
@@ -73,7 +79,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
 
         // 首先缓存调用方法
         final MapperMethod mapperMethod = cachedMapperMethod(method);
-        // 执行调用方法
+        // 执行调用方法（将Mapper接口的具体实现交给了MapperMethod进行处理），并将执行结果返回
         return mapperMethod.execute(sqlSession, args);
     }
     // 将调用的方法缓存起来，缓存key是根据 会话、方法和方法参数 决定的
