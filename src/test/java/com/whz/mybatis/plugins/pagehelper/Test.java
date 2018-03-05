@@ -44,8 +44,10 @@ public class Test {
     public void testGetPage(){
         SqlSession session = sqlSessionFactory.openSession();
 
-        // 分页查找，PageHelper使用的是物理分页
+        // 分页查找，PageHelper使用的是物理分页（设置分页信息保存到threadlocal中）
         PageHelper.startPage(2, 3);
+        // 紧跟着的第一个select方法会被分页，contryMapper会被PageInterceptor截拦,截拦器会从threadlocal中取出分页信息，把
+        // 分页信息加到sql语句中，实现了分页查旬
         List<User> userList = session.getMapper(UserMapper.class).getAllUsers();
         // userList 会被包装成一个Page对象
         PageInfo pageInfo = new PageInfo<>(userList);
