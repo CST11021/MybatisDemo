@@ -223,6 +223,8 @@ class PooledConnection implements InvocationHandler {
 
     /**
      * Required for InvocationHandler implementation.
+     * {@link PooledConnection} 代理了原始的{@link Connection}，当调用close()方法时，并不是真正的关闭了连接对象，而将
+     * 连接对象放入到连接池里，以便后续复用
      *
      * @param proxy  - not used
      * @param method - the method to be executed
@@ -233,6 +235,7 @@ class PooledConnection implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodName = method.getName();
         if (CLOSE.hashCode() == methodName.hashCode() && CLOSE.equals(methodName)) {
+            // 当调用close()方法时，并不是真正的关闭了连接对象，而将连接对象放入到连接池里，以便后续复用
             dataSource.pushConnection(this);
             return null;
         } else {
