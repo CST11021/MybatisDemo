@@ -16,30 +16,32 @@ import java.util.Map;
 
 public class MybatisTest {
 
-	private static SqlSessionFactory sqlSessionFactory;
 	private static Reader reader;
 	private static InputStream inputStream;
+	private static SqlSessionFactory sqlSessionFactory;
 	static {
 		try {
 
 			/*
-			1.mybatis初始化要经过简单的以下几步：
-			2.使用Resources类去加载配置文件，返回一个InputStream流对象；
+			mybatis初始化要经过简单的以下几步：
 
-			3.SqlSessionFactoryBuilder使用build(inputStream)方法创建一个SqlSessionFactory：build()方法内部使用XMLConfigBuilder对象进行解析，
+			1.使用Resources类去加载配置文件，返回一个InputStream流对象；
+
+			2.SqlSessionFactoryBuilder使用build(inputStream)方法创建一个SqlSessionFactory：build()方法内部使用XMLConfigBuilder对象进行解析，
 			 然后返回一个Configuration对象，然后，SqlSessionFactoryBuilder再根据Configuration对象创建SqlSessionFactory的对象
 			（SqlSessionFactoryBuilder创建时，都是用DefaultSqlSessionFactory实现类，且该实现类创建的SqlSession时，都使用DefaultSqlSession实现类）;
 
-			4.SqlSessionFactory 调用openSession方法创建一个SqlSession（）实例，创建是会根据ExecutorType、TransactionIsolationLevel和autoCommit三个参数进行创建
+			3.SqlSessionFactory 调用openSession方法创建一个SqlSession（）实例，创建是会根据ExecutorType、TransactionIsolationLevel和autoCommit三个参数进行创建
 
-			5.接下来SqlSession就可以进行一系列的增删改查操作了：SqlSession内部委托给了Executor的doUpdate、doQuery和doQueryCursor进行
+			4.接下来SqlSession就可以进行一系列的增删改查操作了：SqlSession内部委托给了Executor的doUpdate、doQuery和doQueryCursor进行
 
-			 */
+			*/
 
+			// 方案一：返回字节流
 			inputStream = Resources.getResourceAsStream("mybatis-config.xml");
 			sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
 
-			System.out.println();
+			// 方案二：返回字符流
 			//reader = Resources.getResourceAsReader("mybatis-config.xml");
 			//sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
 		} catch (Exception e) {
