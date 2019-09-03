@@ -90,51 +90,52 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
-/*
+/**
   该对像用于表示Mybatis的配置信息：MyBatis根据初始化好Configuration信息，这时候用户就可以使用MyBatis进行数据库操作了。
   可以这么说，MyBatis初始化的过程，就是创建 Configuration对象的过程。
 
   MyBatis的初始化可以有两种方式：
-    基于XML配置文件：基于XML配置文件的方式是将MyBatis的所有配置信息放在XML文件中，MyBatis通过加载并XML配置文件，将配置文信息组装成内部的Configuration对象
-    基于Java API：这种方式不使用XML配置文件，需要MyBatis使用者在Java代码中，手动创建Configuration对象，然后将配置参数set 进入Configuration对象中
+        基于XML配置文件：基于XML配置文件的方式是将MyBatis的所有配置信息放在XML文件中，MyBatis通过加载并XML配置文件，将配置文信息组装成内部的Configuration对象
+        基于Java API：这种方式不使用XML配置文件，需要MyBatis使用者在Java代码中，手动创建Configuration对象，然后将配置参数set 进入Configuration对象中
  */
 public class Configuration {
 
-    // 表示要解析的配置文件路径
+    /** 表示要解析的配置文件路径，配置文件可能有多个 */
     protected final Set<String> loadedResources = new HashSet<String>();
 
-    // 表示配置文件中的 <properties/> 标签
+    /** 表示配置文件中的 <properties/> 标签 */
     protected Environment environment;
-    // 表示配置文件中的 <properties/> 标签
+    /** 表示配置文件中的 <properties/> 标签 */
     protected Properties variables = new Properties();
-    // 表示配置文件中的 <reflectorFactory/> 标签
+    /** 表示配置文件中的 <reflectorFactory/> 标签 */
     protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
-    // 表示配置文件中的 <objectFactory/> 标签
+    /** 表示配置文件中的 <objectFactory/> 标签 */
     protected ObjectFactory objectFactory = new DefaultObjectFactory();
-    // 表示配置文件中的 <objectWrapperFactory/> 标签
+    /** 表示配置文件中的 <objectWrapperFactory/> 标签 */
     protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
-    // 表示配置文件中的 <databaseIdProvider/> 标签
+    /** 表示配置文件中的 <databaseIdProvider/> 标签 */
     protected String databaseId;
-    // <mappers/> 中配置的所有Mapper接口都会注册到这里
+    /** <mappers/> 中配置的所有Mapper接口都会注册到这里 */
     protected final MapperRegistry mapperRegistry = new MapperRegistry(this);
-    // 类型处理注册表，表示配置文件中<typeHandlers/> 标签的配置信息
+    /** 类型处理注册表，表示配置文件中<typeHandlers/> 标签的配置信息 */
     protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
-    // 别名注册表，表示配置文件中<typeAliases/> 标签的配置信息
+    /** 别名注册表，表示配置文件中<typeAliases/> 标签的配置信息 */
     protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
-    // <plugins/> 相关的配置
+    /** <plugins/> 相关的配置 */
     protected final InterceptorChain interceptorChain = new InterceptorChain();
 
-
-    protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL
+    /** #224 Using internal Javassist instead of OGNL */
+    protected ProxyFactory proxyFactory = new JavassistProxyFactory();
     protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
-    // 在配置文件中<mapper/>里配置的<select>、<update>、<insert>和<delete>都会生成一个 MappedStatement 对象
+
+    /** 在配置文件中<mapper/>里配置的<select>、<update>、<insert>和<delete>都会生成一个 MappedStatement 对象 */
     protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection");
     protected final Map<String, Cache> caches = new StrictMap<Cache>("Caches collection");
-    // 配置文件中<mapper/>里配置的<resultMap>解析完后都会注册到这里，并且特别需要注意的是，同一个ResultMap对象，会注册两次，分别使用不同的key进行注册，详细请看StrictMap的put方法
+    /** 配置文件中<mapper/>里配置的<resultMap>解析完后都会注册到这里，并且特别需要注意的是，同一个ResultMap对象，会注册两次，分别使用不同的key进行注册，详细请看StrictMap的put方法 */
     protected final Map<String, ResultMap> resultMaps = new StrictMap<ResultMap>("Result Maps collection");
     protected final Map<String, ParameterMap> parameterMaps = new StrictMap<ParameterMap>("Parameter Maps collection");
     protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<KeyGenerator>("Key Generators collection");
-    // sql碎片，<mapper/>里可以配置一些模式式的sql语句，mybatis解析完后会将其保存到 sqlFragments 属性中
+    /** sql碎片，<mapper/>里可以配置一些模式式的sql语句，mybatis解析完后会将其保存到 sqlFragments 属性中 */
     protected final Map<String, XNode> sqlFragments = new StrictMap<XNode>("XML fragments parsed from previous mappers");
 
     protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<XMLStatementBuilder>();
@@ -142,7 +143,7 @@ public class Configuration {
     protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<ResultMapResolver>();
     protected final Collection<MethodResolver> incompleteMethods = new LinkedList<MethodResolver>();
 
-    // A map holds cache-ref relationship. The key is the namespace that references a cache bound to another namespace and the value is the namespace which the actual cache is bound to.
+    /** A map holds cache-ref relationship. The key is the namespace that references a cache bound to another namespace and the value is the namespace which the actual cache is bound to. */
     protected final Map<String, String> cacheRefMap = new HashMap<String, String>();
 
 
@@ -153,50 +154,50 @@ public class Configuration {
 
 
     /* ------------------------------------------------------- <settings> 标签的配置-------------------------------------------------------- */
-    // 是否启用行内嵌套语句，默认false
+    /** 是否启用行内嵌套语句，默认false */
     protected boolean safeRowBoundsEnabled;
-    // 允许在嵌套语句中使用分页（ResultHandler），默认true
+    /** 允许在嵌套语句中使用分页（ResultHandler），默认true */
     protected boolean safeResultHandlerEnabled = true;
-    // 是否开启自动驼峰命名规则（camel case）映射，即从经典数据库列名 A_COLUMN 到经典 Java 属性名 aColumn 的类似映射。默认false
+    /** 是否开启自动驼峰命名规则（camel case）映射，即从经典数据库列名 A_COLUMN 到经典 Java 属性名 aColumn 的类似映射。默认false */
     protected boolean mapUnderscoreToCamelCase;
-    // 当开启时，任何方法的调用都会加载该对象的所有属性，否则，每个属性会按需加载。默认 false (true in ≤3.4.1)
+    /** 当开启时，任何方法的调用都会加载该对象的所有属性，否则，每个属性会按需加载。默认 false (true in ≤3.4.1) */
     protected boolean aggressiveLazyLoading;
-    // 是否允许单一语句返回多结果集（需要兼容驱动）
+    /** 是否允许单一语句返回多结果集（需要兼容驱动） */
     protected boolean multipleResultSetsEnabled = true;
-    // 允许 JDBC 支持自动生成主键，需要驱动兼容。 如果设置为true 则这个设置强制使用自动生成主键，尽管一些驱动不能兼容但仍可正常工作（比如 Derby）。
+    /** 允许 JDBC 支持自动生成主键，需要驱动兼容。 如果设置为true 则这个设置强制使用自动生成主键，尽管一些驱动不能兼容但仍可正常工作（比如 Derby）。 */
     protected boolean useGeneratedKeys;
-    // 使用列标签代替列名。不同的驱动在这方面会有不同的表现，具体可参考相关驱动文档或通过测试这两种不同的模式来观察所用驱动的结果。
+    /** 使用列标签代替列名。不同的驱动在这方面会有不同的表现，具体可参考相关驱动文档或通过测试这两种不同的模式来观察所用驱动的结果。 */
     protected boolean useColumnLabel = true;
-    // 该配置影响的所有映射器中配置的缓存的全局开关。
+    /** 该配置影响的所有映射器中配置的缓存的全局开关。 */
     protected boolean cacheEnabled = true;
-    // 指定当结果集中值为 null 的时候是否调用映射对象的 setter（map 对象时为 put）方法，这对于有 Map.keySet() 依赖或 null 值初始化的时候是有用的。注意基本类型（int、boolean等）是不能设置成 null 的。
+    /** 指定当结果集中值为 null 的时候是否调用映射对象的 setter（map 对象时为 put）方法，这对于有 Map.keySet() 依赖或 null 值初始化的时候是有用的。注意基本类型（int、boolean等）是不能设置成 null 的。 */
     protected boolean callSettersOnNulls;
-    // 允许使用方法签名中的名称作为语句参数名称。 为了使用该特性，你的工程必须采用Java 8编译，并且加上-parameters选项。（从3.4.1开始）
+    /** 允许使用方法签名中的名称作为语句参数名称。 为了使用该特性，你的工程必须采用Java 8编译，并且加上-parameters选项。（从3.4.1开始） */
     protected boolean useActualParamName = true;
-    // 当返回行的所有列都是空时，MyBatis默认返回null。 当开启这个设置时，MyBatis会返回一个空实例。 请注意，它也适用于嵌套的结果集 (i.e. collectioin and association)。（从3.4.2开始）
+    /** 当返回行的所有列都是空时，MyBatis默认返回null。 当开启这个设置时，MyBatis会返回一个空实例。 请注意，它也适用于嵌套的结果集 (i.e. collectioin and association)。（从3.4.2开始） */
     protected boolean returnInstanceForEmptyRow;
-    // 延迟加载的全局开关。当开启时，所有关联对象都会延迟加载。 特定关联关系中可通过设置fetchType属性来覆盖该项的开关状态。
+    /** 延迟加载的全局开关。当开启时，所有关联对象都会延迟加载。 特定关联关系中可通过设置fetchType属性来覆盖该项的开关状态。 */
     protected boolean lazyLoadingEnabled = false;
 
 
-    // 指定 MyBatis 增加到日志名称的前缀。
+    /** 指定 MyBatis 增加到日志名称的前缀。 */
     protected String logPrefix;
-    // 指定 MyBatis 所用日志的具体实现，未指定时将自动查找:SLF4J | LOG4J | LOG4J2 | JDK_LOGGING | COMMONS_LOGGING | STDOUT_LOGGING | NO_LOGGING
+    /** 指定 MyBatis 所用日志的具体实现，未指定时将自动查找:SLF4J | LOG4J | LOG4J2 | JDK_LOGGING | COMMONS_LOGGING | STDOUT_LOGGING | NO_LOGGING */
     protected Class<? extends Log> logImpl;
     protected Class<? extends VFS> vfsImpl;
-    // MyBatis 利用本地缓存机制（Local Cache）防止循环引用（circular references）和加速重复嵌套查询。 默认值为 SESSION，这种情况下会缓存一个会话中执行的所有查询。 若设置值为 STATEMENT，本地会话仅用在语句执行上，对相同 SqlSession 的不同调用将不会共享数据。
+    /** MyBatis 利用本地缓存机制（Local Cache）防止循环引用（circular references）和加速重复嵌套查询。 默认值为 SESSION，这种情况下会缓存一个会话中执行的所有查询。 若设置值为 STATEMENT，本地会话仅用在语句执行上，对相同 SqlSession 的不同调用将不会共享数据。 */
     protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION;
-    // 当没有为参数提供特定的 JDBC 类型时，为空值指定 JDBC 类型。 某些驱动需要指定列的 JDBC 类型，多数情况直接用一般类型即可，比如 NULL、VARCHAR 或 OTHER。
+    /** 当没有为参数提供特定的 JDBC 类型时，为空值指定 JDBC 类型。 某些驱动需要指定列的 JDBC 类型，多数情况直接用一般类型即可，比如 NULL、VARCHAR 或 OTHER。 */
     protected JdbcType jdbcTypeForNull = JdbcType.OTHER;
-    // 指定哪个对象的方法触发一次延迟加载
+    /** 指定哪个对象的方法触发一次延迟加载 */
     protected Set<String> lazyLoadTriggerMethods = new HashSet<String>(Arrays.asList(new String[]{"equals", "clone", "hashCode", "toString"}));
-    // 指定动态 SQL 生成的默认语言。
+    /** 指定动态 SQL 生成的默认语言。 */
     protected Integer defaultStatementTimeout;
-    // 为驱动的结果集获取数量（fetchSize）设置一个提示值。此参数只可以在查询设置中被覆盖。
+    /** 为驱动的结果集获取数量（fetchSize）设置一个提示值。此参数只可以在查询设置中被覆盖。 */
     protected Integer defaultFetchSize;
-    // 配置默认的执行器。SIMPLE 就是普通的执行器；REUSE 执行器会重用预处理语句（prepared statements）； BATCH 执行器将重用语句并执行批量更新。
+    /** 配置默认的执行器。SIMPLE 就是普通的执行器；REUSE 执行器会重用预处理语句（prepared statements）； BATCH 执行器将重用语句并执行批量更新。 */
     protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE;
-    // 指定 MyBatis 应如何自动映射列到字段或属性。 NONE 表示取消自动映射；PARTIAL 只会自动映射没有定义嵌套结果集映射的结果集。 FULL 会自动映射任意复杂的结果集（无论是否嵌套）。
+    // 指定 MyBatis 应如何自动映射列到字段或属性。 NONE 表示取消自动映射；PARTIAL 只会自动映射没有定义嵌套结果集映射的结果集。 FULL 会自动映射任意复杂的结果集（无论是否嵌套）。 */
     protected AutoMappingBehavior autoMappingBehavior = AutoMappingBehavior.PARTIAL;
     // 指定发现自动映射目标未知列（或者未知属性类型）的行为。
     // NONE: 不做任何反应
@@ -515,7 +516,7 @@ public class Configuration {
         cacheRefMap.put(namespace, referencedNamespace);
     }
 
-    /*
+    /**
      * Parses all the unprocessed statement nodes in the cache. It is recommended
      * to call this method once all the mappers are added as it provides fail-fast
      * statement validation.
@@ -547,7 +548,7 @@ public class Configuration {
         }
     }
 
-    /*
+    /**
      * Extracts namespace from fully qualified statement id.
      *
      * @param statementId

@@ -54,9 +54,10 @@ public class SqlSessionFactoryBuilder {
 
     /**
      * 资源文件可以使用 Reader 和 InputStream 两种形式返回，然后去解析
-     * @param reader         将配置文件包装为一个Reader对象，为后续解析做准备
-     * @param environment   表示配置文件<environments default="development">中的default属性
-     * @param properties    表示配置文件中的 <properties/> 标签
+     *
+     * @param reader            将配置文件包装为一个Reader对象，为后续解析做准备
+     * @param environment       表示配置文件<environments default="development">中的default属性
+     * @param properties        表示配置文件中的 <properties/> 标签
      * @return SqlSessionFactory 接口：该接口用于创建一个 SqlSession 对象
      */
     public SqlSessionFactory build(Reader reader, String environment, Properties properties) {
@@ -77,6 +78,7 @@ public class SqlSessionFactoryBuilder {
 
     /**
      * 类比 {@link SqlSessionFactoryBuilder#build(Reader, String, Properties)} 方法
+     *
      * @param inputStream
      * @param environment
      * @param properties
@@ -100,6 +102,7 @@ public class SqlSessionFactoryBuilder {
 
     /**
      * 配置文件解析后再内存中保存为一个 Configuration 对象，该方法使用 Configuration 对象创建一个 DefaultSqlSessionFactory
+     *
      * @param config
      * @return
      */

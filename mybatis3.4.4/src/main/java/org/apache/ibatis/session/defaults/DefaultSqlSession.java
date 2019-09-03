@@ -340,7 +340,15 @@ public class DefaultSqlSession implements SqlSession {
 
 
 
-    // object 表示SQL语句中占位符的参数，如果object是集合类型，就封装为一个StrictMap对象返回；否则直接返回object参数
+    /**
+     * 如果object是collection类型，则返回 StrictMap<"collection", object>;
+     * 如果object是List类型，则返回 StrictMap<"list", object>;
+     * 如果object是数组类型，则返回 StrictMap<"array", object>;
+     * 否则，返回object
+     *
+     * @param object
+     * @return 如果object是集合类型或者数组，则封装为一个StrictMap对象返回，否则直接object
+     */
     private Object wrapCollection(final Object object) {
         if (object instanceof Collection) {
             StrictMap<Object> map = new StrictMap<Object>();
