@@ -38,7 +38,7 @@ REUSE，是一种执行重用预处理语句。
 BATCH，执行器重用语句和批量更新，它是针对批量专用的执行器
 
 
-执行进行数据操作是，需要准备好：MappedStatement、parameter、rowBounds以及一个ResultHandler对象
+执行进行数据操作时，需要准备好：MappedStatement、parameter、rowBounds以及一个ResultHandler对象
  */
 public interface Executor {
 

@@ -16,9 +16,11 @@
 package org.apache.ibatis.mapping;
 
 /**
+ * 表示 Statement 接口的实现类型：
+ * STATEMENT, PREPARED, CALLABLE分别对应：Statement、PreparedStatement和CallableStatement的三种方式
+ *
  * @author Clinton Begin
  */
-// 表示MappedStatement 的类型
 public enum StatementType {
     STATEMENT, PREPARED, CALLABLE
 }

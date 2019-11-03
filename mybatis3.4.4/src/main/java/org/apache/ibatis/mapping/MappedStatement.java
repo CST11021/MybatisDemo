@@ -51,6 +51,7 @@ public final class MappedStatement {
     // 如果没有特别指定timeout，默认为null
     private Integer timeout;
 
+    // 表示 Statement 接口的实现类型，Mybastic中有STATEMENT, PREPARED, CALLABLE三种类型，分别对应底层JDBC执行数据库操作的三种实现方式，它们分别是：Statement、PreparedStatement和CallableStatement的三种方式
     private StatementType statementType;
     private ResultSetType resultSetType;
     // 封装对应的SQL语句，SqlSource接口有多个实现，解析时根据不同的sql类型，使用不同的实现类

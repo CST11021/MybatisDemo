@@ -83,7 +83,13 @@ public class SimpleStatementHandler extends BaseStatementHandler {
         return resultSetHandler.<E>handleCursorResultSets(statement);
     }
 
-    // 实现 BaseStatementHandler 中的模板方法，创建一个 Statement 对象
+    /**
+     * 实现 BaseStatementHandler 中的模板方法，创建一个 Statement 对象
+     *
+     * @param connection
+     * @return
+     * @throws SQLException
+     */
     @Override
     protected Statement instantiateStatement(Connection connection) throws SQLException {
         if (mappedStatement.getResultSetType() != null) {

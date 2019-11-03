@@ -51,6 +51,12 @@ public class PreparedStatementHandler extends BaseStatementHandler {
         return rows;
     }
 
+    /**
+     * 这里通过PreparedStatement#addBatch的方式，将多个SQL放在一起，然后一起执行
+     *
+     * @param statement
+     * @throws SQLException
+     */
     @Override
     public void batch(Statement statement) throws SQLException {
         PreparedStatement ps = (PreparedStatement) statement;

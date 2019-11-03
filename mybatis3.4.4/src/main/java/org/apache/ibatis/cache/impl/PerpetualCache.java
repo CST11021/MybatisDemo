@@ -48,13 +48,19 @@ cache标签常用属性：
  */
 public class PerpetualCache implements Cache {
 
+    /**
+     * 表示缓存的唯一标识
+     */
     private String id;
+
+    /**
+     * 用来存放缓存数据
+     */
     private Map<Object, Object> cache = new HashMap<Object, Object>();
 
     public PerpetualCache(String id) {
         this.id = id;
     }
-
 
     @Override
     public String getId() {

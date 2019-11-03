@@ -15,15 +15,19 @@
  */
 package org.apache.ibatis.mapping;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import org.apache.ibatis.session.Configuration;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
+ * 一个BoundSql对象，代表了一次sql语句的实际执行，而SqlSource对象的责任，就是根据传入的参数对象，动态计算出这个BoundSql，也就是说Mapper文件中的
+ * <if/>节点的计算，是由SqlSource对象完成的。
+ *
+ * <p>
  * An actual SQL String got from an {@link SqlSource} after having processed any dynamic content.
  * The SQL may have SQL placeholders "?" and an list (ordered) of an parameter mappings
  * with the additional information for each parameter (at least the property name of the input object to read
@@ -33,7 +37,6 @@ import org.apache.ibatis.session.Configuration;
  *
  * @author Clinton Begin
  */
-// 封装了SQL语句和占位符参数
 public class BoundSql {
 
     private String sql;
@@ -53,19 +56,24 @@ public class BoundSql {
     public String getSql() {
         return sql;
     }
+
     public List<ParameterMapping> getParameterMappings() {
         return parameterMappings;
     }
+
     public Object getParameterObject() {
         return parameterObject;
     }
+
     public boolean hasAdditionalParameter(String name) {
         String paramName = new PropertyTokenizer(name).getName();
         return additionalParameters.containsKey(paramName);
     }
+
     public void setAdditionalParameter(String name, Object value) {
         metaParameters.setValue(name, value);
     }
+
     public Object getAdditionalParameter(String name) {
         return metaParameters.getValue(name);
     }

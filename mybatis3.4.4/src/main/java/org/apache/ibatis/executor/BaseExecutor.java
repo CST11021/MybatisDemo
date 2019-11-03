@@ -270,11 +270,11 @@ public abstract class BaseExecutor implements Executor {
 
     protected abstract int doUpdate(MappedStatement ms, Object parameter) throws SQLException;
 
-    protected abstract List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException;
-
     protected abstract <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException;
 
     protected abstract <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql) throws SQLException;
+
+    protected abstract List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException;
 
     protected void closeStatement(Statement statement) {
         if (statement != null) {
@@ -324,6 +324,8 @@ public abstract class BaseExecutor implements Executor {
         } finally {
             localCache.removeObject(key);
         }
+
+        // 执行完查询后将查询结果缓存起来
         localCache.putObject(key, list);
         if (ms.getStatementType() == StatementType.CALLABLE) {
             localOutputParameterCache.putObject(key, parameter);

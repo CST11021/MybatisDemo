@@ -26,16 +26,38 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.session.ResultHandler;
 
 /**
+ * StatementHandler 是对JDBC的 Statement 做进一步的封装，所有的数据库操作，最终其实都是由 Statement 来完成的
+ *
  * @author Clinton Begin
  */
-// StatementHandler 是对JDBC的 Statement 做进一步的封装，所有的数据库操作，最终其实都是由 Statement 来完成的
 public interface StatementHandler {
 
-    // 创建一个Statement 对象
+    /**
+     * 创建一个Statement 对象
+     *
+     * @param connection
+     * @param transactionTimeout
+     * @return
+     * @throws SQLException
+     */
     Statement prepare(Connection connection, Integer transactionTimeout) throws SQLException;
 
+    /**
+     * 用来设置参数：
+     * 因为当使用预编译时，一开始SQL编译的时候是不需要设置参数的，所以当要真正执行SQL时，需要设置参数；
+     * 如果是使用 Statement 的方式，则该实现为空，因为Statement执行SQL的时候，参数就已经设置好了
+     *
+     * @param statement
+     * @throws SQLException
+     */
     void parameterize(Statement statement) throws SQLException;
 
+    /**
+     * 批处理的方式，JDBC仅支持批量新增、更新和删除操作，不支持批量查询
+     *
+     * @param statement
+     * @throws SQLException
+     */
     void batch(Statement statement) throws SQLException;
 
     int update(Statement statement) throws SQLException;

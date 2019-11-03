@@ -29,9 +29,10 @@ import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * 该类主要用来处理别名映射关系的
+ *
  * @author Clinton Begin
  */
-// 该类主要用来处理别名映射关系的
 public abstract class BaseBuilder {
     // 配置信息在内存中以Configuration对象保存
     protected final Configuration configuration;

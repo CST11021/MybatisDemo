@@ -39,9 +39,13 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 // BaseStatementHandler 的主要作用是提供一个prepare()方法，创建一个Statement对象，具体的实现通过instantiateStatement()模板方法方法留给了子类实现
 public abstract class BaseStatementHandler implements StatementHandler {
 
+    /** Mybastic配置 */
     protected final Configuration configuration;
+
     protected final ObjectFactory objectFactory;
     protected final TypeHandlerRegistry typeHandlerRegistry;
+
+    /** 结果集处理器 */
     protected final ResultSetHandler resultSetHandler;
     protected final ParameterHandler parameterHandler;
 

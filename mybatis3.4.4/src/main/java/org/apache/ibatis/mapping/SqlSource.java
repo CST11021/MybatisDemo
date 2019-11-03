@@ -16,15 +16,24 @@
 package org.apache.ibatis.mapping;
 
 /**
+ * 解析配置文件时，会将SQL语句封装成一个SQLSource的对象。SqlSource接口只有一个getBoundSql(Object parameterObject)方法，返回一个BoundSql对象。
+ * 一个BoundSql对象，代表了一次sql语句的实际执行，而SqlSource对象的责任，就是根据传入的参数对象，动态计算出这个BoundSql，也就是说Mapper文件中的
+ * <if/>节点的计算，是由SqlSource对象完成的。SqlSource最常用的实现类是DynamicSqlSource
+ *
+ *
  * Represents the content of a mapped statement read from an XML file or an annotation. 
  * It creates the SQL that will be passed to the database out of the input parameter received from the user.
  *
  * @author Clinton Begin
  */
-// 解析配置文件时，会将SQL语句封装成一个SQLSource的对象
 public interface SqlSource {
 
-    // 实现该方法将SQL和占位符参照封装为一个 BoundSql 对象
+    /**
+     * 实现该方法将SQL和占位符参照封装为一个 BoundSql 对象
+     *
+     * @param parameterObject   表示SQL的入参
+     * @return
+     */
     BoundSql getBoundSql(Object parameterObject);
 
 }

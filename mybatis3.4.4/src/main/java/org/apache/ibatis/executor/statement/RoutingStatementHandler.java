@@ -30,9 +30,10 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 /**
+ * RoutingStatementHandler 内部封装了一个 StatementHandler 的对象，大部分实现都委托给这个 delegate 来实现
+ *
  * @author Clinton Begin
  */
-// RoutingStatementHandler 内部封装了一个 StatementHandler 的对象，大部分实现都委托给这个 delegate 来实现
 public class RoutingStatementHandler implements StatementHandler {
 
     private final StatementHandler delegate;

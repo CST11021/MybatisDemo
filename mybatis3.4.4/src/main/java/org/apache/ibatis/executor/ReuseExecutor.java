@@ -34,10 +34,10 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * REUSE 类型的执行器，这个执行器和 SimpleExecutor 其实是差不多的，它们的区别就在于 {@link #prepareStatement} 方法，
+ *
  * @author Clinton Begin
  */
-// REUSE 类型的执行器，这个执行器和 SimpleExecutor 其实是差不多的，它们的区别就在于 prepareStatement 方法，
-// SimpleExecutor 底层使用 Statement 来执行sql，而 ReuseExecutor 是使用 prepareStatement 对象类
 public class ReuseExecutor extends BaseExecutor {
 
     private final Map<String, Statement> statementMap = new HashMap<String, Statement>();
@@ -80,11 +80,19 @@ public class ReuseExecutor extends BaseExecutor {
     }
 
 
-
+    /**
+     * 创建一个Statement用来执行SQL
+     *
+     * @param handler
+     * @param statementLog
+     * @return
+     * @throws SQLException
+     */
     private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
         Statement stmt;
         BoundSql boundSql = handler.getBoundSql();
         String sql = boundSql.getSql();
+        // 判断缓存中是否存在这个SQL
         if (hasStatementFor(sql)) {
             stmt = getStatement(sql);
             applyTransactionTimeout(stmt);
@@ -96,6 +104,13 @@ public class ReuseExecutor extends BaseExecutor {
         handler.parameterize(stmt);
         return stmt;
     }
+
+    /**
+     * 判断{@link #statementMap}缓存是否存在这个SQL
+     *
+     * @param sql
+     * @return
+     */
     private boolean hasStatementFor(String sql) {
         try {
             return statementMap.keySet().contains(sql) && !statementMap.get(sql).getConnection().isClosed();
@@ -104,9 +119,22 @@ public class ReuseExecutor extends BaseExecutor {
         }
     }
 
+    /**
+     * 从缓存中获取SQL对应的Statement
+     *
+     * @param s 表示要执行的SQL
+     * @return
+     */
     private Statement getStatement(String s) {
         return statementMap.get(s);
     }
+
+    /**
+     * 将SQL及对应的Statement缓存起来
+     *
+     * @param sql
+     * @param stmt
+     */
     private void putStatement(String sql, Statement stmt) {
         statementMap.put(sql, stmt);
     }

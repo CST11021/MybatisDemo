@@ -34,10 +34,10 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 该类用来解析具体的 select|insert|update|delete 标签
+ *
  * @author Clinton Begin
  */
-
-// 该类用来解析具体的 select|insert|update|delete 标签
 public class XMLStatementBuilder extends BaseBuilder {
 
     private MapperBuilderAssistant builderAssistant;

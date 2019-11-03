@@ -71,11 +71,18 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     private static final Object DEFERED = new Object();
 
+    /** 表示执行器 */
     private final Executor executor;
+    /** Mybastic配置 */
     private final Configuration configuration;
+    /** 当前执行的MappedStatement */
     private final MappedStatement mappedStatement;
+    /** 分页条件 */
     private final RowBounds rowBounds;
+    /** 产生处理器 */
     private final ParameterHandler parameterHandler;
+
+
     private final ResultHandler<?> resultHandler;
     private final BoundSql boundSql;
     private final TypeHandlerRegistry typeHandlerRegistry;

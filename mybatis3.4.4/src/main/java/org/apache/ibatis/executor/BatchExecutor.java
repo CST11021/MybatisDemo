@@ -74,7 +74,7 @@ public class BatchExecutor extends BaseExecutor {
             statementList.add(stmt);
             batchResultList.add(new BatchResult(ms, sql, parameterObject));
         }
-        // handler.parameterize(stmt);
+
         handler.batch(stmt);
         return BATCH_UPDATE_RETURN_VALUE;
     }
@@ -84,10 +84,13 @@ public class BatchExecutor extends BaseExecutor {
         try {
             flushStatements();
             Configuration configuration = ms.getConfiguration();
+            // 根据配置信息获取一个StatementHandler的一个实现
             StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameterObject, rowBounds, resultHandler, boundSql);
             Connection connection = getConnection(ms.getStatementLog());
+            // 通过委托 StatementHandler 创建一个 statement 对象
             stmt = handler.prepare(connection, transaction.getTimeout());
             handler.parameterize(stmt);
+            // 委托给 StatementHandler 来执行查询操作
             return handler.<E>query(stmt, resultHandler);
         } finally {
             closeStatement(stmt);
