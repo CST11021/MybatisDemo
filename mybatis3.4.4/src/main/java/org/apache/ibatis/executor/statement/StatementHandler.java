@@ -60,14 +60,48 @@ public interface StatementHandler {
      */
     void batch(Statement statement) throws SQLException;
 
+    /**
+     * 执行更新操作
+     *
+     * @param statement
+     * @return 返回影响的行数
+     * @throws SQLException
+     */
     int update(Statement statement) throws SQLException;
 
+    /**
+     * 执行查询
+     *
+     * @param statement
+     * @param resultHandler
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
     <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException;
 
+    /**
+     * 执行查询，并以游标的方式返回结果集
+     *
+     * @param statement
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
     <E> Cursor<E> queryCursor(Statement statement) throws SQLException;
 
+    /**
+     * 获取要执行的SQL相关信息
+     *
+     * @return
+     */
     BoundSql getBoundSql();
 
+    /**
+     * 获取参数处理器
+     *
+     * @return
+     */
     ParameterHandler getParameterHandler();
 
 }

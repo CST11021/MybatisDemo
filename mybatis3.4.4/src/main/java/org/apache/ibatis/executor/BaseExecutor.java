@@ -108,6 +108,14 @@ public abstract class BaseExecutor implements Executor {
         return closed;
     }
 
+    /**
+     * 更新操作，在父类这里都需要清除缓存，真正的更新操作留给子类去实现
+     *
+     * @param ms
+     * @param parameter
+     * @return
+     * @throws SQLException
+     */
     @Override
     public int update(MappedStatement ms, Object parameter) throws SQLException {
         ErrorContext.instance().resource(ms.getResource()).activity("executing an update").object(ms.getId());

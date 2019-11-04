@@ -43,7 +43,9 @@ public class PreparedStatementHandler extends BaseStatementHandler {
     @Override
     public int update(Statement statement) throws SQLException {
         PreparedStatement ps = (PreparedStatement) statement;
+        // 执行SQL语句
         ps.execute();
+        // 获取影响的行数
         int rows = ps.getUpdateCount();
         Object parameterObject = boundSql.getParameterObject();
         KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();

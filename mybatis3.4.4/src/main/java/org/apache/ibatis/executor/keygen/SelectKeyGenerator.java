@@ -27,12 +27,23 @@ import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.RowBounds;
 
 /**
+ * SelectKeyGenerator：主要是通过 XML 配置或者注解设置 selectKey ，然后单独发出查询语句，在返回拦截方法中使用反射设置主键，
+ * 其中两个拦截方法只能使用其一，默认 使用 processBefore，在 selectKey.order 属性中设置 AFTER|BEFORE 来确定；
+ *
+ *
+ * NoKeyGenerator：默认空实现，不需要对主键单独处理；
+ * Jdbc3KeyGenerator：主要用于数据库的自增主键，比如 MySQL、PostgreSQL；
+ * SelectKeyGenerator：主要用于数据库不支持自增主键的情况，比如 Oracle、DB2；
+ *
+ *
  * @author Clinton Begin
  * @author Jeff Butler
  */
 public class SelectKeyGenerator implements KeyGenerator {
 
     public static final String SELECT_KEY_SUFFIX = "!selectKey";
+
+    /** 是否在执行前进行拦截 */
     private boolean executeBefore;
     private MappedStatement keyStatement;
 
@@ -42,6 +53,31 @@ public class SelectKeyGenerator implements KeyGenerator {
     }
 
 
+    /**
+     * processBefore 是在生成 StatementHandler 的时候；
+     *
+     * protected BaseStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+     *   ...
+     *   if (boundSql == null) { // issue #435, get the key before calculating the statement
+     *     generateKeys(parameterObject);
+     *     boundSql = mappedStatement.getBoundSql(parameterObject);
+     *   }
+     *   ...
+     * }
+     *
+     * protected void generateKeys(Object parameter) {
+     *   KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
+     *   ErrorContext.instance().store();
+     *   keyGenerator.processBefore(executor, mappedStatement, null, parameter);
+     *   ErrorContext.instance().recall();
+     * }
+     *
+     *
+     * @param executor
+     * @param ms
+     * @param stmt
+     * @param parameter
+     */
     @Override
     public void processBefore(Executor executor, MappedStatement ms, Statement stmt, Object parameter) {
         if (executeBefore) {
@@ -56,6 +92,25 @@ public class SelectKeyGenerator implements KeyGenerator {
         }
     }
 
+    /**
+     * processAfter 则是在完成插入返回结果之前，但是 PreparedStatementHandler、SimpleStatementHandler、CallableStatementHandler 的代码稍微有一点不同，但是位置是不变的，这里以 PreparedStatementHandler 举例：
+     *
+     * @Override
+     * public int update(Statement statement) throws SQLException {
+     *   PreparedStatement ps = (PreparedStatement) statement;
+     *   ps.execute();
+     *   int rows = ps.getUpdateCount();
+     *   Object parameterObject = boundSql.getParameterObject();
+     *   KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
+     *   keyGenerator.processAfter(executor, mappedStatement, ps, parameterObject);
+     *   return rows;
+     * }
+     *
+     *
+     * @param executor
+     * @param ms
+     * @param parameter
+     */
     private void processGeneratedKeys(Executor executor, MappedStatement ms, Object parameter) {
         try {
             if (parameter != null && keyStatement != null && keyStatement.getKeyProperties() != null) {
@@ -77,8 +132,7 @@ public class SelectKeyGenerator implements KeyGenerator {
                             if (metaResult.hasGetter(keyProperties[0])) {
                                 setValue(metaParam, keyProperties[0], metaResult.getValue(keyProperties[0]));
                             } else {
-                                // no getter for the property - maybe just a single value object
-                                // so try that
+                                // no getter for the property - maybe just a single value object so try that
                                 setValue(metaParam, keyProperties[0], values.get(0));
                             }
                         } else {
@@ -112,6 +166,13 @@ public class SelectKeyGenerator implements KeyGenerator {
         }
     }
 
+    /**
+     * 通过{@link MetaObject}封装的反射机制，设置对应的属性值
+     *
+     * @param metaParam     表示源数据对象对应的MetaObject实例
+     * @param property      表示要设置的属性名
+     * @param value         表示要设置的属性值
+     */
     private void setValue(MetaObject metaParam, String property, Object value) {
         if (metaParam.hasSetter(property)) {
             metaParam.setValue(property, value);
