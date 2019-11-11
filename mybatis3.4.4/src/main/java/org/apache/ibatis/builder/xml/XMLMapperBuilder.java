@@ -48,10 +48,10 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
 /**
- * 该类用于解析 mapper.xml 文件
+ * 该类主要是用来解析 XxxMapper.xml 文件
+ *
  * @author Clinton Begin
  */
-// 该类主要是用来解析 XxxMapper.xml 文件的
 public class XMLMapperBuilder extends BaseBuilder {
 
     private XPathParser parser;

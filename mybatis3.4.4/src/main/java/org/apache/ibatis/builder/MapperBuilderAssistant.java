@@ -50,13 +50,15 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
 /**
+ * 解析<mapper>标签的辅助类
+ *
  * @author Clinton Begin
  */
 public class MapperBuilderAssistant extends BaseBuilder {
 
-    // 表示 <mapper namespace="xxx"> 配置的命名空间
+    /** 表示 <mapper namespace="xxx"> 配置的命名空间 */
     private String currentNamespace;
-    // 表示对应的配置文件
+    /** 表示对应的配置文件 */
     private String resource;
 
 

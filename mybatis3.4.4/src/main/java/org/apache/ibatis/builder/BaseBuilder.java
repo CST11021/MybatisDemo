@@ -34,11 +34,11 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  * @author Clinton Begin
  */
 public abstract class BaseBuilder {
-    // 配置信息在内存中以Configuration对象保存
+    /** 配置信息在内存中以Configuration对象保存 */
     protected final Configuration configuration;
-    // 用于保存配置的别名
+    /** 用于保存配置的别名 */
     protected final TypeAliasRegistry typeAliasRegistry;
-    // typeHandler注册表
+    /** typeHandler注册表 */
     protected final TypeHandlerRegistry typeHandlerRegistry;
 
 

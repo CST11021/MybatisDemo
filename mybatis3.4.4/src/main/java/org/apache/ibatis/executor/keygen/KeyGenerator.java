@@ -30,27 +30,29 @@ import org.apache.ibatis.mapping.MappedStatement;
  * Jdbc3KeyGenerator：主要用于数据库的自增主键，比如 MySQL、PostgreSQL；
  * SelectKeyGenerator：主要用于数据库不支持自增主键的情况，比如 Oracle、DB2；
  *
+ * Oracle不支持主键自增，因为oracle不存在mysql的自增方法auto_increment，所以在Oracle中要实现字段的自增需要使用序列和触发器来实现字段的自增。
+ *
  * @author Clinton Begin
  */
 public interface KeyGenerator {
 
     /**
-     * statement 执行sql 前调用该方法，自动生成一个主键
+     * 该方法在 Statement 执行sql 前调用该方法，给返回的过结果设置一个主键
      *
-     * @param executor
-     * @param ms
-     * @param stmt
-     * @param parameter
+     * @param executor      mybastic执行器
+     * @param ms            每个<select>、<update>、<insert>和<delete>都对应一个MappedStatement
+     * @param stmt          JDBC基础：java.sql.Statement
+     * @param parameter     sql参数
      */
     void processBefore(Executor executor, MappedStatement ms, Statement stmt, Object parameter);
 
     /**
+     * 该方法在 Statement 执行sql 前调用该方法，给返回的过结果设置一个主键
      *
-     *
-     * @param executor
-     * @param ms
-     * @param stmt
-     * @param parameter
+     * @param executor      mybastic执行器
+     * @param ms            每个<select>、<update>、<insert>和<delete>都对应一个MappedStatement
+     * @param stmt          JDBC基础：java.sql.Statement
+     * @param parameter     sql参数
      */
     void processAfter(Executor executor, MappedStatement ms, Statement stmt, Object parameter);
 

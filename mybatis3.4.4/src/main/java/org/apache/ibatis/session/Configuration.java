@@ -91,8 +91,8 @@ import org.apache.ibatis.type.TypeAliasRegistry;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
-  该对像用于表示Mybatis的配置信息：MyBatis根据初始化好Configuration信息，这时候用户就可以使用MyBatis进行数据库操作了。
-  可以这么说，MyBatis初始化的过程，就是创建 Configuration对象的过程。
+  该对像用于表示Mybatis的配置信息：MyBatis根据初始化好的Configuration信息，这时候用户就可以使用MyBatis进行数据库操作了。
+  可以这么说，MyBatis初始化的过程，就是创建 Configuration对象的过程。解析mybastic配置的实现入口，请参考：XMLConfigBuilder
 
   MyBatis的初始化可以有两种方式：
         基于XML配置文件：基于XML配置文件的方式是将MyBatis的所有配置信息放在XML文件中，MyBatis通过加载并XML配置文件，将配置文信息组装成内部的Configuration对象

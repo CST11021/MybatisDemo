@@ -185,7 +185,8 @@ public class XMLStatementBuilder extends BaseBuilder {
             // skip this statement if there is a previous one with a not null databaseId
             id = builderAssistant.applyCurrentNamespace(id, false);
             if (this.configuration.hasStatement(id, false)) {
-                MappedStatement previous = this.configuration.getMappedStatement(id, false); // issue #2
+                // issue #2
+                MappedStatement previous = this.configuration.getMappedStatement(id, false);
                 if (previous.getDatabaseId() != null) {
                     return false;
                 }

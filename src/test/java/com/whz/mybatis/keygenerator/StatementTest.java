@@ -32,11 +32,10 @@ public class StatementTest {
             stmt.executeUpdate();
 
             ResultSet rs = stmt.getGeneratedKeys();
-            int id = 0;
             if (rs.next()) {
                 // 这里的 t_employeer 表以 employeer_id 为主键，但是代码中我传的 columnNames 都不符合，而结果仍然可以正确的返回主键，
                 // 主要是因为在 mybatis 的驱动中只要 columnNames.length > 1就可以了，所以在具体使用的时候还要注意不同数据库驱动实现不同所带来的影响；
-                id = rs.getInt(1);
+                int id = rs.getInt(1);
                 System.out.println("----------" + id);
             }
         } catch (Exception e) {

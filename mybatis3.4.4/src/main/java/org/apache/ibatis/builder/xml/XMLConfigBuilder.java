@@ -46,12 +46,14 @@ import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
 
-// 用于解析mybatis配置文件，并创建一个内存表示的 Configuration 对象
+/**
+ * 用于解析mybatis配置文件，并创建一个内存表示的 Configuration 对象
+ */
 public class XMLConfigBuilder extends BaseBuilder {
 
-    //每个XMLConfigBuilder对象只能使用一次，该字段用于表示该对象是否被使用过
+    /** 用于标记XMLConfigBuilder实例是否解析过配置文件 */
     private boolean parsed;
-    // 该对象封装了将要被解析的配置文件信息
+    /** 该对象封装了将要被解析的配置文件信息 */
     private XPathParser parser;
     private String environment;
     private ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();
@@ -83,7 +85,7 @@ public class XMLConfigBuilder extends BaseBuilder {
         this.parser = parser;
     }
 
-    // 核心方法，解析配置文件信息
+    // 核心方法，解析配置文件信息的入口
     public Configuration parse() {
         if (parsed) {
             // 如果XMLConfigBuilder 对象已经被使用过了，则抛出异常
@@ -305,6 +307,7 @@ public class XMLConfigBuilder extends BaseBuilder {
             }
         }
     }
+
     // 解析<environments/>标签内的<transactionManager/>标签
     private TransactionFactory transactionManagerElement(XNode context) throws Exception {
         if (context != null) {
@@ -316,6 +319,7 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
         throw new BuilderException("Environment declaration requires a TransactionFactory.");
     }
+
     // 解析<environments/>标签内的<dataSource/>标签
     private DataSourceFactory dataSourceElement(XNode context) throws Exception {
         if (context != null) {
@@ -417,7 +421,6 @@ public class XMLConfigBuilder extends BaseBuilder {
             }
         }
     }
-
 
     /**
     <environments default="development">

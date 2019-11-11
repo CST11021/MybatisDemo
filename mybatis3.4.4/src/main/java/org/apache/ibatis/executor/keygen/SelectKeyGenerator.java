@@ -93,7 +93,7 @@ public class SelectKeyGenerator implements KeyGenerator {
     }
 
     /**
-     * processAfter 则是在完成插入返回结果之前，但是 PreparedStatementHandler、SimpleStatementHandler、CallableStatementHandler 的代码稍微有一点不同，但是位置是不变的，这里以 PreparedStatementHandler 举例：
+     * processAfter 则是在完成插入返回结果之后，但是 PreparedStatementHandler、SimpleStatementHandler、CallableStatementHandler 的代码稍微有一点不同，但是位置是不变的，这里以 PreparedStatementHandler 举例：
      *
      * @Override
      * public int update(Statement statement) throws SQLException {
@@ -121,6 +121,8 @@ public class SelectKeyGenerator implements KeyGenerator {
                     // Do not close keyExecutor.
                     // The transaction will be closed by parent executor.
                     Executor keyExecutor = configuration.newExecutor(executor.getTransaction(), ExecutorType.SIMPLE);
+
+                    // 获取设置的返回值：返回值只能设置一个
                     List<Object> values = keyExecutor.query(keyStatement, parameter, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER);
                     if (values.size() == 0) {
                         throw new ExecutorException("SelectKey returned no data.");

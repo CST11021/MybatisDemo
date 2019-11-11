@@ -30,9 +30,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
+ * 该类用解析动态的sql语句
+ *
  * @author Clinton Begin
  */
-// 该类用解析动态的sql语句
 public class XMLScriptBuilder extends BaseBuilder {
 
     private XNode context;
