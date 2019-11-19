@@ -68,17 +68,28 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
         processBatch(ms, stmt, getParameters(parameter));
     }
 
+    /**
+     * 将返回的结果集中，对应的keyProperties属性设置到入参中
+     *
+     * @param ms
+     * @param stmt
+     * @param parameters
+     */
     public void processBatch(MappedStatement ms, Statement stmt, Collection<Object> parameters) {
         ResultSet rs = null;
         try {
+            // 获取SQL执行完成后，返回的结果集
             rs = stmt.getGeneratedKeys();
 
             final Configuration configuration = ms.getConfiguration();
+            // 类型转换器注册表
             final TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
 
+            // 获取<insert>中的keyProperties属性配置
             final String[] keyProperties = ms.getKeyProperties();
             final ResultSetMetaData rsmd = rs.getMetaData();
             TypeHandler<?>[] typeHandlers = null;
+            // 如果mybastic中配置了keyProperties，并且返回的结果集>=keyProperties配置的列数（注意：keyProperties可以配置多个字段）
             if (keyProperties != null && rsmd.getColumnCount() >= keyProperties.length) {
                 for (Object parameter : parameters) {
                     // there should be one row for each statement (also one for each parameter)
@@ -90,6 +101,7 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
                     if (typeHandlers == null) {
                         typeHandlers = getTypeHandlers(typeHandlerRegistry, metaParam, keyProperties, rsmd);
                     }
+                    // 通过 MetaObject 的反射机制，将返回的结果集中，对应的keyProperties属性设置到入参中
                     populateKeys(rs, metaParam, keyProperties, typeHandlers);
                 }
             }
@@ -147,7 +159,7 @@ public class Jdbc3KeyGenerator implements KeyGenerator {
     }
 
     /**
-     * 将返回值通过 {@link MetaObject} 的反射机制，设置到入参中
+     * 将返回的结果中对应的keyProperties属性，通过 {@link MetaObject} 的反射机制，设置到入参中
      *
      * @param rs                SQL执行后的结果集
      * @param metaParam         用于设置返回值的入参

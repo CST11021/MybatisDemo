@@ -63,7 +63,8 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
 
     private Cache currentCache;
-    private boolean unresolvedCacheRef; // issue #676
+    // issue #676
+    private boolean unresolvedCacheRef;
 
     public MapperBuilderAssistant(Configuration configuration, String resource) {
         super(configuration);
@@ -93,8 +94,10 @@ public class MapperBuilderAssistant extends BaseBuilder {
         if (base == null) {
             return null;
         }
+
         if (isReference) {
             // is it qualified with any namespace yet?
+            // 它是否已经限定了任何名称空间?
             if (base.contains(".")) {
                 return base;
             }

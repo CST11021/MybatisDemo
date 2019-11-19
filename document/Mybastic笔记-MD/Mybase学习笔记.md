@@ -267,7 +267,7 @@ mybastic使用DOM的方式解析xml配置文件；
 
 properties是一个配置属性的元素，能让我们在配置文件的上下中使用配置的属性，Mybatis提供了3种配置方式：
 
-* property子元素
+* Xml配置
 * .properties文件配置
 * 程序参数传递
 
@@ -295,9 +295,9 @@ properties是一个配置属性的元素，能让我们在配置文件的上下�
 </dataSource>
 ```
 
- 
 
-####.properties文件配置
+
+####.properties配置
 
 ​		我们也可以使用使用properties配置文件来配置属性值，以方便在多个配置文件中重复使用它们，也方便日后维护修改，我们将上面的数据源信息配置在.properties文件中，如：
 
@@ -353,7 +353,9 @@ sqlSessionFactory = new SqlSessionFactoryBuilder().build(cfg,Reader, properties)
 
 * 最后读取作为方法参数传递的属性，并覆盖已读取的同名属性。
 
-​		因此，**通过方法参数传递的属性具有最高优先级，resource/url 属性中指定的配置文件次之，最低优先级的是properties属性中指定的属性。实际操作中我们推荐使用properties文件的方式，尽量避免使用混合的方式。**
+​		因此，**通过方法参数传递的属性具有最高优先级，resource/url 属性中指定的配置文件次之，最低优先级的是properties属性中指定的属性。实际操作中我们推荐使用.properties文件的方式，尽量避免使用混合的方式。**
+
+**优先级：**参数传递 > .properties文件 > xml配置
 
 
 

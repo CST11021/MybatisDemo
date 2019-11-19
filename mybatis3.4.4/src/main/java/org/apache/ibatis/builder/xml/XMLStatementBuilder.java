@@ -40,8 +40,9 @@ import org.apache.ibatis.session.Configuration;
  */
 public class XMLStatementBuilder extends BaseBuilder {
 
+    /** 用于解析<mapper>标签的辅助类 */
     private MapperBuilderAssistant builderAssistant;
-    // 表示 select|insert|update|delete 这些节点
+    /** 表示 select|insert|update|delete 这些节点 */
     private XNode context;
     private String requiredDatabaseId;
 
@@ -76,6 +77,7 @@ public class XMLStatementBuilder extends BaseBuilder {
         String lang = context.getStringAttribute("lang");
         LanguageDriver langDriver = getLanguageDriver(lang);
 
+        // 获取结果集类型，这里配置的可能是别名，需要转为对应的java类型
         Class<?> resultTypeClass = resolveClass(resultType);
         String resultSetType = context.getStringAttribute("resultSetType");
         // 如果有配置 statementType 属性，则创建指定类型的 MappedStatement ，否则使用 PREPARED 作为默认的类型
@@ -83,6 +85,8 @@ public class XMLStatementBuilder extends BaseBuilder {
         ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
 
         String nodeName = context.getNode().getNodeName();
+
+        // 获取SQL命令的类型
         SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
         boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
         boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
@@ -103,12 +107,14 @@ public class XMLStatementBuilder extends BaseBuilder {
         String resultSets = context.getStringAttribute("resultSets");
         String keyProperty = context.getStringAttribute("keyProperty");
         String keyColumn = context.getStringAttribute("keyColumn");
+
         KeyGenerator keyGenerator;
         String keyStatementId = id + SelectKeyGenerator.SELECT_KEY_SUFFIX;
         keyStatementId = builderAssistant.applyCurrentNamespace(keyStatementId, true);
         if (configuration.hasKeyGenerator(keyStatementId)) {
             keyGenerator = configuration.getKeyGenerator(keyStatementId);
         } else {
+            //
             keyGenerator = context.getBooleanAttribute("useGeneratedKeys",
                     configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))
                     ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
@@ -119,14 +125,33 @@ public class XMLStatementBuilder extends BaseBuilder {
                 resultSetTypeEnum, flushCache, useCache, resultOrdered,
                 keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets);
     }
+
+    /**
+     * 解析<selectKey/>标签，该标签可以配置多个
+     *
+     * @param id                        SQL配置的ID
+     * @param parameterTypeClass        SQL中parameterType属性配置的类型
+     * @param langDriver
+     */
     private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
         List<XNode> selectKeyNodes = context.evalNodes("selectKey");
         if (configuration.getDatabaseId() != null) {
             parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, configuration.getDatabaseId());
         }
         parseSelectKeyNodes(id, selectKeyNodes, parameterTypeClass, langDriver, null);
+        // 解析完成后会移除<selectKey/>标签
         removeSelectKeyNodes(selectKeyNodes);
     }
+
+    /**
+     * 解析每个<selectKey/>标签
+     *
+     * @param parentId
+     * @param list
+     * @param parameterTypeClass
+     * @param langDriver
+     * @param skRequiredDatabaseId
+     */
     private void parseSelectKeyNodes(String parentId, List<XNode> list, Class<?> parameterTypeClass, LanguageDriver langDriver, String skRequiredDatabaseId) {
         for (XNode nodeToHandle : list) {
             String id = parentId + SelectKeyGenerator.SELECT_KEY_SUFFIX;
@@ -136,6 +161,16 @@ public class XMLStatementBuilder extends BaseBuilder {
             }
         }
     }
+
+    /**
+     * 解析每个<selectKey/>标签
+     *
+     * @param id
+     * @param nodeToHandle
+     * @param parameterTypeClass
+     * @param langDriver
+     * @param databaseId
+     */
     private void parseSelectKeyNode(String id, XNode nodeToHandle, Class<?> parameterTypeClass, LanguageDriver langDriver, String databaseId) {
         String resultType = nodeToHandle.getStringAttribute("resultType");
         Class<?> resultTypeClass = resolveClass(resultType);
@@ -168,6 +203,12 @@ public class XMLStatementBuilder extends BaseBuilder {
         MappedStatement keyStatement = configuration.getMappedStatement(id, false);
         configuration.addKeyGenerator(id, new SelectKeyGenerator(keyStatement, executeBefore));
     }
+
+    /**
+     * 移除<selectKey/>标签
+     *
+     * @param selectKeyNodes
+     */
     private void removeSelectKeyNodes(List<XNode> selectKeyNodes) {
         for (XNode nodeToHandle : selectKeyNodes) {
             nodeToHandle.getParent().getNode().removeChild(nodeToHandle.getNode());
@@ -194,9 +235,17 @@ public class XMLStatementBuilder extends BaseBuilder {
         }
         return true;
     }
+
+    /**
+     * 获取LanguageDriver
+     *
+     * @param lang
+     * @return
+     */
     private LanguageDriver getLanguageDriver(String lang) {
         Class<?> langClass = null;
         if (lang != null) {
+            // 这里的lang可能是个别名，需要解析下获取对应的java类
             langClass = resolveClass(lang);
         }
         return builderAssistant.getLanguageDriver(langClass);

@@ -45,6 +45,7 @@ public class SelectKeyGenerator implements KeyGenerator {
 
     /** 是否在执行前进行拦截 */
     private boolean executeBefore;
+    /** 在mybatis中我们将select|insert|update|delete 这些配置节点信息抽象为MappedStatement */
     private MappedStatement keyStatement;
 
     public SelectKeyGenerator(MappedStatement keyStatement, boolean executeBefore) {
@@ -113,6 +114,7 @@ public class SelectKeyGenerator implements KeyGenerator {
      */
     private void processGeneratedKeys(Executor executor, MappedStatement ms, Object parameter) {
         try {
+            // 如果配置了KeyProperties
             if (parameter != null && keyStatement != null && keyStatement.getKeyProperties() != null) {
                 String[] keyProperties = keyStatement.getKeyProperties();
                 final Configuration configuration = ms.getConfiguration();
@@ -120,6 +122,7 @@ public class SelectKeyGenerator implements KeyGenerator {
                 if (keyProperties != null) {
                     // Do not close keyExecutor.
                     // The transaction will be closed by parent executor.
+                    // 创建一个简单类型的执行器
                     Executor keyExecutor = configuration.newExecutor(executor.getTransaction(), ExecutorType.SIMPLE);
 
                     // 获取设置的返回值：返回值只能设置一个
@@ -130,6 +133,7 @@ public class SelectKeyGenerator implements KeyGenerator {
                         throw new ExecutorException("SelectKey returned more than one value.");
                     } else {
                         MetaObject metaResult = configuration.newMetaObject(values.get(0));
+                        // keyProperties只配置了一个
                         if (keyProperties.length == 1) {
                             if (metaResult.hasGetter(keyProperties[0])) {
                                 setValue(metaParam, keyProperties[0], metaResult.getValue(keyProperties[0]));
@@ -137,7 +141,9 @@ public class SelectKeyGenerator implements KeyGenerator {
                                 // no getter for the property - maybe just a single value object so try that
                                 setValue(metaParam, keyProperties[0], values.get(0));
                             }
-                        } else {
+                        }
+                        // keyProperties配置了多个
+                        else {
                             handleMultipleProperties(keyProperties, metaParam, metaResult);
                         }
                     }
@@ -150,6 +156,13 @@ public class SelectKeyGenerator implements KeyGenerator {
         }
     }
 
+    /**
+     * 通过{@link MetaObject}封装的反射机制，设置对应的属性值，这里是将返回的结果值设置到入参中
+     *
+     * @param keyProperties     表示要设置的属性名
+     * @param metaParam         SQL入参对应的MetaObject实例
+     * @param metaResult        结果集对应的MetaObject实例
+     */
     private void handleMultipleProperties(String[] keyProperties, MetaObject metaParam, MetaObject metaResult) {
         String[] keyColumns = keyStatement.getKeyColumns();
 
