@@ -42,9 +42,13 @@ public class BatchExecutor extends BaseExecutor {
 
     public static final int BATCH_UPDATE_RETURN_VALUE = Integer.MIN_VALUE + 1002;
 
+    /** 表示本次会话所有执行的Statement实例 */
     private final List<Statement> statementList = new ArrayList<Statement>();
+    /** 表示本次会话执行所有返回结果 */
     private final List<BatchResult> batchResultList = new ArrayList<BatchResult>();
+    /** 表示本次执行的SQL */
     private String currentSql;
+    /** 表示本次执行的MappedStatement */
     private MappedStatement currentStatement;
 
     public BatchExecutor(Configuration configuration, Transaction transaction) {
@@ -62,13 +66,15 @@ public class BatchExecutor extends BaseExecutor {
             int last = statementList.size() - 1;
             stmt = statementList.get(last);
             applyTransactionTimeout(stmt);
-            handler.parameterize(stmt);//fix Issues 322
+            //fix Issues 322
+            handler.parameterize(stmt);
             BatchResult batchResult = batchResultList.get(last);
             batchResult.addParameterObject(parameterObject);
         } else {
             Connection connection = getConnection(ms.getStatementLog());
             stmt = handler.prepare(connection, transaction.getTimeout());
-            handler.parameterize(stmt);    //fix Issues 322
+            //fix Issues 322
+            handler.parameterize(stmt);
             currentSql = sql;
             currentStatement = ms;
             statementList.add(stmt);
@@ -126,7 +132,8 @@ public class BatchExecutor extends BaseExecutor {
                     if (Jdbc3KeyGenerator.class.equals(keyGenerator.getClass())) {
                         Jdbc3KeyGenerator jdbc3KeyGenerator = (Jdbc3KeyGenerator) keyGenerator;
                         jdbc3KeyGenerator.processBatch(ms, stmt, parameterObjects);
-                    } else if (!NoKeyGenerator.class.equals(keyGenerator.getClass())) { //issue #141
+                        //issue #141
+                    } else if (!NoKeyGenerator.class.equals(keyGenerator.getClass())) {
                         for (Object parameter : parameterObjects) {
                             keyGenerator.processAfter(this, ms, stmt, parameter);
                         }

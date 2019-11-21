@@ -91,7 +91,7 @@ public interface StatementHandler {
     <E> Cursor<E> queryCursor(Statement statement) throws SQLException;
 
     /**
-     * 获取要执行的SQL相关信息
+     * 获取本次要执行的SQL相关信息
      *
      * @return
      */

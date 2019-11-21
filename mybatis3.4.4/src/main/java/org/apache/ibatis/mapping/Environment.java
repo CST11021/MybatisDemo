@@ -20,12 +20,25 @@ import javax.sql.DataSource;
 import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
+ * 表示 <environments> 标签内的配置，主要是事务和数据源相关的配置， <environments> 可以配置多个环境的数据源，这里表示单个环境的实例
+ *
  * @author Clinton Begin
  */
-// 表示 <environments>标签内的配置，主要是事务和数据源相关的配置
 public final class Environment {
+
+    /**
+     * 用于表示当前的环境，对应<environment>标签的id配置
+     */
     private final String id;
+
+    /**
+     * 事务工厂
+     */
     private final TransactionFactory transactionFactory;
+
+    /**
+     * 数据源
+     */
     private final DataSource dataSource;
 
     public Environment(String id, TransactionFactory transactionFactory, DataSource dataSource) {

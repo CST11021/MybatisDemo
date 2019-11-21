@@ -29,27 +29,31 @@ import org.apache.ibatis.session.TransactionIsolationLevel;
  */
 public interface TransactionFactory {
 
-    // 设置事务工厂自定义属性
+    /**
+     * 设置事务工厂自定义属性
+     *
+     * @param props
+     */
     void setProperties(Properties props);
 
     /**
-     * Creates a {@link Transaction} out of an existing connection.
+     * 从一个数据库连接实例（会话）创建一个事务，connection实例已经指定了事务隔离级别和是否自动提交
+     *
      * @param conn Existing database connection
      * @return Transaction
      * @since 3.1.0
      */
-    // 创建一个已存在连接的事务
     Transaction newTransaction(Connection conn);
 
     /**
-     * Creates a {@link Transaction} out of a datasource.
-     * @param dataSource DataSource to take the connection from
-     * @param level Desired isolation level
-     * @param autoCommit Desired autocommit
+     * 从数据源创建一个事务，根据数据源创建事务实例时需要指定事务隔离级别和是否自动提交
+     *
+     * @param dataSource    数据源
+     * @param level         事务隔离级别
+     * @param autoCommit    是否自动提交
      * @return Transaction
      * @since 3.1.0
      */
-    // 从数据源创建一个事务
     Transaction newTransaction(DataSource dataSource, TransactionIsolationLevel level, boolean autoCommit);
 
 }

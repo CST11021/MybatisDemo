@@ -15,33 +15,36 @@
  */
 package org.apache.ibatis.transaction.jdbc;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.transaction.TransactionException;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 /**
- * {@link Transaction} that makes use of the JDBC commit and rollback facilities directly.
- * It relies on the connection retrieved from the dataSource to manage the scope of the transaction.
- * Delays connection retrieval until getConnection() is called.
- * Ignores commit or rollback requests when autocommit is on.
+ * 直接使用JDBC提交和回滚功能的{@link Transaction}。
+ * 它依赖于从数据源检索的连接来管理事务的范围。
+ * 延迟连接检索，直到调用getConnection()。
+ * 当启动自动提交时，将忽略提交或回滚请求。
  *
  * @author Clinton Begin
- *
  * @see JdbcTransactionFactory
  */
 public class JdbcTransaction implements Transaction {
 
     private static final Log log = LogFactory.getLog(JdbcTransaction.class);
 
+    /** 数据库连接对象 */
     protected Connection connection;
+    /** 数据源 */
     protected DataSource dataSource;
+    /** 事务隔离级别 */
     protected TransactionIsolationLevel level;
+    /** 是否自动提交 */
     protected boolean autoCommmit;
 
     public JdbcTransaction(DataSource ds, TransactionIsolationLevel desiredLevel, boolean desiredAutoCommit) {
@@ -49,6 +52,7 @@ public class JdbcTransaction implements Transaction {
         level = desiredLevel;
         autoCommmit = desiredAutoCommit;
     }
+
     public JdbcTransaction(Connection connection) {
         this.connection = connection;
     }
@@ -92,6 +96,11 @@ public class JdbcTransaction implements Transaction {
         }
     }
 
+    /**
+     * 设置本次会话的autoCommit
+     *
+     * @param desiredAutoCommit
+     */
     protected void setDesiredAutoCommit(boolean desiredAutoCommit) {
         try {
             if (connection.getAutoCommit() != desiredAutoCommit) {
@@ -109,12 +118,14 @@ public class JdbcTransaction implements Transaction {
         }
     }
 
+    /**
+     * 重置本次会话为自动提交
+     */
     protected void resetAutoCommit() {
         try {
             if (!connection.getAutoCommit()) {
                 // MyBatis does not call commit/rollback on a connection if just selects were performed.
-                // Some databases start transactions with select statements
-                // and they mandate a commit/rollback before closing the connection.
+                // Some databases start transactions with select statements and they mandate a commit/rollback before closing the connection.
                 // A workaround is setting the autocommit to true before closing the connection.
                 // Sybase throws an exception here.
                 if (log.isDebugEnabled()) {
@@ -130,6 +141,11 @@ public class JdbcTransaction implements Transaction {
         }
     }
 
+    /**
+     * 开启数据库连接：根据数据源信息创建一个连接实例（会话），并指定事务隔离级别
+     *
+     * @throws SQLException
+     */
     protected void openConnection() throws SQLException {
         if (log.isDebugEnabled()) {
             log.debug("Opening JDBC Connection");

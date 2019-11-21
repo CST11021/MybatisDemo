@@ -37,10 +37,7 @@ import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.ObjectFactory;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.LocalCacheScope;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.session.*;
 import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
@@ -52,15 +49,21 @@ public abstract class BaseExecutor implements Executor {
 
     private static final Log log = LogFactory.getLog(BaseExecutor.class);
 
+    /** Mybastic配置 */
+    protected Configuration configuration;
+    /** 事务对象 */
     protected Transaction transaction;
+    /** 当前执行器的引用 */
     protected Executor wrapper;
 
     protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
     protected PerpetualCache localCache;
     protected PerpetualCache localOutputParameterCache;
-    protected Configuration configuration;
+
 
     protected int queryStack;
+
+    /** 用于标记执行器是否关闭，当SqlSession关闭时，执行器也会关闭 */
     private boolean closed;
 
     protected BaseExecutor(Configuration configuration, Transaction transaction) {
@@ -71,41 +74,6 @@ public abstract class BaseExecutor implements Executor {
         this.closed = false;
         this.configuration = configuration;
         this.wrapper = this;
-    }
-
-    @Override
-    public Transaction getTransaction() {
-        if (closed) {
-            throw new ExecutorException("Executor was closed.");
-        }
-        return transaction;
-    }
-
-    @Override
-    public void close(boolean forceRollback) {
-        try {
-            try {
-                rollback(forceRollback);
-            } finally {
-                if (transaction != null) {
-                    transaction.close();
-                }
-            }
-        } catch (SQLException e) {
-            // Ignore.  There's nothing that can be done at this point.
-            log.warn("Unexpected exception on closing transaction.  Cause: " + e);
-        } finally {
-            transaction = null;
-            deferredLoads = null;
-            localCache = null;
-            localOutputParameterCache = null;
-            closed = true;
-        }
-    }
-
-    @Override
-    public boolean isClosed() {
-        return closed;
     }
 
     /**
@@ -122,20 +90,10 @@ public abstract class BaseExecutor implements Executor {
         if (closed) {
             throw new ExecutorException("Executor was closed.");
         }
+
+        // 清除session会话缓存（一级缓存）
         clearLocalCache();
         return doUpdate(ms, parameter);
-    }
-
-    @Override
-    public List<BatchResult> flushStatements() throws SQLException {
-        return flushStatements(false);
-    }
-
-    public List<BatchResult> flushStatements(boolean isRollBack) throws SQLException {
-        if (closed) {
-            throw new ExecutorException("Executor was closed.");
-        }
-        return doFlushStatements(isRollBack);
     }
 
     @Override
@@ -186,6 +144,58 @@ public abstract class BaseExecutor implements Executor {
         BoundSql boundSql = ms.getBoundSql(parameter);
         return doQueryCursor(ms, parameter, rowBounds, boundSql);
     }
+
+
+    @Override
+    public Transaction getTransaction() {
+        if (closed) {
+            throw new ExecutorException("Executor was closed.");
+        }
+        return transaction;
+    }
+
+    @Override
+    public void close(boolean forceRollback) {
+        try {
+            try {
+                rollback(forceRollback);
+            } finally {
+                if (transaction != null) {
+                    transaction.close();
+                }
+            }
+        } catch (SQLException e) {
+            // Ignore.  There's nothing that can be done at this point.
+            log.warn("Unexpected exception on closing transaction.  Cause: " + e);
+        } finally {
+            transaction = null;
+            deferredLoads = null;
+            localCache = null;
+            localOutputParameterCache = null;
+            closed = true;
+        }
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closed;
+    }
+
+
+
+    @Override
+    public List<BatchResult> flushStatements() throws SQLException {
+        return flushStatements(false);
+    }
+
+    public List<BatchResult> flushStatements(boolean isRollBack) throws SQLException {
+        if (closed) {
+            throw new ExecutorException("Executor was closed.");
+        }
+        return doFlushStatements(isRollBack);
+    }
+
+
 
     @Override
     public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key, Class<?> targetType) {
@@ -268,6 +278,9 @@ public abstract class BaseExecutor implements Executor {
         }
     }
 
+    /**
+     * 用于清除会话缓存，当执行器执行更新操作前，会调用该方法清除会话缓存；也可以通过{@link SqlSession#clearCache()}方法手动清除缓存
+     */
     @Override
     public void clearLocalCache() {
         if (!closed) {
@@ -276,6 +289,14 @@ public abstract class BaseExecutor implements Executor {
         }
     }
 
+    /**
+     * 更新操作交由具体的执行器去实现
+     *
+     * @param ms            在mybatis中我们将select|insert|update|delete 这些配置节点信息抽象为MappedStatement
+     * @param parameter     SQL入参
+     * @return
+     * @throws SQLException
+     */
     protected abstract int doUpdate(MappedStatement ms, Object parameter) throws SQLException;
 
     protected abstract <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException;

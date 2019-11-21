@@ -45,12 +45,25 @@ public class ManagedTransactionFactory implements TransactionFactory {
         }
     }
 
+    /**
+     * 从已存在的连接实例，创建一个事务实例
+     *
+     * @param conn Existing database connection
+     * @return
+     */
     @Override
     public Transaction newTransaction(Connection conn) {
         return new ManagedTransaction(conn, closeConnection);
     }
 
-    // 根据数据源，事务隔离级别创建一个事务管理器
+    /**
+     * 根据数据源，事务隔离级别创建一个事务管理器
+     *
+     * @param ds
+     * @param level         事务隔离级别
+     * @param autoCommit    是否自动提交
+     * @return
+     */
     @Override
     public Transaction newTransaction(DataSource ds, TransactionIsolationLevel level, boolean autoCommit) {
         // Silently ignores autocommit and isolation level, as managed transactions are entirely

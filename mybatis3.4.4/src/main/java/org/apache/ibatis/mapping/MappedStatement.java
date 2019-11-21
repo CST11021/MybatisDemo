@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.whz.entity.Employeer;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -29,50 +30,56 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 在mybatis中我们将select|insert|update|delete 这些配置节点信息抽象为MappedStatement
+ *
  * @author Clinton Begin
  */
-// 在mybatis中我们将select|insert|update|delete 这些配置节点信息抽象为MappedStatement
 public final class MappedStatement {
 
-    // 表示该mapper接口对应的配置的所在配置文件名，如：IEmployeerMapper.xml
+    /** 表示该mapper接口对应的配置的所在配置文件名，如：IEmployeerMapper.xml */
     private String resource;
-    // 全局配置的引用
+    /** 全局配置的引用 */
     private Configuration configuration;
-    // 表示该MappedStatement对应的id，这里使用方法名作为id，每个id对应一个MappedStatement应用，在解析过程中，同一个MappedStatement对象对应两个不同的id，如：
-    // 1、key:findEmployeerByID
-    // 2、key:findEmployeerByID
-    // 这样就可以使用如下两个方式调用对应的Mapper接口
-    // Employeer employeer = session.selectOne("findEmployeerByID", 5);
-    // Employeer employeer = session.selectOne("com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
+
+    /**
+     * 表示该MappedStatement对应的id，这里使用方法名作为id，每个id对应一个MappedStatement应用，在解析过程中，同一个MappedStatement对象对应两个不同的id，如：
+     * 1、key:findEmployeerByID
+     * 2、key:com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID
+     * 这样就可以使用如下两个方式调用对应的Mapper接口
+     * Employeer employeer = session.selectOne("findEmployeerByID", 5);
+     * Employeer employeer = session.selectOne("com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
+     */
     private String id;
 
-    // 如果没有特别指定fetchSize，默认为null
+    /** 如果没有特别指定fetchSize，默认为null */
     private Integer fetchSize;
-    // 如果没有特别指定timeout，默认为null
+    /** 如果没有特别指定timeout，默认为null */
     private Integer timeout;
 
-    // 表示 Statement 接口的实现类型，Mybastic中有STATEMENT, PREPARED, CALLABLE三种类型，分别对应底层JDBC执行数据库操作的三种实现方式，它们分别是：Statement、PreparedStatement和CallableStatement的三种方式
+    /** 表示 Statement 接口的实现类型，Mybastic中有STATEMENT, PREPARED, CALLABLE三种类型，分别对应底层JDBC执行数据库操作的三种实现方式，它们分别是：Statement、PreparedStatement和CallableStatement的三种方式 */
     private StatementType statementType;
     private ResultSetType resultSetType;
-    // 封装对应的SQL语句，SqlSource接口有多个实现，解析时根据不同的sql类型，使用不同的实现类
+    /** 封装对应的SQL语句，SqlSource接口有多个实现，解析时根据不同的sql类型，使用不同的实现类 */
     private SqlSource sqlSource;
     private Cache cache;
-    // 封装对应的 parameterType 属性配置
+    /** 封装对应的 parameterType 属性配置 */
     private ParameterMap parameterMap;
-    // 封装对应的 resultMap 属性配置
+    /** 封装对应的 resultMap 属性配置 */
     private List<ResultMap> resultMaps;
-    // 对应flushCache 属性配置，缓存相关配置表示是否及时清空缓存
+    /** 对应flushCache 属性配置，缓存相关配置表示是否及时清空缓存 */
     private boolean flushCacheRequired;
     private boolean useCache;
     private boolean resultOrdered;
     private SqlCommandType sqlCommandType;
-    // 对应返回主键相关配置，如：useGeneratedKeys="true" keyProperty="employeer_id"
+    /** 对应返回主键相关配置，如：useGeneratedKeys="true" keyProperty="employeer_id" */
     private KeyGenerator keyGenerator;
+    /**  */
     private String[] keyProperties;
     private String[] keyColumns;
+
     private boolean hasNestedResultMaps;
     private String databaseId;
-    // 表示相应的日志实现
+    /** 表示相应的日志实现 */
     private Log statementLog;
     private LanguageDriver lang;
     private String[] resultSets;
@@ -204,7 +211,13 @@ public final class MappedStatement {
     }
 
 
-    // MapperdStatement本身封装了sql执行语句，这里配合sql的占位符参数，将它们封装为一个BoundSql对象
+    /**
+     * MapperdStatement本身封装了sql执行语句，这里配合sql的占位符参数，将它们封装为一个BoundSql对象。
+     * BoundSql封装了每次向数据库发起执行SQL命令的具体执行语句信息
+     *
+     * @param parameterObject
+     * @return
+     */
     public BoundSql getBoundSql(Object parameterObject) {
         BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();

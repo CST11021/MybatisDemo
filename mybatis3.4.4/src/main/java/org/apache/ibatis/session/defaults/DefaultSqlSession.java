@@ -48,15 +48,15 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class DefaultSqlSession implements SqlSession {
 
-    // 表示配置信息
+    /** 表示配置信息 */
     private Configuration configuration;
-    // SqlSession最终都将委托执行器类执行数据库操作
+    /** SqlSession最终都将委托执行器类执行数据库操作 */
     private Executor executor;
-    // 是否自动提交
+    /** 是否自动提交 */
     private boolean autoCommit;
-
+    /** 当执行insert、update或delete操作时，该标识设置为true，直到事务提交或者回滚后才置为false */
     private boolean dirty;
-
+    /** 当会话中使用游标的方式查询时，会将游标注册到该字段中，当会话关闭时，统一将游标注销，由于在一次会话中可能执行多次查询，所以这里是一个集合 */
     private List<Cursor<?>> cursorList;
 
 
@@ -324,7 +324,10 @@ public class DefaultSqlSession implements SqlSession {
             throw ExceptionFactory.wrapException("Error getting a new connection.  Cause: " + e, e);
         }
     }
-    // 清理会话缓存
+
+    /**
+     * 清理会话缓存
+     */
     @Override
     public void clearCache() {
         executor.clearLocalCache();

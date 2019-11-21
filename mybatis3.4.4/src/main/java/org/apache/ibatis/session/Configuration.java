@@ -103,7 +103,7 @@ public class Configuration {
     /** 表示要解析的配置文件路径，配置文件可能有多个 */
     protected final Set<String> loadedResources = new HashSet<String>();
 
-    /** 表示配置文件中的 <properties/> 标签 */
+    /** 表示当前环境对应的 environmentId，比如生产环境、测试环境等 */
     protected Environment environment;
     /** 表示配置文件中的 <properties/> 标签 */
     protected Properties variables = new Properties();
@@ -331,7 +331,17 @@ public class Configuration {
         return resultSetHandler;
     }
 
-    // 根据执行器类型、MappedStatement对象、sql占位符参数、分页信息、resultHandler对象和封装了sql语句的BoundSql对象，创建一个 StatementHandler 对象
+    /**
+     * 根据执行器类型、MappedStatement对象、sql占位符参数、分页信息、resultHandler对象和封装了sql语句的BoundSql对象，创建一个 StatementHandler 对象
+     *
+     * @param executor
+     * @param mappedStatement
+     * @param parameterObject
+     * @param rowBounds
+     * @param resultHandler
+     * @param boundSql
+     * @return
+     */
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
         StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
         statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);

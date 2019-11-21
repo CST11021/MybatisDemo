@@ -280,7 +280,27 @@ public class XMLConfigBuilder extends BaseBuilder {
         configuration.setConfigurationFactory(resolveClass(props.getProperty("configurationFactory")));
     }
 
-    // 解析<environments>标签
+    /**
+     * 解析<environments>标签：
+     * Mybatis可以配置成适应多种环境，这种机制有助于将SQL映射应用于多种数据库之中，现实情况下有多种理由需要这么做。
+     * 例如：开发，测试和生产环境需要不同的配置。配置环境可以注册多个数据源，每一个数据源分为两大部分：一个是数据库源的配置，另一个是数据库事物的配置。如：
+     * <environments default="development">
+     *    <environment id="development">
+     *
+     *       <transactionManager type="JDBC" >
+     *          <property name="autoCommit" value="false"/>
+     *       </transactionManager>
+     *
+     *       <dataSource type="POOLED">
+     *          <property name="driver" value="${driver}" />
+     *          <property name="url" value="${url}" />
+     *          <property name="username" value="${username}" />
+     *          <property name="password" value="${password}" />
+     *       </dataSource>
+     *
+     *    </environment>
+     * </environments>
+     */
     private void environmentsElement(XNode context) throws Exception {
         if (context != null) {
             if (environment == null) {

@@ -130,7 +130,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
     protected abstract Statement instantiateStatement(Connection connection) throws SQLException;
 
     /**
-     * 设置实务超时时间
+     * 设置事务超时时间
      *
      * @param stmt
      * @param transactionTimeout

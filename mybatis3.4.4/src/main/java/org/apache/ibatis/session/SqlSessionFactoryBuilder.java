@@ -25,10 +25,14 @@ import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 
-// SqlSessionFactoryBuilder通过类名就可以看出这个类的主要作用就是创建一个SqlSessionFactory，SqlSessionFactory 有两个实现类
-// DefaultSqlSessionFactory 和 SqlSessionManager，这里SqlSessionFactoryBuilder 创建的SqlSessionFactory都是使用SqlSessionFactoryBuilder实现类，
-// 它通过输入mybatis配置文件的字节流或者字符流生成XMLConfigBuilder，XMLConfigBuilder再创建一个Configuration，
-// Configuration这个类中包含了mybatis的配置的一切信息，mybatis进行的所有操作都需要根据Configuration中的信息来进行。
+/**
+ * SqlSessionFactoryBuilder通过类名就可以看出这个类的主要作用就是创建一个SqlSessionFactory。
+ * SqlSessionFactory有两个实现类：DefaultSqlSessionFactory 和 SqlSessionManager
+ *
+ * 这里SqlSessionFactoryBuilder 创建的SqlSessionFactory都是使用DefaultSqlSessionFactory实现类，
+ * 它通过输入mybatis配置文件的字节流或者字符流生成XMLConfigBuilder，XMLConfigBuilder再创建一个Configuration，
+ * Configuration这个类中包含了mybatis的配置的一切信息，mybatis进行的所有操作都需要根据Configuration中的信息来进行。
+ */
 public class SqlSessionFactoryBuilder {
 
     public SqlSessionFactory build(Reader reader) {
@@ -56,8 +60,8 @@ public class SqlSessionFactoryBuilder {
      * 资源文件可以使用 Reader 和 InputStream 两种形式返回，然后去解析
      *
      * @param reader            将配置文件包装为一个Reader对象，为后续解析做准备
-     * @param environment       表示配置文件<environments default="development">中的default属性
-     * @param properties        表示配置文件中的 <properties/> 标签
+     * @param environment       表示配置文件<environments default="development">中的default属性，用于指定当前的环境，比如：开发、测试或生产环境
+     * @param properties        表示配置文件中的 <properties/> 标签，对应占位符参数
      * @return SqlSessionFactory 接口：该接口用于创建一个 SqlSession 对象
      */
     public SqlSessionFactory build(Reader reader, String environment, Properties properties) {
@@ -79,9 +83,9 @@ public class SqlSessionFactoryBuilder {
     /**
      * 类比 {@link SqlSessionFactoryBuilder#build(Reader, String, Properties)} 方法
      *
-     * @param inputStream
-     * @param environment
-     * @param properties
+     * @param inputStream   Mybastic配置文件流
+     * @param environment   表示配置文件<environments default="development">中的default属性，用于指定当前的环境，比如：开发、测试或生产环境
+     * @param properties    表示配置文件中的 <properties/> 标签，对应占位符参数
      * @return
      */
     public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {

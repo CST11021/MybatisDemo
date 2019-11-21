@@ -42,6 +42,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     // SQLSessionFactoryBuilder通过 build(inputStream) 方法创建了一个XMLConfigBuilder 对象来解析配置文件；
     // XMLConfigBuilder 解析完配置文件后，将配置文件的配置信息保存在一个 Configuration 实例中；
     // 最后，SqlSessionFactory 通过 Configuration 的实例，进行时实例化
+
     public DefaultSqlSessionFactory(Configuration configuration) {
         this.configuration = configuration;
     }
@@ -52,6 +53,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     }
 
     /* ---------------------- 以下的这些 openSession 方法最终都委托给openSessionFromDataSource 或 openSessionFromConnection 来创建 SqlSession -------------------*/
+
     @Override
     public SqlSession openSession() {
         return openSessionFromDataSource(configuration.getDefaultExecutorType(), null, false);
@@ -87,7 +89,14 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     /* ---------------------- 以上的这些 openSession 方法最终都委托给openSessionFromDataSource 或 openSessionFromConnection 来创建 SqlSession -------------------*/
 
 
-    // 返回一个DefaultSqlSession 实例
+    /**
+     * 返回一个DefaultSqlSession 实例
+     *
+     * @param execType
+     * @param level
+     * @param autoCommit
+     * @return
+     */
     private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level, boolean autoCommit) {
         Transaction tx = null;
         try {
@@ -108,7 +117,14 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
             ErrorContext.instance().reset();
         }
     }
-    // 返回一个DefaultSqlSession 实例
+
+    /**
+     * 返回一个DefaultSqlSession 实例
+     *
+     * @param execType
+     * @param connection
+     * @return
+     */
     private SqlSession openSessionFromConnection(ExecutorType execType, Connection connection) {
         try {
             boolean autoCommit;
@@ -116,8 +132,10 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
                 autoCommit = connection.getAutoCommit();
             } catch (SQLException e) {
                 // Failover to true, as most poor drivers or databases won't support transactions
+                // 失败时设置为true，因为大多数糟糕的驱动程序或数据库不支持事务
                 autoCommit = true;
             }
+            // 获取当前环境的数据源等信息
             final Environment environment = configuration.getEnvironment();
 
             final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
@@ -132,13 +150,25 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
             ErrorContext.instance().reset();
         }
     }
-    // 根据 Environment 配置返回一个 TransactionFactory 实例，如果没有配置，则实例化一个 ManagedTransactionFactory 实例
+
+    /**
+     * 根据 Environment 配置返回一个 TransactionFactory 实例，如果没有配置，则实例化一个 ManagedTransactionFactory 实例
+     *
+     * @param environment
+     * @return
+     */
     private TransactionFactory getTransactionFactoryFromEnvironment(Environment environment) {
         if (environment == null || environment.getTransactionFactory() == null) {
             return new ManagedTransactionFactory();
         }
         return environment.getTransactionFactory();
     }
+
+    /**
+     * 关闭事务
+     *
+     * @param tx
+     */
     private void closeTransaction(Transaction tx) {
         if (tx != null) {
             try {

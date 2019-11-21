@@ -15,46 +15,49 @@
  */
 package org.apache.ibatis.transaction.managed;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.session.TransactionIsolationLevel;
 import org.apache.ibatis.transaction.Transaction;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 /**
- * {@link Transaction} that lets the container manage the full lifecycle of the transaction.
- * Delays connection retrieval until getConnection() is called.
- * Ignores all commit or rollback requests.
- * By default, it closes the connection but can be configured not to do it.
+ * {@link Transaction}，表示一个事务管理器，它允许容器管理事务的整个生命周期。
+ * 延迟连接检索，直到调用getConnection()。
+ * 忽略所有提交或回滚请求。
+ * 默认情况下，它关闭连接，但是可以配置为不这样做。
+ *
  *
  * @author Clinton Begin
- *
  * @see ManagedTransactionFactory
  */
-// 表示一个事务管理器
 public class ManagedTransaction implements Transaction {
 
     private static final Log log = LogFactory.getLog(ManagedTransaction.class);
 
+    /** 数据源 */
     private DataSource dataSource;
+    /** 事务隔离级别 */
     private TransactionIsolationLevel level;
+    /** 数据库连接 */
     private Connection connection;
+    /** 用于标记是否关闭连接 */
     private boolean closeConnection;
 
     public ManagedTransaction(Connection connection, boolean closeConnection) {
         this.connection = connection;
         this.closeConnection = closeConnection;
     }
+
     public ManagedTransaction(DataSource ds, TransactionIsolationLevel level, boolean closeConnection) {
         this.dataSource = ds;
         this.level = level;
         this.closeConnection = closeConnection;
     }
 
-    // 根据 this.dataSource 获取一个连接对象
     @Override
     public Connection getConnection() throws SQLException {
         if (this.connection == null) {
@@ -62,14 +65,17 @@ public class ManagedTransaction implements Transaction {
         }
         return this.connection;
     }
+
     @Override
     public void commit() throws SQLException {
         // Does nothing
     }
+
     @Override
     public void rollback() throws SQLException {
         // Does nothing
     }
+
     @Override
     public void close() throws SQLException {
         if (this.closeConnection && this.connection != null) {
@@ -79,6 +85,7 @@ public class ManagedTransaction implements Transaction {
             this.connection.close();
         }
     }
+
     protected void openConnection() throws SQLException {
         if (log.isDebugEnabled()) {
             log.debug("Opening JDBC Connection");
@@ -88,6 +95,7 @@ public class ManagedTransaction implements Transaction {
             this.connection.setTransactionIsolation(this.level.getLevel());
         }
     }
+
     @Override
     public Integer getTimeout() throws SQLException {
         return null;

@@ -25,6 +25,7 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
@@ -80,6 +81,10 @@ public interface Executor {
      */
     CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql);
     boolean isCached(MappedStatement ms, CacheKey key);
+
+    /**
+     * 用于清除会话缓存，当执行器执行更新操作前，会调用该方法清除会话缓存；也可以通过{@link SqlSession#clearCache()}方法手动清除缓存
+     */
     void clearLocalCache();
     void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key, Class<?> targetType);
     Transaction getTransaction();
