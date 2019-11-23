@@ -39,8 +39,12 @@ import java.util.Map;
  */
 public class BoundSql {
 
+    /** 表示每次实际数据库操作的SQL */
     private String sql;
+
     private List<ParameterMapping> parameterMappings;
+
+    /** 表示SQL的入参 */
     private Object parameterObject;
     private Map<String, Object> additionalParameters;
     private MetaObject metaParameters;

@@ -79,7 +79,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     private final MappedStatement mappedStatement;
     /** 分页条件 */
     private final RowBounds rowBounds;
-    /** 产生处理器 */
+    /** 参数处理器 */
     private final ParameterHandler parameterHandler;
 
 
@@ -180,7 +180,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
 
     /* --------------------------------------- 处理结果 ---------------------------------------------- */
-    // HANDLE RESULT SETS
+
     // 程序执行调用该方法前，已经通过 statement.execute()方法执行了sql语句，该方法主要对结果集进行处理
     @Override
     public List<Object> handleResultSets(Statement stmt) throws SQLException {

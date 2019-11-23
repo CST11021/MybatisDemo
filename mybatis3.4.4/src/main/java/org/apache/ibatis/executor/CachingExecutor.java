@@ -43,7 +43,10 @@ import org.apache.ibatis.transaction.Transaction;
  */
 public class CachingExecutor implements Executor {
 
+    /** 对应simple、reuse和batch其中一种执行器 */
     private Executor delegate;
+
+    /** 事务缓存管理器 */
     private TransactionalCacheManager tcm = new TransactionalCacheManager();
 
     public CachingExecutor(Executor delegate) {
@@ -51,6 +54,11 @@ public class CachingExecutor implements Executor {
         delegate.setExecutorWrapper(this);
     }
 
+    /**
+     * 委托真正的执行器去获取事务实例
+     *
+     * @return
+     */
     @Override
     public Transaction getTransaction() {
         return delegate.getTransaction();
@@ -77,6 +85,7 @@ public class CachingExecutor implements Executor {
 
     @Override
     public int update(MappedStatement ms, Object parameterObject) throws SQLException {
+        // 执行更新操作之前，如果SQL配置了每次清除缓存，则这里就在执行更新更新操作之前清除缓存
         flushCacheIfRequired(ms);
         return delegate.update(ms, parameterObject);
     }
@@ -91,13 +100,13 @@ public class CachingExecutor implements Executor {
 
     @Override
     public <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException {
+        // 使用游标的方式查询，也需要事先清除缓存
         flushCacheIfRequired(ms);
         return delegate.queryCursor(ms, parameter, rowBounds);
     }
 
     @Override
-    public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds,
-                             ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
+    public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
         throws SQLException {
         Cache cache = ms.getCache();
         if (cache != null) {
@@ -173,8 +182,14 @@ public class CachingExecutor implements Executor {
         delegate.clearLocalCache();
     }
 
+    /**
+     * 如果{@link MappedStatement#isFlushCacheRequired()}为true时，调用该方法会清除缓存
+     *
+     * @param ms
+     */
     private void flushCacheIfRequired(MappedStatement ms) {
         Cache cache = ms.getCache();
+        // 缓存不为空，并且需要清除的时候，清除缓存
         if (cache != null && ms.isFlushCacheRequired()) {
             tcm.clear(cache);
         }

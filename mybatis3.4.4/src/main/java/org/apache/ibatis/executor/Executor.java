@@ -42,6 +42,7 @@ import org.apache.ibatis.transaction.Transaction;
  */
 public interface Executor {
 
+    /** 表示一个null的查询结果 */
     ResultHandler NO_RESULT_HANDLER = null;
 
     // --------------------
@@ -68,7 +69,21 @@ public interface Executor {
 
 
     List<BatchResult> flushStatements() throws SQLException;
+
+    /**
+     * 提交事务
+     *
+     * @param required
+     * @throws SQLException
+     */
     void commit(boolean required) throws SQLException;
+
+    /**
+     * 回滚事务
+     *
+     * @param required
+     * @throws SQLException
+     */
     void rollback(boolean required) throws SQLException;
 
     /**
@@ -80,6 +95,14 @@ public interface Executor {
      * @return
      */
     CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql);
+
+    /**
+     * 判断该缓存key是否存在缓存
+     *
+     * @param ms
+     * @param key
+     * @return
+     */
     boolean isCached(MappedStatement ms, CacheKey key);
 
     /**
@@ -87,9 +110,32 @@ public interface Executor {
      */
     void clearLocalCache();
     void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key, Class<?> targetType);
+
+    /**
+     * 获取一个事务实例
+     *
+     * @return
+     */
     Transaction getTransaction();
+
+    /**
+     * 关闭会话
+     *
+     * @param forceRollback 关闭会话时，是否强制回滚事务，为false时，事务会默认提交
+     */
     void close(boolean forceRollback);
+
+    /**
+     * 会话是否已经关闭
+     *
+     * @return
+     */
     boolean isClosed();
+
+    /**
+     *
+     * @param executor
+     */
     void setExecutorWrapper(Executor executor);
 
 }

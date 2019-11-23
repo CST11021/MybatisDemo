@@ -56,6 +56,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
     protected final MappedStatement mappedStatement;
     protected final RowBounds rowBounds;
 
+    /** 封装了本次操作要执行的SQL */
     protected BoundSql boundSql;
 
     protected BaseStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
@@ -81,19 +82,6 @@ public abstract class BaseStatementHandler implements StatementHandler {
     }
 
     /**
-     * 如果<setting>标签中有设置 useGeneratedKeys 为 true（默认为false），则调用该方法获取一个 KeyGenerator 的实现
-     *
-     * @param parameter
-     */
-    protected void generateKeys(Object parameter) {
-        KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
-        ErrorContext.instance().store();
-        // statement 在执行sql 前，会调用该方法，自动生成一个主键
-        keyGenerator.processBefore(executor, mappedStatement, null, parameter);
-        ErrorContext.instance().recall();
-    }
-
-    /**
      * 创建一个Statement 对象，实例化的动作留给子类实现，根据子类创建不同的Statement实例，比如：PrepareStatementHandler
      * 使用 connection.prepareStatement(sql)的方式创建；SimpleStatementHandler 通过 connection.createStatement() 方式创建
      *
@@ -104,11 +92,15 @@ public abstract class BaseStatementHandler implements StatementHandler {
      */
     @Override
     public Statement prepare(Connection connection, Integer transactionTimeout) throws SQLException {
+        // 在上下文里设置本次要执行的SQL
         ErrorContext.instance().sql(boundSql.getSql());
         Statement statement = null;
         try {
+            // 创建一个 java.sql.Statement 实例
             statement = instantiateStatement(connection);
+            // 设置事务超时时间
             setStatementTimeout(statement, transactionTimeout);
+            // 设置fetchSize
             setFetchSize(statement);
             return statement;
         } catch (SQLException e) {
@@ -118,6 +110,29 @@ public abstract class BaseStatementHandler implements StatementHandler {
             closeStatement(statement);
             throw new ExecutorException("Error preparing statement.  Cause: " + e, e);
         }
+    }
+
+    @Override
+    public BoundSql getBoundSql() {
+        return boundSql;
+    }
+
+    @Override
+    public ParameterHandler getParameterHandler() {
+        return parameterHandler;
+    }
+
+    /**
+     * 如果<setting>标签中有设置 useGeneratedKeys 为 true（默认为false），则调用该方法获取一个 KeyGenerator 的实现
+     *
+     * @param parameter
+     */
+    protected void generateKeys(Object parameter) {
+        KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
+        ErrorContext.instance().store();
+        // statement 在执行sql 前，会调用该方法，自动生成一个主键
+        keyGenerator.processBefore(executor, mappedStatement, null, parameter);
+        ErrorContext.instance().recall();
     }
 
     /**
@@ -161,6 +176,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
             stmt.setFetchSize(fetchSize);
             return;
         }
+
         Integer defaultFetchSize = configuration.getDefaultFetchSize();
         if (defaultFetchSize != null) {
             stmt.setFetchSize(defaultFetchSize);
@@ -180,16 +196,6 @@ public abstract class BaseStatementHandler implements StatementHandler {
         } catch (SQLException e) {
             //ignore
         }
-    }
-
-    @Override
-    public BoundSql getBoundSql() {
-        return boundSql;
-    }
-
-    @Override
-    public ParameterHandler getParameterHandler() {
-        return parameterHandler;
     }
 
 }

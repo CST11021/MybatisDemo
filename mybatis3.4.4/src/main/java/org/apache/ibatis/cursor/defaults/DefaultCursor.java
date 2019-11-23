@@ -165,6 +165,11 @@ public class DefaultCursor<T> implements Cursor<T> {
         return indexWithRowBound + 1;
     }
 
+    /**
+     * 返回单个对象类型的结果集实现
+     *
+     * @param <T>
+     */
     private static class ObjectWrapperResultHandler<T> implements ResultHandler<T> {
 
         private T result;

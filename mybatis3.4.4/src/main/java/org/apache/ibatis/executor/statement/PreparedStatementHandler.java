@@ -47,7 +47,10 @@ public class PreparedStatementHandler extends BaseStatementHandler {
         ps.execute();
         // 获取影响的行数
         int rows = ps.getUpdateCount();
+        // 获取SQL参数
         Object parameterObject = boundSql.getParameterObject();
+
+        // 获取一个KeyGenerator，当它执行完SQL后，将对应的字段设置到入参中（常见的场景是设置自增主键）
         KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
         keyGenerator.processAfter(executor, mappedStatement, ps, parameterObject);
         return rows;
@@ -79,9 +82,19 @@ public class PreparedStatementHandler extends BaseStatementHandler {
         return resultSetHandler.<E>handleCursorResultSets(ps);
     }
 
+    /**
+     * 根据数据库连接对象创建一个{@link PreparedStatement}类型的实例
+     *
+     * @param connection
+     * @return
+     * @throws SQLException
+     */
     @Override
     protected Statement instantiateStatement(Connection connection) throws SQLException {
+
         String sql = boundSql.getSql();
+
+        // 判断一下是否使用了Jdbc3KeyGenerator的实现，如果使用的JDBC3中提供的KeyGenerator实现，则需要设置keyColumnNames
         if (mappedStatement.getKeyGenerator() instanceof Jdbc3KeyGenerator) {
             String[] keyColumnNames = mappedStatement.getKeyColumns();
             if (keyColumnNames == null) {
@@ -89,9 +102,13 @@ public class PreparedStatementHandler extends BaseStatementHandler {
             } else {
                 return connection.prepareStatement(sql, keyColumnNames);
             }
-        } else if (mappedStatement.getResultSetType() != null) {
+        }
+        // 判断是否使用游标的方式返回结果集
+        else if (mappedStatement.getResultSetType() != null) {
             return connection.prepareStatement(sql, mappedStatement.getResultSetType().getValue(), ResultSet.CONCUR_READ_ONLY);
-        } else {
+        }
+        // 最简单的就是直接创建一个PreparedStatement实例
+        else {
             return connection.prepareStatement(sql);
         }
     }

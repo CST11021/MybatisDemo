@@ -56,7 +56,7 @@ import org.apache.ibatis.type.TypeHandler;
  */
 public class MapperBuilderAssistant extends BaseBuilder {
 
-    /** 表示 <mapper namespace="xxx"> 配置的命名空间 */
+    /** 表示 <mapper namespace="xxx"> 配置的命名空间，例如：<mapper namespace="com.whz.mapperinterface.IEmployeerMapper"> */
     private String currentNamespace;
     /** 表示对应的配置文件 */
     private String resource;
@@ -90,6 +90,13 @@ public class MapperBuilderAssistant extends BaseBuilder {
         this.currentNamespace = currentNamespace;
     }
 
+    /**
+     * 添加命名空间的引用，例如：
+     *
+     * @param base
+     * @param isReference   是否引用当前的命名空间，如果为true，一般该配置的作用域对应每个mapper接口下
+     * @return
+     */
     public String applyCurrentNamespace(String base, boolean isReference) {
         if (base == null) {
             return null;
@@ -229,6 +236,31 @@ public class MapperBuilderAssistant extends BaseBuilder {
         return new Discriminator.Builder(configuration, resultMapping, namespaceDiscriminatorMap).build();
     }
 
+    /**
+     * 添加一个MappedStatement配置，在mybatis中我们将select|insert|update|delete 这些配置节点信息抽象为MappedStatement
+     *
+     * @param id                    对应配置的SQL语句的id
+     * @param sqlSource
+     * @param statementType         对应SQL语句中的statementType属性配置
+     * @param sqlCommandType        表示SQL语句的类型
+     * @param fetchSize             对应SQL语句中的fetchSize属性配置
+     * @param timeout               对应SQL语句中的timeout属性配置
+     * @param parameterMap          对应SQL语句中的parameterMap属性配置
+     * @param parameterType         对应SQL语句中的parameterType属性配置
+     * @param resultMap             对应SQL语句中的resultMap属性配置
+     * @param resultType            对应SQL语句中的resultType属性配置
+     * @param resultSetType         对应SQL语句中的resultSetType属性配置
+     * @param flushCache            对应SQL语句中的flushCache属性配置
+     * @param useCache              对应SQL语句中的useCache属性配置
+     * @param resultOrdered         对应SQL语句中的resultOrdered属性配置
+     * @param keyGenerator          表示所使用的{@link KeyGenerator}实现方式
+     * @param keyProperty           对应SQL语句中的keyProperty属性配置
+     * @param keyColumn             对应SQL语句中的keyColumn属性配置
+     * @param databaseId            对应SQL语句中的databaseId属性配置
+     * @param lang                  对应SQL语句中的lang属性配置
+     * @param resultSets            对应SQL语句中的resultSets属性配置
+     * @return
+     */
     public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType, SqlCommandType sqlCommandType, Integer fetchSize, Integer timeout, String parameterMap, Class<?> parameterType, String resultMap, Class<?> resultType, ResultSetType resultSetType, boolean flushCache, boolean useCache, boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId, LanguageDriver lang, String resultSets) {
 
         if (unresolvedCacheRef) {
@@ -270,6 +302,13 @@ public class MapperBuilderAssistant extends BaseBuilder {
         return value == null ? defaultValue : value;
     }
 
+    /**
+     *
+     * @param parameterMapName      对应SQL语句中的parameterMap属性配置
+     * @param parameterTypeClass    对应SQL语句中的parameterType属性配置
+     * @param statementId           对应配置的SQL语句的id
+     * @return
+     */
     private ParameterMap getStatementParameterMap(String parameterMapName, Class<?> parameterTypeClass, String statementId) {
         parameterMapName = applyCurrentNamespace(parameterMapName, true);
         ParameterMap parameterMap = null;

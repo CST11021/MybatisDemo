@@ -25,12 +25,16 @@ import org.apache.ibatis.session.ResultContext;
 import org.apache.ibatis.session.ResultHandler;
 
 /**
+ * 表示Map方式的结果集
+ *
  * @author Clinton Begin
  */
 public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
 
     private final Map<K, V> mappedResults;
+    /** 表示map中对应的key */
     private final String mapKey;
+    /** 用于将结果对象转为{@link MetaObject}的对象工厂 */
     private final ObjectFactory objectFactory;
     private final ObjectWrapperFactory objectWrapperFactory;
     private final ReflectorFactory reflectorFactory;

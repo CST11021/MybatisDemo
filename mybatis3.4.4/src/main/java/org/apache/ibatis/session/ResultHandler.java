@@ -16,10 +16,20 @@
 package org.apache.ibatis.session;
 
 /**
+ * SQL执行结果处理器，Mybastic提供了Object、List和Map三种实现，分别对应：
+ * ObjectWrapperResultHandler
+ * DefaultResultHandler
+ * DefaultMapResultHandler
+ *
  * @author Clinton Begin
  */
 public interface ResultHandler<T> {
 
+    /**
+     * 处理结果集
+     *
+     * @param resultContext
+     */
     void handleResult(ResultContext<? extends T> resultContext);
 
 }

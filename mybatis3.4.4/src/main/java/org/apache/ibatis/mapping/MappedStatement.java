@@ -84,14 +84,21 @@ public final class MappedStatement {
     private LanguageDriver lang;
     private String[] resultSets;
 
-    // 构造器
+    /**
+     * 构造器
+     *
+     * @return
+     */
     MappedStatement() {
         // constructor disabled
     }
 
 
-    // 使用建造者模式构建 MappedStatement 对象
+    /**
+     * 使用建造者模式构建 MappedStatement 对象
+     */
     public static class Builder {
+
         private MappedStatement mappedStatement = new MappedStatement();
 
         public Builder(Configuration configuration, String id, SqlSource sqlSource, SqlCommandType sqlCommandType) {
@@ -110,7 +117,6 @@ public final class MappedStatement {
             mappedStatement.statementLog = LogFactory.getLog(logId);
             mappedStatement.lang = configuration.getDefaultScriptingLanguageInstance();
         }
-
 
         public Builder resource(String resource) {
             mappedStatement.resource = resource;
@@ -253,6 +259,7 @@ public final class MappedStatement {
 
 
     // getter ...
+
     public KeyGenerator getKeyGenerator() {
         return keyGenerator;
     }

@@ -71,6 +71,7 @@ public class SimpleStatementHandler extends BaseStatementHandler {
 
     @Override
     public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
+        // 获取本次数据库要执行的SQL
         String sql = boundSql.getSql();
         // 执行sql语句
         statement.execute(sql);
@@ -78,6 +79,14 @@ public class SimpleStatementHandler extends BaseStatementHandler {
         return resultSetHandler.<E>handleResultSets(statement);
     }
 
+    /**
+     * 使用游标的方式执行查询
+     *
+     * @param statement
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
     @Override
     public <E> Cursor<E> queryCursor(Statement statement) throws SQLException {
         String sql = boundSql.getSql();
@@ -86,7 +95,7 @@ public class SimpleStatementHandler extends BaseStatementHandler {
     }
 
     /**
-     * 实现 BaseStatementHandler 中的模板方法，创建一个 Statement 对象
+     * 实现 BaseStatementHandler 中的模板方法，创建一个{@link java.sql.Statement}实例，这里对应JDBC的Statement实例
      *
      * @param connection
      * @return
@@ -95,12 +104,19 @@ public class SimpleStatementHandler extends BaseStatementHandler {
     @Override
     protected Statement instantiateStatement(Connection connection) throws SQLException {
         if (mappedStatement.getResultSetType() != null) {
+            // 这里默认使用的ResultSet是只读的
             return connection.createStatement(mappedStatement.getResultSetType().getValue(), ResultSet.CONCUR_READ_ONLY);
         } else {
             return connection.createStatement();
         }
     }
 
+    /**
+     * 该方法实现为空，因为simple类型的StatementHandler不需要参数化，只有当使用 {@link java.sql.PreparedStatement} 和 {@link java.sql.CallableStatement} 的方式执行SQL时，才需要参数化
+     *
+     * @param statement
+     * @throws SQLException
+     */
     @Override
     public void parameterize(Statement statement) throws SQLException {
         // N/A

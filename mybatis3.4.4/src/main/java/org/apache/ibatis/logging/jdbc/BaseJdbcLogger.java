@@ -129,7 +129,13 @@ public abstract class BaseJdbcLogger {
         columnNames.clear();
         columnValues.clear();
     }
-    // 对字符串进行格式处理，比如将多个空格、换行、制表符等替换为空格，一般该方法用来处理用户配置的sql语句，使生成的日志好看一些
+
+    /**
+     * 对字符串进行格式处理，比如将多个空格、换行、制表符等替换为空格，一般该方法用来处理用户配置的sql语句，使生成的日志好看一些
+     *
+     * @param original
+     * @return
+     */
     protected String removeBreakingWhitespace(String original) {
         StringTokenizer whitespaceStripper = new StringTokenizer(original);
         StringBuilder builder = new StringBuilder();
@@ -139,22 +145,54 @@ public abstract class BaseJdbcLogger {
         }
         return builder.toString();
     }
+
+    /**
+     * 判断日志级别是否为debug
+     *
+     * @return
+     */
     protected boolean isDebugEnabled() {
         return statementLog.isDebugEnabled();
     }
+
+    /**
+     * 判断日志级别是否为trace
+     *
+     * @return
+     */
     protected boolean isTraceEnabled() {
         return statementLog.isTraceEnabled();
     }
+
+    /**
+     *
+     * @param text
+     * @param input
+     */
     protected void debug(String text, boolean input) {
         if (statementLog.isDebugEnabled()) {
             statementLog.debug(prefix(input) + text);
         }
     }
+
+    /**
+     *
+     *
+     * @param text
+     * @param input
+     */
     protected void trace(String text, boolean input) {
         if (statementLog.isTraceEnabled()) {
             statementLog.trace(prefix(input) + text);
         }
     }
+
+    /**
+     *
+     *
+     * @param isInput
+     * @return
+     */
     private String prefix(boolean isInput) {
         char[] buffer = new char[queryStack * 2 + 2];
         Arrays.fill(buffer, '=');

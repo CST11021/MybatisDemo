@@ -28,12 +28,20 @@ public class CacheKey implements Cloneable, Serializable {
     private static final long serialVersionUID = 1146682552656046210L;
 
     public static final CacheKey NULL_CACHE_KEY = new NullCacheKey();
+
+    /** 默认的乘以因子 */
     private static final int DEFAULT_MULTIPLYER = 37;
+    /** 默认的hashcode */
     private static final int DEFAULT_HASHCODE = 17;
+    /** 乘以因子，默认的为{@link #DEFAULT_MULTIPLYER} */
     private int multiplier;
+    /** 缓存key的hash值 */
     private int hashcode;
+    /** 每次更新缓存key时，都会将hashcode累加 */
     private long checksum;
+    /** 标记缓存的更新次数 */
     private int count;
+    /**  */
     private List<Object> updateList;
 
     public CacheKey() {

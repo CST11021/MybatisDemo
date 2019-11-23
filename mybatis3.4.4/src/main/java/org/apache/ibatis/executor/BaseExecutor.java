@@ -57,7 +57,9 @@ public abstract class BaseExecutor implements Executor {
     protected Executor wrapper;
 
     protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
+    /** 用于缓存查询结果 */
     protected PerpetualCache localCache;
+    /** 用于缓存存储过程的执行结果 */
     protected PerpetualCache localOutputParameterCache;
 
 
@@ -100,6 +102,7 @@ public abstract class BaseExecutor implements Executor {
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
         // 将SQL参数包装成一个BoundSql对象
         BoundSql boundSql = ms.getBoundSql(parameter);
+
         CacheKey key = createCacheKey(ms, parameter, rowBounds, boundSql);
         return query(ms, parameter, rowBounds, resultHandler, key, boundSql);
     }
@@ -110,9 +113,12 @@ public abstract class BaseExecutor implements Executor {
         if (closed) {
             throw new ExecutorException("Executor was closed.");
         }
+
+        // isFlushCacheRequired()：是否每次查询都走DB查询，不走缓存
         if (queryStack == 0 && ms.isFlushCacheRequired()) {
             clearLocalCache();
         }
+
         List<E> list;
         try {
             queryStack++;
@@ -126,12 +132,14 @@ public abstract class BaseExecutor implements Executor {
         } finally {
             queryStack--;
         }
+
         if (queryStack == 0) {
             for (DeferredLoad deferredLoad : deferredLoads) {
                 deferredLoad.load();
             }
             // issue #601
             deferredLoads.clear();
+            // 如果缓存作用域是statement，清楚缓存
             if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
                 // issue #482
                 clearLocalCache();
@@ -202,6 +210,7 @@ public abstract class BaseExecutor implements Executor {
         if (closed) {
             throw new ExecutorException("Executor was closed.");
         }
+
         DeferredLoad deferredLoad = new DeferredLoad(resultObject, property, key, localCache, configuration, targetType);
         if (deferredLoad.canLoad()) {
             deferredLoad.load();
@@ -215,6 +224,7 @@ public abstract class BaseExecutor implements Executor {
         if (closed) {
             throw new ExecutorException("Executor was closed.");
         }
+
         CacheKey cacheKey = new CacheKey();
         cacheKey.update(ms.getId());
         cacheKey.update(rowBounds.getOffset());
@@ -240,6 +250,7 @@ public abstract class BaseExecutor implements Executor {
                 cacheKey.update(value);
             }
         }
+
         if (configuration.getEnvironment() != null) {
             // issue #176
             cacheKey.update(configuration.getEnvironment().getId());
@@ -344,9 +355,22 @@ public abstract class BaseExecutor implements Executor {
         }
     }
 
-    // 执行器准备好所有准备工作后，最终会委托该方法进行查询操作，根据执行器的类型，会将查询的实现逻辑通过doQuery() 留给子类实现
+    /**
+     * 执行器准备好所有准备工作后，最终会委托该方法进行查询操作，根据执行器的类型，会将查询的实现逻辑通过doQuery() 留给子类实现
+     *
+     * @param ms                MappedStatement
+     * @param parameter         查询参数
+     * @param rowBounds         分页信息
+     * @param resultHandler     查询结果
+     * @param key               缓存key
+     * @param boundSql          执行的select语句
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
     private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
         List<E> list;
+        // 执行查询时，会往缓存中放入一个占位符标识，查询执行完毕后，再从缓存中移除
         localCache.putObject(key, EXECUTION_PLACEHOLDER);
         try {
             list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
@@ -356,12 +380,21 @@ public abstract class BaseExecutor implements Executor {
 
         // 执行完查询后将查询结果缓存起来
         localCache.putObject(key, list);
+
+        // 如果执行的是存储过程，则将结果放入localOutputParameterCache
         if (ms.getStatementType() == StatementType.CALLABLE) {
             localOutputParameterCache.putObject(key, parameter);
         }
         return list;
     }
 
+    /**
+     * 从事务实例获取一个数据库连接实例
+     *
+     * @param statementLog
+     * @return
+     * @throws SQLException
+     */
     protected Connection getConnection(Log statementLog) throws SQLException {
         Connection connection = transaction.getConnection();
         // MappedStatement 中封装了一个 Log 对象，如果当前调用的 MappedStatement 的日志级别是debug，则对connection 进一步处理
@@ -379,21 +412,20 @@ public abstract class BaseExecutor implements Executor {
 
     private static class DeferredLoad {
 
+        /** 表示一个结果 */
         private final MetaObject resultObject;
         private final String property;
         private final Class<?> targetType;
         private final CacheKey key;
+
+        /** 缓存组件 */
         private final PerpetualCache localCache;
         private final ObjectFactory objectFactory;
+        /** 结果提取工具 */
         private final ResultExtractor resultExtractor;
 
         // issue #781
-        public DeferredLoad(MetaObject resultObject,
-                            String property,
-                            CacheKey key,
-                            PerpetualCache localCache,
-                            Configuration configuration,
-                            Class<?> targetType) {
+        public DeferredLoad(MetaObject resultObject, String property, CacheKey key, PerpetualCache localCache, Configuration configuration, Class<?> targetType) {
             this.resultObject = resultObject;
             this.property = property;
             this.key = key;
@@ -403,15 +435,22 @@ public abstract class BaseExecutor implements Executor {
             this.targetType = targetType;
         }
 
+        /**
+         * 当缓存不为空时，返回true
+         *
+         * @return
+         */
         public boolean canLoad() {
             return localCache.getObject(key) != null && localCache.getObject(key) != EXECUTION_PLACEHOLDER;
         }
 
         public void load() {
             @SuppressWarnings("unchecked")
-            // we suppose we get back a List
-                    List<Object> list = (List<Object>) localCache.getObject(key);
+            // 从缓存中获取数据，假设我们得到了一个List
+            List<Object> list = (List<Object>) localCache.getObject(key);
+            // 将List转为targetType
             Object value = resultExtractor.extractObjectFromList(list, targetType);
+
             resultObject.setValue(property, value);
         }
 

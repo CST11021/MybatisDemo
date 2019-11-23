@@ -27,12 +27,12 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
  * Connection proxy to add logging
+ * ConnectionLogger 实现了 InvocationHandler 接口（JDK 动态代理），这个类是一个代理类
  *
  * @author Clinton Begin
  * @author Eduardo Macarron
  *
  */
-// ConnectionLogger 实现了 InvocationHandler 接口（JDK 动态代理），这个类是一个代理类
 public final class ConnectionLogger extends BaseJdbcLogger implements InvocationHandler {
 
     private Connection connection;
@@ -78,11 +78,11 @@ public final class ConnectionLogger extends BaseJdbcLogger implements Invocation
 
     /**
      * Creates a logging version of a connection
+     * 返回一个 这个Connection 的代理对象，代理的类添加了一个 Log 对象，具体的代理实现请看invoke()方法的实现
      *
      * @param conn - the original connection
      * @return - the connection with logging
      */
-    // 返回一个 这个Connection 的代理对象，代理的类添加了一个 Log 对象，具体的代理实现请看ivoke()方法的实现
     public static Connection newInstance(Connection conn, Log statementLog, int queryStack) {
         InvocationHandler handler = new ConnectionLogger(conn, statementLog, queryStack);
         ClassLoader cl = Connection.class.getClassLoader();

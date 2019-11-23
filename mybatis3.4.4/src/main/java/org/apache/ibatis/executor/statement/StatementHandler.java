@@ -26,17 +26,17 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.session.ResultHandler;
 
 /**
- * StatementHandler 是对JDBC的 Statement 做进一步的封装，所有的数据库操作，最终其实都是由 Statement 来完成的
+ * StatementHandler 是对JDBC的 Statement 做进一步的封装，所有的数据库操作，最终其实都是由 java.sql.Statement 来完成的
  *
  * @author Clinton Begin
  */
 public interface StatementHandler {
 
     /**
-     * 创建一个Statement 对象
+     * 根据数据库的连接实例创建一个Statement对象
      *
-     * @param connection
-     * @param transactionTimeout
+     * @param connection            数据库连接实例
+     * @param transactionTimeout    事务超时时间
      * @return
      * @throws SQLException
      */
@@ -61,7 +61,7 @@ public interface StatementHandler {
     void batch(Statement statement) throws SQLException;
 
     /**
-     * 执行更新操作
+     * 执行更新操作时会调用给方法，这里的更新操作包括：insert、update和delete
      *
      * @param statement
      * @return 返回影响的行数
