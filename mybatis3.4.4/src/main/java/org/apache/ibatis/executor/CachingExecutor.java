@@ -172,8 +172,7 @@ public class CachingExecutor implements Executor {
     }
 
     @Override
-    public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key,
-                          Class<?> targetType) {
+    public void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key, Class<?> targetType) {
         delegate.deferLoad(ms, resultObject, property, key, targetType);
     }
 

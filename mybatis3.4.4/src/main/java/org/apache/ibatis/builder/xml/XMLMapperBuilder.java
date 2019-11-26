@@ -54,11 +54,13 @@ import org.apache.ibatis.type.TypeHandler;
  */
 public class XMLMapperBuilder extends BaseBuilder {
 
+    /** 该对象封装了一个Document对象，用于表示将要解析的mybatis的配置文件 */
     private XPathParser parser;
+    /** 该变量在构造器的时候初始化 */
     private MapperBuilderAssistant builderAssistant;
-    // 表示sql碎片，解析<mapper>标签内的<sql>标签后，会将解析结果保存到 sqlFragments 中，
+    /** 表示sql碎片，解析<mapper>标签内的<sql>标签后，会将解析结果保存到 sqlFragments 中 */
     private Map<String, XNode> sqlFragments;
-    // 表示要解析的配置文件路径
+    /** 表示要解析的配置文件路径 */
     private String resource;
 
     @Deprecated
@@ -86,14 +88,17 @@ public class XMLMapperBuilder extends BaseBuilder {
         this.resource = resource;
     }
 
-    // 解析XxxMapper.xml文件的入口
+    /**
+     * 解析XxxMapper.xml文件的入口
+     */
     public void parse() {
+        // 判断mybastic是否解析过该配置文件
         if (!configuration.isResourceLoaded(resource)) {
             // 开始解析<mapper>节点
             configurationElement(parser.evalNode("/mapper"));
+            // 保存解析过的配置文件，防止重复解析
             configuration.addLoadedResource(resource);
-
-            // 绑定命名空间
+            // 绑定命名空间：保存当前要解析的配置文件文件，命名空间及对应的Mapper接口等信息，防止重复解析
             bindMapperForNamespace();
         }
 
@@ -144,27 +149,38 @@ public class XMLMapperBuilder extends BaseBuilder {
             }
         }
     }
-    // 绑定命名空间
+
+    /**
+     * 绑定命名空间：保存当前要解析的配置文件文件，命名空间及对应的Mapper接口等信息，防止重复解析
+     */
     private void bindMapperForNamespace() {
         String namespace = builderAssistant.getCurrentNamespace();
         if (namespace != null) {
+            // namespace表示 <mapper namespace="xxx"> 配置的命名空间，这里对应的Mapper接口，例如：<mapper namespace="com.whz.mapperinterface.IEmployeerMapper">
             Class<?> boundType = null;
             try {
                 boundType = Resources.classForName(namespace);
             } catch (ClassNotFoundException e) {
                 //ignore, bound type is not required
             }
+
             if (boundType != null) {
                 if (!configuration.hasMapper(boundType)) {
-                    // Spring may not know the real resource name so we set a flag to prevent loading again this resource
-                    // from the mapper interface look at MapperAnnotationBuilder#loadXmlResource
+                    // Spring可能不知道真正的资源名，因此我们设置了一个标志来防止再次从mapper接口加载该资源
                     configuration.addLoadedResource("namespace:" + namespace);
+                    // 添加对应的Mapper接口
                     configuration.addMapper(boundType);
                 }
             }
         }
     }
-    // 根据id查找SQL碎片
+
+    /**
+     * 根据id查找SQL碎片
+     *
+     * @param refid
+     * @return
+     */
     public XNode getSqlFragment(String refid) {
         return sqlFragments.get(refid);
     }
@@ -172,7 +188,12 @@ public class XMLMapperBuilder extends BaseBuilder {
 
 
     /* ----------------------------------------- 解析<mapper>节点 --------------------------------------- */
-    // 解析<mapper>节点
+
+    /**
+     * 解析<mapper>节点
+     *
+     * @param context
+     */
     private void configurationElement(XNode context) {
         try {
             // 例如：<mapper namespace="com.whz.mapperinterface.IEmployeerMapper"> 获取该配置的命名空间
@@ -197,11 +218,18 @@ public class XMLMapperBuilder extends BaseBuilder {
             throw new BuilderException("Error parsing Mapper XML. Cause: " + e, e);
         }
     }
-    // 解析 select|insert|update|delete 标签，这些标签的解析过程会委托给 XMLStatementBuilder 来解析
+
+    /**
+     * 解析 select|insert|update|delete 标签，这些标签的解析过程会委托给 XMLStatementBuilder 来解析
+     *
+     * @param list
+     */
     private void buildStatementFromContext(List<XNode> list) {
+        // 如果配置了databaseId，则会解析带有databaseId配置的SQL
         if (configuration.getDatabaseId() != null) {
             buildStatementFromContext(list, configuration.getDatabaseId());
         }
+        //
         buildStatementFromContext(list, null);
     }
     private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
@@ -217,7 +245,11 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
     }
 
-    // 解析<cache-ref>标签
+    /**
+     * 解析<cache-ref>标签
+     *
+     * @param context
+     */
     private void cacheRefElement(XNode context) {
         if (context != null) {
             configuration.addCacheRef(builderAssistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
@@ -229,22 +261,45 @@ public class XMLMapperBuilder extends BaseBuilder {
             }
         }
     }
-    // 解析<cache>标签，缓存配置相关
+
+    /**
+     * 解析<cache>标签，缓存配置相关
+     *
+     * @param context
+     * @throws Exception
+     */
     private void cacheElement(XNode context) throws Exception {
         if (context != null) {
+            // 缓存实现类，默认为PERPETUAL，对应PerpetualCache实现类
             String type = context.getStringAttribute("type", "PERPETUAL");
             Class<? extends Cache> typeClass = typeAliasRegistry.resolveAlias(type);
+            // eviction：代表的是缓存收回策略，有一下策略：
+            // 1. LRU， 最近最少使用的，移除最长时间不用的对象。
+            // 2. FIFO，先进先出，按对象进入缓存的顺序来移除他们
+            // 3. SOFT， 软引用，移除基于垃圾回收器状态和软引用规则的对象。
+            // 4. WEAK，若引用，更积极的移除基于垃圾收集器状态和若引用规则的对象
             String eviction = context.getStringAttribute("eviction", "LRU");
             Class<? extends Cache> evictionClass = typeAliasRegistry.resolveAlias(eviction);
+
+            // 缓存刷新时间
             Long flushInterval = context.getLongAttribute("flushInterval");
+
+            // 设置缓存的最大大小
             Integer size = context.getIntAttribute("size");
+            // 缓存是否只读，默认否
             boolean readWrite = !context.getBooleanAttribute("readOnly", false);
             boolean blocking = context.getBooleanAttribute("blocking", false);
             Properties props = context.getChildrenAsProperties();
             builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
         }
     }
-    // 解析<parameterMap>标签
+
+    /**
+     * 解析<parameterMap>标签
+     *
+     * @param list
+     * @throws Exception
+     */
     private void parameterMapElement(List<XNode> list) throws Exception {
         for (XNode parameterMapNode : list) {
             String id = parameterMapNode.getStringAttribute("id");
@@ -271,7 +326,13 @@ public class XMLMapperBuilder extends BaseBuilder {
             builderAssistant.addParameterMap(id, parameterClass, parameterMappings);
         }
     }
-    // 解析所有的<resultMap> 标签
+
+    /**
+     * 解析所有的<resultMap> 标签
+     *
+     * @param list
+     * @throws Exception
+     */
     private void resultMapElements(List<XNode> list) throws Exception {
         for (XNode resultMapNode : list) {
             try {
@@ -385,13 +446,26 @@ public class XMLMapperBuilder extends BaseBuilder {
         return null;
     }
 
-    // 解析<mapper>标签内的<sql>标签
+    /**
+     * 解析<mapper>标签内的<sql>标签
+     *
+     * @param list
+     * @throws Exception
+     */
     private void sqlElement(List<XNode> list) throws Exception {
         if (configuration.getDatabaseId() != null) {
             sqlElement(list, configuration.getDatabaseId());
         }
         sqlElement(list, null);
     }
+
+    /**
+     * 解析<mapper>标签内的<sql>标签
+     *
+     * @param list
+     * @param requiredDatabaseId
+     * @throws Exception
+     */
     private void sqlElement(List<XNode> list, String requiredDatabaseId) throws Exception {
         for (XNode context : list) {
             String databaseId = context.getStringAttribute("databaseId");
@@ -402,6 +476,15 @@ public class XMLMapperBuilder extends BaseBuilder {
             }
         }
     }
+
+    /**
+     * 判断id对应的SQL是否匹配当前要求的databaseId
+     *
+     * @param id                    SQL对应的id
+     * @param databaseId            SQL配置的databaseId
+     * @param requiredDatabaseId    当前要求的databaseId
+     * @return
+     */
     private boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
         if (requiredDatabaseId != null) {
             if (!requiredDatabaseId.equals(databaseId)) {

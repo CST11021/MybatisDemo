@@ -44,6 +44,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     private MapperBuilderAssistant builderAssistant;
     /** 表示 select|insert|update|delete 这些节点 */
     private XNode context;
+    /** 是否要求使用对应的数据库标识来解析，对应mybastic配置的<databaseIdProvider/>标签 */
     private String requiredDatabaseId;
 
 
@@ -58,7 +59,9 @@ public class XMLStatementBuilder extends BaseBuilder {
     }
 
 
-    // 解析select|insert|update|delete 标签的入口方法
+    /**
+     * 解析select|insert|update|delete 标签的入口方法
+     */
     public void parseStatementNode() {
         String id = context.getStringAttribute("id");
         String databaseId = context.getStringAttribute("databaseId");
@@ -89,6 +92,7 @@ public class XMLStatementBuilder extends BaseBuilder {
         // 获取SQL命令的类型
         SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
         boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
+        // 不是select语句默认都清楚缓存
         boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
         boolean useCache = context.getBooleanAttribute("useCache", isSelect);
         boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
@@ -214,6 +218,15 @@ public class XMLStatementBuilder extends BaseBuilder {
             nodeToHandle.getParent().getNode().removeChild(nodeToHandle.getNode());
         }
     }
+
+    /**
+     * 判断SQL配置的databaseId是否匹配当前要求的databaseId
+     *
+     * @param id                        表示SQL的id
+     * @param databaseId                SQL配置的databaseId
+     * @param requiredDatabaseId        当前要求的databaseId
+     * @return
+     */
     private boolean databaseIdMatchesCurrent(String id, String databaseId, String requiredDatabaseId) {
         if (requiredDatabaseId != null) {
             if (!requiredDatabaseId.equals(databaseId)) {

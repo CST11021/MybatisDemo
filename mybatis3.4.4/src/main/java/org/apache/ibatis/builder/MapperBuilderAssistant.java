@@ -72,24 +72,6 @@ public class MapperBuilderAssistant extends BaseBuilder {
         this.resource = resource;
     }
 
-
-
-    public String getCurrentNamespace() {
-        return currentNamespace;
-    }
-    public void setCurrentNamespace(String currentNamespace) {
-        if (currentNamespace == null) {
-            throw new BuilderException("The mapper element requires a namespace attribute to be specified.");
-        }
-
-        if (this.currentNamespace != null && !this.currentNamespace.equals(currentNamespace)) {
-            throw new BuilderException("Wrong namespace. Expected '"
-                    + this.currentNamespace + "' but found '" + currentNamespace + "'.");
-        }
-
-        this.currentNamespace = currentNamespace;
-    }
-
     /**
      * 添加命名空间的引用，例如：
      *
@@ -138,6 +120,22 @@ public class MapperBuilderAssistant extends BaseBuilder {
         }
     }
 
+    /**
+     * 创建一个缓存实例
+     *
+     * @param typeClass         缓存实现类
+     * @param evictionClass     eviction：代表的是缓存收回策略，有一下策略：
+     *                          1. LRU， 最近最少使用的，移除最长时间不用的对象。
+     *                          2. FIFO，先进先出，按对象进入缓存的顺序来移除他们
+     *                          3. SOFT， 软引用，移除基于垃圾回收器状态和软引用规则的对象。
+     *                          4. WEAK，若引用，更积极的移除基于垃圾收集器状态和若引用规则的对象
+     * @param flushInterval     缓存自动清除的时间间隔
+     * @param size              缓存最大大小
+     * @param readWrite         缓存是否只读
+     * @param blocking
+     * @param props
+     * @return
+     */
     public Cache useNewCache(Class<? extends Cache> typeClass, Class<? extends Cache> evictionClass, Long flushInterval, Integer size, boolean readWrite, boolean blocking, Properties props) {
         Cache cache = new CacheBuilder(currentNamespace)
                 .implementation(valueOrDefault(typeClass, PerpetualCache.class))
@@ -298,6 +296,14 @@ public class MapperBuilderAssistant extends BaseBuilder {
         return statement;
     }
 
+    /**
+     * 如果value为null，则返回返回默认值，否则返回value
+     *
+     * @param value
+     * @param defaultValue
+     * @param <T>
+     * @return
+     */
     private <T> T valueOrDefault(T value, T defaultValue) {
         return value == null ? defaultValue : value;
     }
@@ -463,6 +469,25 @@ public class MapperBuilderAssistant extends BaseBuilder {
                 parameterMap, parameterType, resultMap, resultType, resultSetType,
                 flushCache, useCache, resultOrdered, keyGenerator, keyProperty,
                 keyColumn, databaseId, lang, null);
+    }
+
+
+
+
+    public String getCurrentNamespace() {
+        return currentNamespace;
+    }
+    public void setCurrentNamespace(String currentNamespace) {
+        if (currentNamespace == null) {
+            throw new BuilderException("The mapper element requires a namespace attribute to be specified.");
+        }
+
+        if (this.currentNamespace != null && !this.currentNamespace.equals(currentNamespace)) {
+            throw new BuilderException("Wrong namespace. Expected '"
+                    + this.currentNamespace + "' but found '" + currentNamespace + "'.");
+        }
+
+        this.currentNamespace = currentNamespace;
     }
 
 }

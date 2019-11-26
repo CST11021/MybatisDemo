@@ -138,6 +138,7 @@ public class Configuration {
     /** sql碎片，<mapper/>里可以配置一些模式式的sql语句，mybatis解析完后会将其保存到 sqlFragments 属性中 */
     protected final Map<String, XNode> sqlFragments = new StrictMap<XNode>("XML fragments parsed from previous mappers");
 
+    /** 当解析Mapper对应的SQL出错时，会将对应的XMLStatementBuilder解析器，添加到该变量中，每个<select>、<update>、<insert>和<delete>配置都会对应一个解析器 */
     protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<XMLStatementBuilder>();
     protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<CacheRefResolver>();
     protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<ResultMapResolver>();
@@ -460,13 +461,20 @@ public class Configuration {
     }
 
 
-
-
-
-
+    /**
+     * 当解析mapper对应SQL的出错时，会将解析器添加到{@link #incompleteStatements}
+     *
+     * @param incompleteStatement   解析SQL异常时，对应的解析器实例
+     */
     public void addIncompleteStatement(XMLStatementBuilder incompleteStatement) {
         incompleteStatements.add(incompleteStatement);
     }
+
+    /**
+     * 解析<cacheRef>失败时对应的解析器实例
+     *
+     * @param incompleteCacheRef
+     */
     public void addIncompleteCacheRef(CacheRefResolver incompleteCacheRef) {
         incompleteCacheRefs.add(incompleteCacheRef);
     }
