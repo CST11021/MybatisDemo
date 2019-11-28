@@ -52,7 +52,7 @@ public class DefaultSqlSession implements SqlSession {
     private Configuration configuration;
     /** SqlSession最终都将委托执行器类执行数据库操作 */
     private Executor executor;
-    /** 是否自动提交 */
+    /** 是否自动提交事务，是否自动提交在Mybastic中统一默认为否，创建会话的时候可以指定是否自动提交 */
     private boolean autoCommit;
     /** 当执行insert、update或delete操作时，该标识设置为true，直到事务提交或者回滚后才置为false */
     private boolean dirty;
@@ -226,15 +226,18 @@ public class DefaultSqlSession implements SqlSession {
     }
 
 
-
-
-
-
-    // 事务提交
+    /**
+     * 提交事务，不强制提交
+     */
     @Override
     public void commit() {
         commit(false);
     }
+    /**
+     * 提交事务
+     *
+     * @param force 是否强制提交
+     */
     @Override
     public void commit(boolean force) {
         try {
@@ -246,15 +249,30 @@ public class DefaultSqlSession implements SqlSession {
             ErrorContext.instance().reset();
         }
     }
+    /**
+     * 用于判断是否要求提交或回滚事务，如果是强制提交，则每次都返回true；
+     * 否则如果是不自动提交，则每次指定完update、insert、delete操作后，该接口放回true；
+     *
+     * @param force
+     * @return
+     */
     private boolean isCommitOrRollbackRequired(boolean force) {
         return (!autoCommit && dirty) || force;
     }
 
-    // 事务回滚
+    /**
+     * 回滚事务，不强制回滚
+     */
     @Override
     public void rollback() {
         rollback(false);
     }
+
+    /**
+     * 回滚事务，强制回滚
+     *
+     * @param force 是否强制回滚
+     */
     @Override
     public void rollback(boolean force) {
         try {
@@ -290,6 +308,9 @@ public class DefaultSqlSession implements SqlSession {
         }
     }
 
+    /**
+     * 关闭所有的游标，批量执行器执行完后通常都是返回多个游标实例
+     */
     private void closeCursors() {
         if (cursorList != null && cursorList.size() != 0) {
             for (Cursor<?> cursor : cursorList) {
@@ -308,14 +329,19 @@ public class DefaultSqlSession implements SqlSession {
         return configuration;
     }
 
-    // 从 mapperRegistry 注册表中获取一个Mapper实例，
-    // 如：IEmployeerMapper iEmployeerMapper = sqlSession.getMapper(IEmployeerMapper.class);
+    /**
+     * 从 mapperRegistry 注册表中获取一个Mapper实例，如：
+     * IEmployeerMapper iEmployeerMapper = sqlSession.getMapper(IEmployeerMapper.class);
+     *
+     * @param type
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> T getMapper(Class<T> type) {
         return configuration.<T>getMapper(type, this);
     }
 
-    // 获取一个连接对象
     @Override
     public Connection getConnection() {
         try {
@@ -326,22 +352,25 @@ public class DefaultSqlSession implements SqlSession {
     }
 
     /**
-     * 清理会话缓存
+     * 清理会话缓存，直接委托执行器清除缓存
      */
     @Override
     public void clearCache() {
         executor.clearLocalCache();
     }
 
+    /**
+     * 注册游标实例
+     *
+     * @param cursor
+     * @param <T>
+     */
     private <T> void registerCursor(Cursor<T> cursor) {
         if (cursorList == null) {
             cursorList = new ArrayList<Cursor<?>>();
         }
         cursorList.add(cursor);
     }
-
-
-
 
     /**
      * 如果object是collection类型，则返回 StrictMap<"collection", object>;
@@ -367,6 +396,7 @@ public class DefaultSqlSession implements SqlSession {
         }
         return object;
     }
+
     public static class StrictMap<V> extends HashMap<String, V> {
         private static final long serialVersionUID = -5741767162221585340L;
         @Override

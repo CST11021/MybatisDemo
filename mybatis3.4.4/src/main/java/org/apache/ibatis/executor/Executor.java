@@ -51,10 +51,6 @@ public interface Executor {
 
     int update(MappedStatement ms, Object parameter) throws SQLException;
 
-
-
-
-
     // --------------------
     // 查询方法最终调用以下三个方法的其中一个来操作数据库
     // --------------------
@@ -64,22 +60,26 @@ public interface Executor {
     <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException;
 
 
-
-
-
-
+    /**
+     * 清空Statement实例：
+     * 比如，批量执行器，则会将多个Statement实例缓存起来，在该方法中一起执行，执行完成后则关闭和清空相关的Statement实例；
+     * 再比如，复用执行器，会将执行过的Statement实例缓存起来，方便下次在里利用；
+     *
+     * @return
+     * @throws SQLException
+     */
     List<BatchResult> flushStatements() throws SQLException;
 
     /**
-     * 提交事务
+     * 提交事务：执行器的事务提交实现委托给了{@link Transaction}去实现，执行器层的事务提交是对Statement实例缓存和查询结果缓存做了一层封装，保证了事务提交前都能清楚Statement缓存和Mybastic的一级缓存
      *
-     * @param required
+     * @param required      是否执行事务提交操作
      * @throws SQLException
      */
     void commit(boolean required) throws SQLException;
 
     /**
-     * 回滚事务
+     * 回滚事务：执行器的事务回滚实现委托给了{@link Transaction}去实现，执行器层的事务回滚是对Statement实例缓存和查询结果缓存做了一层封装，保证了事务回滚前都能清除Statement缓存和Mybastic的一级缓存
      *
      * @param required
      * @throws SQLException
@@ -88,10 +88,11 @@ public interface Executor {
 
     /**
      * 创建一个CacheKey对象
-     * @param ms
-     * @param parameterObject
-     * @param rowBounds
-     * @param boundSql
+     *
+     * @param ms                    MappedStatement
+     * @param parameterObject       本次执行的参数
+     * @param rowBounds             分页信息
+     * @param boundSql              本次执行的SQL相关信息
      * @return
      */
     CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql);
@@ -109,6 +110,16 @@ public interface Executor {
      * 用于清除会话缓存，当执行器执行更新操作前，会调用该方法清除会话缓存；也可以通过{@link SqlSession#clearCache()}方法手动清除缓存
      */
     void clearLocalCache();
+
+    /**
+     * 结果集处理器在每次处理执行结果的时候会来调该方法，缓存查询结果
+     *
+     * @param ms                本次执行MappedStatement
+     * @param resultObject      结果集对应的MetaObject
+     * @param property
+     * @param key               缓存key
+     * @param targetType
+     */
     void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key, Class<?> targetType);
 
     /**
@@ -119,20 +130,21 @@ public interface Executor {
     Transaction getTransaction();
 
     /**
-     * 关闭会话
+     * 关闭执行器，会话关闭时会关闭对应的执行器
      *
      * @param forceRollback 关闭会话时，是否强制回滚事务，为false时，事务会默认提交
      */
     void close(boolean forceRollback);
 
     /**
-     * 会话是否已经关闭
+     * 执行器是否已经关闭
      *
      * @return
      */
     boolean isClosed();
 
     /**
+     * 设置保存执行器，{@link BatchExecutor}、{@link ReuseExecutor}和{@link SimpleExecutor}会调用该方法，一般设置的包装执行器是缓存执行器，缓存执行器在最外层
      *
      * @param executor
      */

@@ -40,6 +40,7 @@ import org.apache.ibatis.transaction.Transaction;
  */
 public class ReuseExecutor extends BaseExecutor {
 
+    /** 将SQL及对应的Statement缓存起来Map<sql, Statement> */
     private final Map<String, Statement> statementMap = new HashMap<String, Statement>();
 
     public ReuseExecutor(Configuration configuration, Transaction transaction) {
@@ -69,7 +70,13 @@ public class ReuseExecutor extends BaseExecutor {
         return handler.<E>queryCursor(stmt);
     }
 
-
+    /**
+     * 复用Statement的执行，在调用该方法前已经执行过SQL了，该方法不需要再次执行，只需清空相关的Statement实例即可
+     *
+     * @param isRollback    是否需要回滚
+     * @return
+     * @throws SQLException
+     */
     @Override
     public List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException {
         for (Statement stmt : statementMap.values()) {

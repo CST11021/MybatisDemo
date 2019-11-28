@@ -34,12 +34,12 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
- * @author Clinton Begin
- * @author Eduardo Macarron
  *
  * 缓存执行器，这里使用了装饰器的设计模式，在{@link org.apache.ibatis.session.Configuration#newExecutor(Transaction, ExecutorType)}
  * 方法中，如果有开启缓存，则会返回一个{@link CachingExecutor}类型的执行器
  *
+ * @author Clinton Begin
+ * @author Eduardo Macarron
  */
 public class CachingExecutor implements Executor {
 
@@ -54,11 +54,6 @@ public class CachingExecutor implements Executor {
         delegate.setExecutorWrapper(this);
     }
 
-    /**
-     * 委托真正的执行器去获取事务实例
-     *
-     * @return
-     */
     @Override
     public Transaction getTransaction() {
         return delegate.getTransaction();
@@ -83,6 +78,14 @@ public class CachingExecutor implements Executor {
         return delegate.isClosed();
     }
 
+    /**
+     * 执行更新操作之前，如果SQL配置了每次清除缓存，则这里就在执行更新更新操作之前清除缓存
+     *
+     * @param ms
+     * @param parameterObject
+     * @return
+     * @throws SQLException
+     */
     @Override
     public int update(MappedStatement ms, Object parameterObject) throws SQLException {
         // 执行更新操作之前，如果SQL配置了每次清除缓存，则这里就在执行更新更新操作之前清除缓存
@@ -90,14 +93,34 @@ public class CachingExecutor implements Executor {
         return delegate.update(ms, parameterObject);
     }
 
+    /**
+     * 执行查询前，会先去缓存中捞一遍
+     *
+     * @param ms
+     * @param parameterObject
+     * @param rowBounds
+     * @param resultHandler
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
     @Override
-    public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds,
-                             ResultHandler resultHandler) throws SQLException {
+    public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
         BoundSql boundSql = ms.getBoundSql(parameterObject);
         CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
         return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
     }
 
+    /**
+     * 使用游标的方式查询，也需要事先清除缓存
+     *
+     * @param ms
+     * @param parameter
+     * @param rowBounds
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
     @Override
     public <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException {
         // 使用游标的方式查询，也需要事先清除缓存
@@ -105,6 +128,19 @@ public class CachingExecutor implements Executor {
         return delegate.queryCursor(ms, parameter, rowBounds);
     }
 
+    /**
+     * 执行查询前，会先去缓存中捞一遍
+     *
+     * @param ms
+     * @param parameterObject
+     * @param rowBounds
+     * @param resultHandler
+     * @param key
+     * @param boundSql
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
         throws SQLException {

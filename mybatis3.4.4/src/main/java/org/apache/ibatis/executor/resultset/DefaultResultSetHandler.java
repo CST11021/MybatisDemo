@@ -816,6 +816,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             final BoundSql nestedBoundSql = nestedQuery.getBoundSql(nestedQueryParameterObject);
             final CacheKey key = executor.createCacheKey(nestedQuery, nestedQueryParameterObject, RowBounds.DEFAULT, nestedBoundSql);
             final Class<?> targetType = propertyMapping.getJavaType();
+            // 如果有缓存的话，会将结果集，缓存到执行器中，CacheExecutor会再查下前先检查一下缓存
             if (executor.isCached(nestedQuery, key)) {
                 executor.deferLoad(nestedQuery, metaResultObject, property, key, targetType);
                 value = DEFERED;

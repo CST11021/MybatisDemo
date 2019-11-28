@@ -113,6 +113,14 @@ public class BatchExecutor extends BaseExecutor {
         return handler.<E>queryCursor(stmt);
     }
 
+    /**
+     * 遍历本次批量执行的Statements实例，并依次执行，如果需要回滚，则不执行，返回空的执行结果；
+     * 执行完以后关闭每个Statement实例，并清空{@link #statementList} 、 {@link #batchResultList} 和 {@link #currentSql}
+     *
+     * @param isRollback    是否需要回滚
+     * @return
+     * @throws SQLException
+     */
     @Override
     public List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException {
         try {
@@ -120,6 +128,8 @@ public class BatchExecutor extends BaseExecutor {
             if (isRollback) {
                 return Collections.emptyList();
             }
+
+            // 遍历每个Statements实例，执行SQL
             for (int i = 0, n = statementList.size(); i < n; i++) {
                 Statement stmt = statementList.get(i);
                 applyTransactionTimeout(stmt);

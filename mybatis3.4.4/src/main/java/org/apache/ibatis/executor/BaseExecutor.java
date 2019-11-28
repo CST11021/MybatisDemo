@@ -190,16 +190,31 @@ public abstract class BaseExecutor implements Executor {
     }
 
 
-
+    /**
+     * 清空Statement实例
+     *
+     * @return
+     * @throws SQLException
+     */
     @Override
     public List<BatchResult> flushStatements() throws SQLException {
         return flushStatements(false);
     }
 
+    /**
+     * 清空Statement实例
+     *
+     * @param isRollBack    是否回滚
+     * @return
+     * @throws SQLException
+     */
     public List<BatchResult> flushStatements(boolean isRollBack) throws SQLException {
         if (closed) {
             throw new ExecutorException("Executor was closed.");
         }
+        // 清空Statement实例：
+        // 比如，批量执行器，则会将多个Statement实例缓存起来，在该方法中一起执行，执行完成后则关闭和清空相关的Statement实例；
+        // 再比如，复用执行器，会将执行过的Statement实例缓存起来，方便下次在里利用；
         return doFlushStatements(isRollBack);
     }
 
@@ -263,17 +278,26 @@ public abstract class BaseExecutor implements Executor {
         return localCache.getObject(key) != null;
     }
 
+    /**
+     * 执行器的事务提交操作
+     *
+     * @param required      是否执行事务提交操作
+     * @throws SQLException
+     */
     @Override
     public void commit(boolean required) throws SQLException {
         if (closed) {
             throw new ExecutorException("Cannot commit, transaction is already closed");
         }
+
+        // 情况本地缓存和缓存的Statement实例
         clearLocalCache();
         flushStatements();
         if (required) {
             transaction.commit();
         }
     }
+
 
     @Override
     public void rollback(boolean required) throws SQLException {
@@ -314,8 +338,22 @@ public abstract class BaseExecutor implements Executor {
 
     protected abstract <E> Cursor<E> doQueryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds, BoundSql boundSql) throws SQLException;
 
+    /**
+     * 清空Statement实例：
+     * 比如，批量执行器，则会将多个Statement实例缓存起来，在该方法中一起执行，执行完成后则关闭和清空相关的Statement实例；
+     * 再比如，复用执行器，会将执行过的Statement实例缓存起来，方便下次在里利用；
+     *
+     * @param isRollback    是否需要回滚，如果为true，则本次Statement不会执行SQL
+     * @return
+     * @throws SQLException
+     */
     protected abstract List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException;
 
+    /**
+     * 关闭Statement实例
+     *
+     * @param statement
+     */
     protected void closeStatement(Statement statement) {
         if (statement != null) {
             try {

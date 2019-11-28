@@ -135,7 +135,13 @@ public class SimpleExecutor extends BaseExecutor {
         return stmt;
     }
 
-
+    /**
+     * 简单类型的执行器，方法不需要做其他操作，因为Statement执行完SQL以后就关闭了
+     *
+     * @param isRollback    是否需要回滚
+     * @return
+     * @throws SQLException
+     */
     @Override
     public List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException {
         return Collections.emptyList();

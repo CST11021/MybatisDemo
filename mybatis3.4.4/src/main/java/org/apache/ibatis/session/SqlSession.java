@@ -44,7 +44,6 @@ public interface SqlSession extends Closeable {
 
     // 声明：所有的入参statement表示select、insert、update、delete的语句的id
 
-
     <T> T selectOne(String statement);
     <T> T selectOne(String statement, Object parameter);
 
@@ -78,8 +77,13 @@ public interface SqlSession extends Closeable {
     void rollback();
     void rollback(boolean force);
 
+
+
     /**
-     * Flushes batch statements.
+     * 清空Statement实例：
+     * 比如，批量执行器，则会将多个Statement实例缓存起来，在该方法中一起执行，执行完成后则关闭和清空相关的Statement实例；
+     * 再比如，复用执行器，会将执行过的Statement实例缓存起来，方便下次在里利用；
+     *
      * @return
      */
     List<BatchResult> flushStatements();

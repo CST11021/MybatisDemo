@@ -46,7 +46,7 @@ public interface SqlSessionFactory {
     /**
      * 根据数据源创建一个会话，并指定是否自动提交
      *
-     * @param autoCommit
+     * @param autoCommit    是否自动提交事务，是否自动提交在Mybastic中统一默认为否
      * @return
      */
     SqlSession openSession(boolean autoCommit);
@@ -77,6 +77,8 @@ public interface SqlSessionFactory {
     /**
      * 根据数据源创建一个会话
      *
+     * @param execType      执行器类型
+     * @param autoCommit    是否自动提交事务，是否自动提交在Mybastic中统一默认为否
      * @return
      */
     SqlSession openSession(ExecutorType execType, boolean autoCommit);
