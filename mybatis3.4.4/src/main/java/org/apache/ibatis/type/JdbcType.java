@@ -23,9 +23,9 @@ import java.util.Map;
  * @author Clinton Begin
  */
 public enum JdbcType {
-    /*
-     * This is added to enable basic support for the
-     * ARRAY data type - but a custom type handler is still required
+    /**
+     * This is added to enable basic support for the ARRAY data type - but a custom type handler is still required
+     * 这是为了启用对数组数据类型的基本支持而添加的，但是仍然需要自定义类型处理程序
      */
     ARRAY(Types.ARRAY),
     BIT(Types.BIT),
@@ -52,20 +52,28 @@ public enum JdbcType {
     BLOB(Types.BLOB),
     CLOB(Types.CLOB),
     BOOLEAN(Types.BOOLEAN),
-    CURSOR(-10), // Oracle
+    // Oracle
+    CURSOR(-10),
     UNDEFINED(Integer.MIN_VALUE + 1000),
-    NVARCHAR(Types.NVARCHAR), // JDK6
-    NCHAR(Types.NCHAR), // JDK6
-    NCLOB(Types.NCLOB), // JDK6
+    // JDK6
+    NVARCHAR(Types.NVARCHAR),
+    // JDK6
+    NCHAR(Types.NCHAR),
+    // JDK6
+    NCLOB(Types.NCLOB),
     STRUCT(Types.STRUCT),
     JAVA_OBJECT(Types.JAVA_OBJECT),
     DISTINCT(Types.DISTINCT),
     REF(Types.REF),
     DATALINK(Types.DATALINK),
-    ROWID(Types.ROWID), // JDK6
-    LONGNVARCHAR(Types.LONGNVARCHAR), // JDK6
-    SQLXML(Types.SQLXML), // JDK6
-    DATETIMEOFFSET(-155); // SQL Server 2008
+    // JDK6
+    ROWID(Types.ROWID),
+    // JDK6
+    LONGNVARCHAR(Types.LONGNVARCHAR),
+    // JDK6
+    SQLXML(Types.SQLXML),
+    // SQL Server 2008
+    DATETIMEOFFSET(-155);
 
     public final int TYPE_CODE;
     private static Map<Integer, JdbcType> codeLookup = new HashMap<Integer, JdbcType>();

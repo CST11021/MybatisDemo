@@ -23,6 +23,20 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 import java.sql.ResultSet;
 
 /**
+ * 对应的mysql配置
+ *
+ * <parameterMap class="User" id="insertUser-param">
+ *     <parameter property="username"/>
+ *     <parameter property="password"/>
+ * </parameterMap>
+ *
+ * <insert id="insertUser" parameterMap="insertUser-param">
+ *     insert into t_user values (null,?,?)
+ * </insert>
+ *
+ * parameterMap用于传入参数，以便匹配SQL语句中的?号, 跟JDBC中的PreparedStatement类似，利用parameterMap，可以定义参数对象的属性映射
+ * 到SQL查询语句的动态参数上，注意parameterMap中<parameter/>标签的先后顺序不能颠倒！
+ *
  * @author Clinton Begin
  */
 public class ParameterMapping {
@@ -31,17 +45,27 @@ public class ParameterMapping {
 
     /** 对应POJO的属性名 */
     private String property;
+    /**
+     * mode 属性允许你指定 IN，OUT 或 INOUT 参数。如果参数为 OUT 或 INOUT，参数对象属性的真实值将会被改变，就像你在获取输出参数时所期望的那样。
+     * 如果 mode 为 OUT（或 INOUT），而且 jdbcType 为 CURSOR(也就是 Oracle 的 REFCURSOR)，你必须指定一个 resultMap 来映射结果集到参数类型
+     */
     private ParameterMode mode;
 
     /** 对应java类型 */
     private Class<?> javaType = Object.class;
+    /** 对应的JdbcType */
     private JdbcType jdbcType;
+    /** 小数点后保留的位数 */
     private Integer numericScale;
+    /** 参数类型转换器 */
     private TypeHandler<?> typeHandler;
     private String resultMapId;
     private String jdbcTypeName;
     private String expression;
 
+    /**
+     * 建造者模式（Builder Pattern）
+     */
     public static class Builder {
         private ParameterMapping parameterMapping = new ParameterMapping();
 

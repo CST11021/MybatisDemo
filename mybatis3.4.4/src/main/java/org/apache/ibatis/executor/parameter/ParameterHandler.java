@@ -19,7 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * A parameter handler sets the parameters of the {@code PreparedStatement}
+ * 参数处理程序设置{@code PreparedStatement}的参数
  *
  * @author Clinton Begin
  */
@@ -27,6 +27,21 @@ public interface ParameterHandler {
 
     Object getParameterObject();
 
+    /**
+     * 参数预处理，对应如下JDBC代码：
+     * 省略...
+     * PreparedStatement stmt = conn.prepareStatement(sql, columnNames);
+     * stmt.setString(1, "www");
+     * stmt.setInt(2, 24);
+     * stmt.setString(3, "部门");
+     * stmt.setString(4, "类型");
+     *
+     * stmt.executeUpdate();
+     * 省略...
+     *
+     * @param ps
+     * @throws SQLException
+     */
     void setParameters(PreparedStatement ps) throws SQLException;
 
 }

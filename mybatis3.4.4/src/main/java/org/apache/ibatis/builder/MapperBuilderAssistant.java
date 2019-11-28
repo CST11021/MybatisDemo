@@ -60,9 +60,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
     private String currentNamespace;
     /** 表示对应的配置文件 */
     private String resource;
-
-
+    /** 表示命名空间对应的缓存实例 */
     private Cache currentCache;
+    /** 表示当前命名空间共享的缓存实例是否还未被加载，比如：命名空间A和B、A引用的B的缓存，当加载A的缓存实例时，B还未加载 */
     // issue #676
     private boolean unresolvedCacheRef;
 
@@ -102,16 +102,24 @@ public class MapperBuilderAssistant extends BaseBuilder {
         return currentNamespace + "." + base;
     }
 
+    /**
+     * 根据命名空间获取对应的缓存实例，如果该实例还未被创建，则抛出IncompleteElementException异常
+     *
+     * @param namespace
+     * @return
+     */
     public Cache useCacheRef(String namespace) {
         if (namespace == null) {
             throw new BuilderException("cache-ref element requires a namespace attribute.");
         }
+
         try {
             unresolvedCacheRef = true;
             Cache cache = configuration.getCache(namespace);
             if (cache == null) {
                 throw new IncompleteElementException("No cache for namespace '" + namespace + "' could be found.");
             }
+
             currentCache = cache;
             unresolvedCacheRef = false;
             return cache;
@@ -132,11 +140,12 @@ public class MapperBuilderAssistant extends BaseBuilder {
      * @param flushInterval     缓存自动清除的时间间隔
      * @param size              缓存最大大小
      * @param readWrite         缓存是否只读
-     * @param blocking
-     * @param props
+     * @param blocking          是否设置为阻塞缓存，参考{@link org.apache.ibatis.cache.decorators.BlockingCache}
+     * @param props             初始化参数实例的变量
      * @return
      */
     public Cache useNewCache(Class<? extends Cache> typeClass, Class<? extends Cache> evictionClass, Long flushInterval, Integer size, boolean readWrite, boolean blocking, Properties props) {
+        // 根据指定的命名空间创建一个缓存实例
         Cache cache = new CacheBuilder(currentNamespace)
                 .implementation(valueOrDefault(typeClass, PerpetualCache.class))
                 .addDecorator(valueOrDefault(evictionClass, LruCache.class))
@@ -150,6 +159,15 @@ public class MapperBuilderAssistant extends BaseBuilder {
         currentCache = cache;
         return cache;
     }
+
+    /**
+     * 获取一个<parameterMap>配置的实例
+     *
+     * @param id                    对应<parameterMap>的id配置
+     * @param parameterClass        对应<parameterMap>的type配置
+     * @param parameterMappings     表示一个<parameterMap>配置的详细信息
+     * @return
+     */
     public ParameterMap addParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
         id = applyCurrentNamespace(id, false);
         ParameterMap parameterMap = new ParameterMap.Builder(configuration, id, parameterClass, parameterMappings).build();
@@ -173,6 +191,17 @@ public class MapperBuilderAssistant extends BaseBuilder {
                 .build();
     }
 
+    /**
+     * 添加一个<resultMap>配置的实例
+     *
+     * @param id                对应<resultMap>的id配置
+     * @param type              对应<parameterMap>的type配置
+     * @param extend
+     * @param discriminator
+     * @param resultMappings
+     * @param autoMapping
+     * @return
+     */
     public ResultMap addResultMap(String id, Class<?> type, String extend, Discriminator discriminator, List<ResultMapping> resultMappings, Boolean autoMapping) {
         id = applyCurrentNamespace(id, false);
         extend = applyCurrentNamespace(extend, true);
@@ -410,6 +439,14 @@ public class MapperBuilderAssistant extends BaseBuilder {
         return composites;
     }
 
+    /**
+     * 解析返回的结果类型
+     *
+     * @param resultType
+     * @param property
+     * @param javaType
+     * @return
+     */
     private Class<?> resolveResultJavaType(Class<?> resultType, String property, Class<?> javaType) {
         if (javaType == null && property != null) {
             try {
@@ -425,8 +462,18 @@ public class MapperBuilderAssistant extends BaseBuilder {
         return javaType;
     }
 
+    /**
+     * 解析参数类型
+     *
+     * @param resultType
+     * @param property
+     * @param javaType
+     * @param jdbcType
+     * @return
+     */
     private Class<?> resolveParameterJavaType(Class<?> resultType, String property, Class<?> javaType, JdbcType jdbcType) {
         if (javaType == null) {
+            // Oracle的游标类型对应java的 JdbcType.CURSOR
             if (JdbcType.CURSOR.equals(jdbcType)) {
                 javaType = java.sql.ResultSet.class;
             } else if (Map.class.isAssignableFrom(resultType)) {
@@ -436,6 +483,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
                 javaType = metaResultType.getGetterType(property);
             }
         }
+
         if (javaType == null) {
             javaType = Object.class;
         }
@@ -443,7 +491,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
 
     /**
-     * Backward compatibility signature
+     * Backward compatibility signature（向后兼容性的签名）
      */
     public ResultMapping buildResultMapping(Class<?> resultType, String property, String column, Class<?> javaType, JdbcType jdbcType, String nestedSelect, String nestedResultMap, String notNullColumn, String columnPrefix, Class<? extends TypeHandler<?>> typeHandler, List<ResultFlag> flags) {
         return buildResultMapping(
@@ -451,6 +499,12 @@ public class MapperBuilderAssistant extends BaseBuilder {
                 nestedResultMap, notNullColumn, columnPrefix, typeHandler, flags, null, null, configuration.isLazyLoadingEnabled());
     }
 
+    /**
+     * 根据class类型，从注册表获取对应的实例
+     *
+     * @param langClass
+     * @return
+     */
     public LanguageDriver getLanguageDriver(Class<?> langClass) {
         if (langClass != null) {
             configuration.getLanguageRegistry().register(langClass);
@@ -461,7 +515,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
 
     /**
-     * Backward compatibility signature
+     * Backward compatibility signature（向后兼容性的签名）
      */
     public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType, SqlCommandType sqlCommandType, Integer fetchSize, Integer timeout, String parameterMap, Class<?> parameterType, String resultMap, Class<?> resultType, ResultSetType resultSetType, boolean flushCache, boolean useCache, boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId, LanguageDriver lang) {
         return addMappedStatement(
@@ -472,11 +526,20 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
 
 
-
-
+    /**
+     * 获取命名空间
+     *
+     * @return
+     */
     public String getCurrentNamespace() {
         return currentNamespace;
     }
+
+    /**
+     * 设置命名空间
+     *
+     * @param currentNamespace
+     */
     public void setCurrentNamespace(String currentNamespace) {
         if (currentNamespace == null) {
             throw new BuilderException("The mapper element requires a namespace attribute to be specified.");

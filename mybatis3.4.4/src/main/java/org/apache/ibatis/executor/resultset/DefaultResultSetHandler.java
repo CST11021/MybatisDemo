@@ -463,7 +463,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         return rowValue;
     }
 
-    // 返回<resultMap>标签中的 autoMapping 属性配置，isNested表示是否使用<setting>中的 autoMappingBehavior 配置
+    /**
+     * 返回<resultMap>标签中的 autoMapping 属性配置，isNested表示是否使用<setting>中的 autoMappingBehavior 配置
+     *
+     * @param resultMap     <resultMap>配置信息
+     * @param isNested      对应<setting name="autoMappingBehavior" value="PARTIAL"/>配置
+     * @return
+     */
     private boolean shouldApplyAutomaticMappings(ResultMap resultMap, boolean isNested) {
         if (resultMap.getAutoMapping() != null) {
             return resultMap.getAutoMapping();

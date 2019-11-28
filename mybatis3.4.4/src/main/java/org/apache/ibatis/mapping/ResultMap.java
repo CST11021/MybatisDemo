@@ -39,9 +39,9 @@ import org.apache.ibatis.session.Configuration;
 public class ResultMap {
     private Configuration configuration;
 
-    // 标识这个结果结果集的id，如果没有配置则mybatis会自动生成
+    /** 标识这个结果结果集的id，如果没有配置则mybatis会自动生成 */
     private String id;
-    // 表示返回结果集的类型
+    /** 表示返回结果集的类型 */
     private Class<?> type;
     private List<ResultMapping> resultMappings;
     private List<ResultMapping> idResultMappings;
@@ -52,6 +52,7 @@ public class ResultMap {
     private Discriminator discriminator;
     private boolean hasNestedResultMaps;
     private boolean hasNestedQueries;
+    /** 是否自动映射 */
     private Boolean autoMapping;
 
     private ResultMap() {}

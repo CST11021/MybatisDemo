@@ -21,8 +21,9 @@ package org.apache.ibatis.mapping;
  * <if/>节点的计算，是由SqlSource对象完成的。SqlSource最常用的实现类是DynamicSqlSource
  *
  *
- * Represents the content of a mapped statement read from an XML file or an annotation. 
- * It creates the SQL that will be passed to the database out of the input parameter received from the user.
+ * 表示从XML文件或注释读取的映射语句的内容。
+ *
+ * It creates the SQL that will be passed to the database out of the input parameter received from the user.（它创建将从用户接收的输入参数传递到数据库的SQL。）
  *
  * @author Clinton Begin
  */

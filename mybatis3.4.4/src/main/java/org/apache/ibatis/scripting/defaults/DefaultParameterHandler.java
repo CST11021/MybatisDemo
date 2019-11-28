@@ -38,11 +38,15 @@ import java.util.List;
  */
 public class DefaultParameterHandler implements ParameterHandler {
 
+    /** 类型转换器注册表 */
     private final TypeHandlerRegistry typeHandlerRegistry;
-
+    /** 在mybatis中我们将select|insert|update|delete 这些配置节点信息抽象为MappedStatement */
     private final MappedStatement mappedStatement;
+    /** 本次执行的SQL参数 */
     private final Object parameterObject;
+    /** 封装了本次要执行的SQL */
     private BoundSql boundSql;
+    /** MyBastic配置 */
     private Configuration configuration;
 
     public DefaultParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
@@ -61,12 +65,16 @@ public class DefaultParameterHandler implements ParameterHandler {
     @Override
     public void setParameters(PreparedStatement ps) {
         ErrorContext.instance().activity("setting parameters").object(mappedStatement.getParameterMap().getId());
+
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
         if (parameterMappings != null) {
             for (int i = 0; i < parameterMappings.size(); i++) {
+
                 ParameterMapping parameterMapping = parameterMappings.get(i);
                 if (parameterMapping.getMode() != ParameterMode.OUT) {
+                    // 表示参数值
                     Object value;
+                    // 表示参数名
                     String propertyName = parameterMapping.getProperty();
 
                     // issue #448 ask first for additional params
@@ -95,6 +103,7 @@ public class DefaultParameterHandler implements ParameterHandler {
                         throw new TypeException("Could not set parameters for mapping: " + parameterMapping + ". Cause: " + e, e);
                     }
                 }
+
             }
         }
     }

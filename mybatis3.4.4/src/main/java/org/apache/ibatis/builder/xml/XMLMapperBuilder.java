@@ -103,6 +103,7 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
 
         parsePendingResultMaps();
+        // 解析哪些当前还未加载的缓存实例
         parsePendingCacheRefs();
         parsePendingStatements();
     }
@@ -295,7 +296,11 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
 
     /**
-     * 解析<parameterMap>标签
+     * 解析<parameterMap>标签，例如：
+     * <parameterMap id="userParameterMap" type="com.whz.entity.User">
+     *      <parameter property="age" jdbcType="int" typeHandler="INTEGER" javaType="int" resultMap="userResultMap" mode="" scale=""/>
+     *      省略。。。
+     * </parameterMap>
      *
      * @param list
      * @throws Exception
@@ -305,15 +310,18 @@ public class XMLMapperBuilder extends BaseBuilder {
             String id = parameterMapNode.getStringAttribute("id");
             String type = parameterMapNode.getStringAttribute("type");
             Class<?> parameterClass = resolveClass(type);
+
             List<XNode> parameterNodes = parameterMapNode.evalNodes("parameter");
             List<ParameterMapping> parameterMappings = new ArrayList<ParameterMapping>();
             for (XNode parameterNode : parameterNodes) {
                 String property = parameterNode.getStringAttribute("property");
                 String javaType = parameterNode.getStringAttribute("javaType");
                 String jdbcType = parameterNode.getStringAttribute("jdbcType");
+                // 对应<resultMap>标签配置的id
                 String resultMap = parameterNode.getStringAttribute("resultMap");
                 String mode = parameterNode.getStringAttribute("mode");
                 String typeHandler = parameterNode.getStringAttribute("typeHandler");
+                // 小数点后保留的位数
                 Integer numericScale = parameterNode.getIntAttribute("numericScale");
                 ParameterMode modeEnum = resolveParameterMode(mode);
                 Class<?> javaTypeClass = resolveClass(javaType);
@@ -342,17 +350,33 @@ public class XMLMapperBuilder extends BaseBuilder {
             }
         }
     }
+
+    /**
+     * 解析<resultMap> 标签
+     *
+     * @param resultMapNode
+     * @return
+     * @throws Exception
+     */
     private ResultMap resultMapElement(XNode resultMapNode) throws Exception {
         return resultMapElement(resultMapNode, Collections.<ResultMapping>emptyList());
     }
+
+    /**
+     *
+     * @param resultMapNode             当前解析的<resultMap>标签
+     * @param additionalResultMappings  额外的ResultMapping配置
+     * @return
+     * @throws Exception
+     */
     private ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings) throws Exception {
         ErrorContext.instance().activity("processing " + resultMapNode.getValueBasedIdentifier());
-        String id = resultMapNode.getStringAttribute("id",
-                resultMapNode.getValueBasedIdentifier());
+        String id = resultMapNode.getStringAttribute("id", resultMapNode.getValueBasedIdentifier());
         String type = resultMapNode.getStringAttribute("type",
                 resultMapNode.getStringAttribute("ofType",
-                        resultMapNode.getStringAttribute("resultType",
-                                resultMapNode.getStringAttribute("javaType"))));
+                resultMapNode.getStringAttribute("resultType",
+                resultMapNode.getStringAttribute("javaType"))));
+
         String extend = resultMapNode.getStringAttribute("extends");
         Boolean autoMapping = resultMapNode.getBooleanAttribute("autoMapping");
         Class<?> typeClass = resolveClass(type);
@@ -381,6 +405,15 @@ public class XMLMapperBuilder extends BaseBuilder {
             throw e;
         }
     }
+
+    /**
+     * 处理<constructor>标签
+     *
+     * @param resultChild
+     * @param resultType
+     * @param resultMappings
+     * @throws Exception
+     */
     private void processConstructorElement(XNode resultChild, Class<?> resultType, List<ResultMapping> resultMappings) throws Exception {
         List<XNode> argChildren = resultChild.getChildren();
         for (XNode argChild : argChildren) {
@@ -392,6 +425,16 @@ public class XMLMapperBuilder extends BaseBuilder {
             resultMappings.add(buildResultMappingFromContext(argChild, resultType, flags));
         }
     }
+
+    /**
+     * 处理<discriminator>标签
+     *
+     * @param context
+     * @param resultType
+     * @param resultMappings
+     * @return
+     * @throws Exception
+     */
     private Discriminator processDiscriminatorElement(XNode context, Class<?> resultType, List<ResultMapping> resultMappings) throws Exception {
         String column = context.getStringAttribute("column");
         String javaType = context.getStringAttribute("javaType");
@@ -409,6 +452,7 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
         return builderAssistant.buildDiscriminator(resultType, column, javaTypeClass, jdbcTypeEnum, typeHandlerClass, discriminatorMap);
     }
+
     private ResultMapping buildResultMappingFromContext(XNode context, Class<?> resultType, List<ResultFlag> flags) throws Exception {
         String property;
         if (flags.contains(ResultFlag.CONSTRUCTOR)) {
@@ -434,6 +478,15 @@ public class XMLMapperBuilder extends BaseBuilder {
         JdbcType jdbcTypeEnum = resolveJdbcType(jdbcType);
         return builderAssistant.buildResultMapping(resultType, property, column, javaTypeClass, jdbcTypeEnum, nestedSelect, nestedResultMap, notNullColumn, columnPrefix, typeHandlerClass, flags, resultSet, foreignColumn, lazy);
     }
+
+    /**
+     * 处理<association>标签
+     *
+     * @param context
+     * @param resultMappings
+     * @return
+     * @throws Exception
+     */
     private String processNestedResultMappings(XNode context, List<ResultMapping> resultMappings) throws Exception {
         if ("association".equals(context.getName())
                 || "collection".equals(context.getName())

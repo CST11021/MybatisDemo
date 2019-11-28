@@ -143,6 +143,7 @@ public class CacheBuilder {
                 cache = newCacheDecoratorInstance(decorator, cache);
                 setCacheProperties(cache);
             }
+            // 设置一些默认的装饰器，包括：ScheduledCache、SerializedCache、LoggingCache、SynchronizedCache和BlockingCache
             cache = setStandardDecorators(cache);
         } else if (!LoggingCache.class.isAssignableFrom(cache.getClass())) {
             cache = new LoggingCache(cache);
@@ -163,7 +164,7 @@ public class CacheBuilder {
     }
 
     /**
-     * 设置一些默认的装饰器
+     * 设置一些默认的装饰器，包括：ScheduledCache、SerializedCache、LoggingCache、SynchronizedCache和BlockingCache
      *
      * @param cache
      * @return

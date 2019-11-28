@@ -27,6 +27,8 @@ import org.apache.ibatis.cache.Cache;
  * Soft Reference cache decorator
  * Thanks to Dr. Heinz Kabutz for his guidance here.
  *
+ * 基于软引用实现的缓存管理策略,软引用回收策略，软引用只有当内存不足时才会被垃圾收集器回收
+ *
  * @author Clinton Begin
  */
 public class SoftCache implements Cache {

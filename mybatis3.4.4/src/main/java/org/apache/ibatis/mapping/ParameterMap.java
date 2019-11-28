@@ -21,6 +21,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * 对应<parameterMap>标签，例如：
+ * <parameterMap id="userParameterMap" type="com.whz.entity.User">
+ *      <parameter property="age" jdbcType="int" typeHandler="INTEGER" javaType="int" resultMap="userResultMap" mode="" scale=""/>
+ *      省略。。。
+ * </parameterMap>
+ *
  * @author Clinton Begin
  */
 public class ParameterMap {
@@ -30,6 +36,8 @@ public class ParameterMap {
 
     /** 对应SQL语句中的parameterType属性配置的java类型 */
     private Class<?> type;
+
+    /** <parameter>子标签配置列表 */
     private List<ParameterMapping> parameterMappings;
 
     private ParameterMap() {

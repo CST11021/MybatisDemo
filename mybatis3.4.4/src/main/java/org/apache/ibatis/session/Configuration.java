@@ -130,6 +130,7 @@ public class Configuration {
 
     /** 在配置文件中<mapper/>里配置的<select>、<update>、<insert>和<delete>都会生成一个 MappedStatement 对象 */
     protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection");
+    /** 保存所有的缓存实例Map<Mapper对应的命名空间, 对应的缓存实例> */
     protected final Map<String, Cache> caches = new StrictMap<Cache>("Caches collection");
     /** 配置文件中<mapper/>里配置的<resultMap>解析完后都会注册到这里，并且特别需要注意的是，同一个ResultMap对象，会注册两次，分别使用不同的key进行注册，详细请看StrictMap的put方法 */
     protected final Map<String, ResultMap> resultMaps = new StrictMap<ResultMap>("Result Maps collection");
@@ -140,8 +141,11 @@ public class Configuration {
 
     /** 当解析Mapper对应的SQL出错时，会将对应的XMLStatementBuilder解析器，添加到该变量中，每个<select>、<update>、<insert>和<delete>配置都会对应一个解析器 */
     protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<XMLStatementBuilder>();
+    /** 存放未被加载的缓存实例，比如：命名空间A和B、A引用的B的缓存，当加载A的缓存实例时，B还未加载 */
     protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<CacheRefResolver>();
+    /** 存放未被加载的ResultMap配置 */
     protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<ResultMapResolver>();
+    /** 存放未被加载的Method配置 */
     protected final Collection<MethodResolver> incompleteMethods = new LinkedList<MethodResolver>();
 
     /** A map holds cache-ref relationship. The key is the namespace that references a cache bound to another namespace and the value is the namespace which the actual cache is bound to. */
@@ -198,7 +202,7 @@ public class Configuration {
     protected Integer defaultFetchSize;
     /** 配置默认的执行器。SIMPLE 就是普通的执行器；REUSE 执行器会重用预处理语句（prepared statements）； BATCH 执行器将重用语句并执行批量更新。 */
     protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE;
-    // 指定 MyBatis 应如何自动映射列到字段或属性。 NONE 表示取消自动映射；PARTIAL 只会自动映射没有定义嵌套结果集映射的结果集。 FULL 会自动映射任意复杂的结果集（无论是否嵌套）。 */
+    /** 指定 MyBatis 应如何自动映射列到字段或属性。 NONE 表示取消自动映射；PARTIAL 只会自动映射没有定义嵌套结果集映射的结果集。 FULL 会自动映射任意复杂的结果集（无论是否嵌套）。 */
     protected AutoMappingBehavior autoMappingBehavior = AutoMappingBehavior.PARTIAL;
     // 指定发现自动映射目标未知列（或者未知属性类型）的行为。
     // NONE: 不做任何反应
@@ -233,6 +237,10 @@ public class Configuration {
         this();
         this.environment = environment;
     }
+
+    /**
+     * 初始化类型的别名注册表
+     */
     public Configuration() {
         typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
         typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
@@ -268,11 +276,21 @@ public class Configuration {
     }
 
 
-
-    // 要解析的配置文件
+    /**
+     * 添加要解析的配置文件
+     *
+     * @param resource
+     */
     public void addLoadedResource(String resource) {
         loadedResources.add(resource);
     }
+
+    /**
+     * 资源配置文件是否已经加载
+     *
+     * @param resource
+     * @return
+     */
     public boolean isResourceLoaded(String resource) {
         return loadedResources.contains(resource);
     }
@@ -519,10 +537,23 @@ public class Configuration {
         return mapperRegistry.hasMapper(type);
     }
 
-
+    /**
+     * 判断是否存在这个statementName对应的{@link MappedStatement}
+     *
+     * @param statementName
+     * @return
+     */
     public boolean hasStatement(String statementName) {
         return hasStatement(statementName, true);
     }
+
+    /**
+     * 判断是否存在这个statementName对应的{@link MappedStatement}
+     *
+     * @param statementName
+     * @param validateIncompleteStatements
+     * @return
+     */
     public boolean hasStatement(String statementName, boolean validateIncompleteStatements) {
         if (validateIncompleteStatements) {
             buildAllStatements();

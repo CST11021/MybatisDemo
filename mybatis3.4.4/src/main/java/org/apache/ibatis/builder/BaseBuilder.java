@@ -117,6 +117,12 @@ public abstract class BaseBuilder {
         }
     }
 
+    /**
+     * 根据别名获取对应的java类型
+     *
+     * @param alias
+     * @return
+     */
     protected Class<?> resolveClass(String alias) {
         if (alias == null) {
             return null;
