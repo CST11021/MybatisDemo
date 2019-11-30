@@ -19,12 +19,17 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * 参数处理程序设置{@code PreparedStatement}的参数
+ * 参数处理器，用于设置{@code PreparedStatement}的参数
  *
  * @author Clinton Begin
  */
 public interface ParameterHandler {
 
+    /**
+     * 获取SQL入参
+     *
+     * @return
+     */
     Object getParameterObject();
 
     /**

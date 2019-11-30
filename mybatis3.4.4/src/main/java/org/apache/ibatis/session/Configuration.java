@@ -100,7 +100,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  */
 public class Configuration {
 
-    /** 表示要解析的配置文件路径，配置文件可能有多个 */
+    /** 表示要解析的配置文件的文件名，例如：IEmployeerMapper.xml，配置文件可能有多个， */
     protected final Set<String> loadedResources = new HashSet<String>();
 
     /** 表示当前环境对应的 environmentId，比如生产环境、测试环境等 */
@@ -132,20 +132,35 @@ public class Configuration {
     protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection");
     /** 保存所有的缓存实例Map<Mapper对应的命名空间, 对应的缓存实例> */
     protected final Map<String, Cache> caches = new StrictMap<Cache>("Caches collection");
-    /** 配置文件中<mapper/>里配置的<resultMap>解析完后都会注册到这里，并且特别需要注意的是，同一个ResultMap对象，会注册两次，分别使用不同的key进行注册，详细请看StrictMap的put方法 */
+    /**
+     * 配置文件中<mapper/>里配置的<resultMap>解析完后都会注册到这里，并且特别需要注意的是，同一个ResultMap对象，会注册两次，分别使用不同的key进行注册，详细请看StrictMap的put方法
+     */
     protected final Map<String, ResultMap> resultMaps = new StrictMap<ResultMap>("Result Maps collection");
+    /**
+     * <parameterMaps>标签配置, key为对应的id属性
+     */
     protected final Map<String, ParameterMap> parameterMaps = new StrictMap<ParameterMap>("Parameter Maps collection");
+    /**
+     * 配置SQL的id，及对应的配置的KeyGenerator实例，key例如：com.whz.mapperinterface.IEmployeerMapper.addEmployeer!selectKey
+     */
     protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<KeyGenerator>("Key Generators collection");
-    /** sql碎片，<mapper/>里可以配置一些模式式的sql语句，mybatis解析完后会将其保存到 sqlFragments 属性中 */
+    /**
+     * sql碎片，<mapper/>里可以配置一些模式式的sql语句，mybatis解析完后会将其保存到 sqlFragments 属性中，
+     * 例如如下配置：
+     * <sql id="selectAll"> id, name, age </sql>
+     */
     protected final Map<String, XNode> sqlFragments = new StrictMap<XNode>("XML fragments parsed from previous mappers");
 
-    /** 当解析Mapper对应的SQL出错时，会将对应的XMLStatementBuilder解析器，添加到该变量中，每个<select>、<update>、<insert>和<delete>配置都会对应一个解析器 */
+    /**
+     * 当解析Mapper对应的SQL无法解析时（例如：配置的<select>标签中引用其他配置的id，而该id Mybastic还未解析加载，则会导致当期的SQL无法解析），
+     * 会将对应的XMLStatementBuilder解析器，添加到该变量中，每个<select>、<update>、<insert>和<delete>配置都会对应一个解析器
+     */
     protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<XMLStatementBuilder>();
-    /** 存放未被加载的缓存实例，比如：命名空间A和B、A引用的B的缓存，当加载A的缓存实例时，B还未加载 */
+    /** 保存未能被加载的缓存实例，比如：命名空间A和B、A引用的B的缓存，当加载A的缓存实例时，B还未加载 */
     protected final Collection<CacheRefResolver> incompleteCacheRefs = new LinkedList<CacheRefResolver>();
-    /** 存放未被加载的ResultMap配置 */
+    /** 保存未能被加载的ResultMap配置 */
     protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<ResultMapResolver>();
-    /** 存放未被加载的Method配置 */
+    /** 保存未被加载的Method配置 */
     protected final Collection<MethodResolver> incompleteMethods = new LinkedList<MethodResolver>();
 
     /** A map holds cache-ref relationship. The key is the namespace that references a cache bound to another namespace and the value is the namespace which the actual cache is bound to. */
@@ -183,8 +198,6 @@ public class Configuration {
     protected boolean returnInstanceForEmptyRow;
     /** 延迟加载的全局开关。当开启时，所有关联对象都会延迟加载。 特定关联关系中可通过设置fetchType属性来覆盖该项的开关状态。 */
     protected boolean lazyLoadingEnabled = false;
-
-
     /** 指定 MyBatis 增加到日志名称的前缀。 */
     protected String logPrefix;
     /** 指定 MyBatis 所用日志的具体实现，未指定时将自动查找:SLF4J | LOG4J | LOG4J2 | JDK_LOGGING | COMMONS_LOGGING | STDOUT_LOGGING | NO_LOGGING */
@@ -392,7 +405,12 @@ public class Configuration {
     }
 
 
-
+    /**
+     * SQL id对应的key生成器
+     *
+     * @param id                对应配置SQL的id，例如：com.whz.mapperinterface.IEmployeerMapper.addEmployeer!selectKey
+     * @param keyGenerator      KeyGenerator实例
+     */
     public void addKeyGenerator(String id, KeyGenerator keyGenerator) {
         keyGenerators.put(id, keyGenerator);
     }

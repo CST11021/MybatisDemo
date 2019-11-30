@@ -25,16 +25,12 @@
 
 ### Mybastic主流程
 
-
-
- Mybatis由一下几个核心组件构成：
+Mybatis由以下几个核心组件构成：
 
 - SqlSessionFactoryBuilder（构造器）：它会根据配置信息或者代码来生成SqlSessionFactory
 - SqlSessionFactory（工厂接口）：依靠工厂来生成SqlSession。
 - SqlSession（会话）：是一个既可以发送SQL去执行并返回结果，也可以获取Mapper的接口。
 - SQL Mapper：它是Mybatis新设计的组件，它是由一个Java接口和XML文件（或注解）构造成的。需要给出对应的SQL和映射规则，它负责发送SQL去执行，并返回结果。
-
- 
 
 用一个图表达它们之间的关系：
 
@@ -52,7 +48,6 @@ SqlSessionFactory sqlSessionFactory = SqlSessionFactoryBuilder.build(inputStream
 // 获取Session
 SqlSession session = sqlSessionFactory.openSession();
 
-
 // 执行CURD
 int resultCount = session.insert("com.whz.mapperinterface.IEmployeerMapper.addEmployeer", employeer );
 
@@ -63,23 +58,309 @@ List<Employeer> employeers = iEmployeerMapper.findAllEmployeer();
 
 
 
-SqlSession接口可以简单分为以下几大类方法：
-
-* CURD接口，所有的接口方法都需要mybastic中的执行语句id
-* commit/rollback方法
-* 获取配置对象Configuration方法
-* 根据Class获取Mapper接口的方法
-* 获取数据库连接对象的方法
-
-
-
 
 
 ###创建SqlSession流程
 
 
 
-### 执行器
+###SqlSessionFactoryBuilder
+
+​		SqlSessionFactoryBuilder通过类名就可以看出这个类的主要作用就是创建一个SqlSessionFactory(SqlSessionFactory有两个实现类：DefaultSqlSessionFactory 和 SqlSessionManager)。
+
+​		SqlSessionFactoryBuilder创建的SqlSessionFactory都是使用DefaultSqlSessionFactory实现类，
+它通过输入mybatis配置文件的字节流或者字符流生成XMLConfigBuilder，XMLConfigBuilder再创建一个Configuration，Configuration这个类中包含了mybatis的配置的一切信息，mybatis进行的所有操作都需要根据Configuration中的信息来进行。
+
+​		SqlSessionFactoryBuilder可以被实例化、使用和丢弃，一旦创建了 SqlSessionFactory，就不再需要它了。 因此 SqlSessionFactoryBuilder 实例的最佳作用域是方法作用域（也就是局部方法变量）。 你可以重用 SqlSessionFactoryBuilder 来创建多个 SqlSessionFactory 实例，但是最好还是不要让其一直存在，以保证所有的 XML 解析资源可以被释放给更重要的事情。
+
+```java
+以下三个方法是SqlSessionFactoryBuilder的核心方法：
+		/**
+     * 资源文件可以使用 Reader 和 InputStream 两种形式返回，然后去解析
+     *
+     * @param reader            将配置文件包装为一个Reader对象，为后续解析做准备
+     * @param environment       表示配置文件<environments default="development">中的default属性，用于指定当前的环境，比如：开发、测试或生产环境
+     * @param properties        表示配置文件中的 <properties/> 标签，对应占位符参数
+     * @return SqlSessionFactory 接口：该接口用于创建一个 SqlSession 对象
+     */
+    public SqlSessionFactory build(Reader reader, String environment, Properties properties) {
+        try {
+            XMLConfigBuilder parser = new XMLConfigBuilder(reader, environment, properties);
+            return build(parser.parse());
+        } catch (Exception e) {
+            throw ExceptionFactory.wrapException("Error building SqlSession.", e);
+        } finally {
+            ErrorContext.instance().reset();
+            try {
+                reader.close();
+            } catch (IOException e) {
+                // Intentionally ignore. Prefer previous error.
+            }
+        }
+    }
+
+    /**
+     * 类比 {@link SqlSessionFactoryBuilder#build(Reader, String, Properties)} 方法
+     *
+     * @param inputStream   Mybastic配置文件流
+     * @param environment   表示配置文件<environments default="development">中的default属性，用于指定当前的环境，比如：开发、测试或生产环境
+     * @param properties    表示配置文件中的 <properties/> 标签，对应占位符参数
+     * @return
+     */
+    public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
+        try {
+            XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
+            return build(parser.parse());
+        } catch (Exception e) {
+            throw ExceptionFactory.wrapException("Error building SqlSession.", e);
+        } finally {
+            ErrorContext.instance().reset();
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                // Intentionally ignore. Prefer previous error.
+            }
+        }
+    }
+
+    /**
+     * 配置文件解析后再内存中保存为一个 Configuration 对象，该方法使用 Configuration 对象创建一个 DefaultSqlSessionFactory
+     *
+     * @param config        Mybastic配合
+     * @return
+     */
+    public SqlSessionFactory build(Configuration config) {
+        return new DefaultSqlSessionFactory(config);
+    }
+```
+
+
+
+### SqlSessionFactory
+
+​		SqlSessionFactory 一旦被创建就应该在应用的运行期间一直存在，没有任何理由丢弃它或重新创建另一个实例。 使用 SqlSessionFactory 的最佳实践是在应用运行期间不要重复创建多次，多次重建 SqlSessionFactory 被视为一种代码“坏味道（bad smell）”。因此 SqlSessionFactory 的最佳作用域是应用作用域。 有很多方法可以做到，最简单的就是使用单例模式或者静态单例模式。
+
+​		SqlSessionFactory创建SqlSession实例时，可以从已有连接对象Connection或数据源来创建，也可以使用数据源创建会话：
+
+1、当使用数据源创建会话时，需要指定事务隔离级别和是否自动提交。
+
+ *      1.1 事务隔离级别可以不要用设置，当不设置的情况下，底层会根据不同的数据库厂商，自动设置默认的隔离级别
+ *      1.2 是否自动提交在Mybastic中统一默认为否，实际的JDBC会依赖不同的数据库厂商实现
+
+2、当使用连接对象创建会话时，此时不需要指定事务隔离级别和是否自动提交，因为创建连接实例时就已经指定了（创建数据库连接的底层实现也是根据数据源来创建的）
+
+```java
+// 创建一个SqlSession实例：
+// 如果入参没有指定执行器类型，默认使用的执行器类型是：ExecutorType.SIMPLE
+// 创建session时，需要创建一个事务实例，此时需要指定：TransactionIsolationLevel（事务隔离级别）和autoCommit（是否自动提交）
+public interface SqlSessionFactory {
+    /**
+     * 根据数据源创建一个会话
+     *
+     * @return
+     */
+    SqlSession openSession();
+
+    /**
+     * 根据数据源创建一个会话，并指定是否自动提交
+     *
+     * @param autoCommit    是否自动提交事务，是否自动提交在Mybastic中统一默认为否
+     * @return
+     */
+    SqlSession openSession(boolean autoCommit);
+
+    /**
+     * 从已存在的数据库连接实例，创建一个会话
+     *
+     * @param connection
+     * @return
+     */
+    SqlSession openSession(Connection connection);
+
+    /**
+     * 根据事务隔离级别创建一个会话，默认使用的执行器类型是：ExecutorType.SIMPLE，默认设置为不自动提交
+     *
+     * @param level     事务隔离级别
+     * @return
+     */
+    SqlSession openSession(TransactionIsolationLevel level);
+
+    /**
+     * 根据数据源创建一个会话
+     *
+     * @return
+     */
+    SqlSession openSession(ExecutorType execType);
+
+    /**
+     * 根据数据源创建一个会话
+     *
+     * @param execType      执行器类型
+     * @param autoCommit    是否自动提交事务，是否自动提交在Mybastic中统一默认为否
+     * @return
+     */
+    SqlSession openSession(ExecutorType execType, boolean autoCommit);
+
+    /**
+     * 根据数据源创建一个会话
+     *
+     * @return
+     */
+    SqlSession openSession(ExecutorType execType, TransactionIsolationLevel level);
+
+    /**
+     * 从已存在的数据库连接实例，创建一个会话
+     *
+     * @param connection
+     * @return
+     */
+    SqlSession openSession(ExecutorType execType, Connection connection);
+
+    /**
+     * 获取Mybastic配置
+     *
+     * @return
+     */
+    Configuration getConfiguration();
+```
+
+
+
+###SqlSession
+
+​		每个线程都应该有它自己的 SqlSession 实例。SqlSession 的实例不是线程安全的，因此是不能被共享的，所以它的最佳的作用域是请求或方法作用域。 绝对不能将 SqlSession 实例的引用放在一个类的静态域，甚至一个类的实例变量也不行。 也绝不能将 SqlSession 实例的引用放在任何类型的托管作用域中，比如 Servlet 框架中的 HttpSession。 如果你现在正在使用一种 Web 框架，要考虑 SqlSession 放在一个和 HTTP 请求对象相似的作用域中。 换句话说，每次收到的 HTTP 请求，就可以打开一个 SqlSession，返回一个响应，就关闭它。 这个关闭操作是很重要的，你应该把这个关闭操作放到 finally 块中以确保每次都能执行关闭。 下面的示例就是一个确保 SqlSession 关闭的标准模式：
+
+```java
+try (SqlSession session = sqlSessionFactory.openSession()) {
+  // 你的应用逻辑代码
+}
+```
+
+在你的所有的代码中一致地使用这种模式来保证所有数据库资源都能被正确地关闭。
+
+
+
+SqlSession接口可以简单分为以下几大类方法：
+
+- CURD接口，所有的接口方法都需要mybastic中的执行语句id
+- commit/rollback方法
+- 获取配置对象Configuration方法
+- 根据Class获取Mapper接口的方法
+- 获取数据库连接对象的方法
+
+SqlSession接口对应的源码如下：
+
+```java
+/**
+ * Mapper执行的过程是通过Executor、StatementHandler、ParameterHandler和ResultHandler来完成数据库操作和结果返回。
+ *
+ * Executor代表执行，由它来调用StatementHandler、ParameterHandler、ResultHandler等来执行对应的SQL
+ * StatementHandler的作用是使用数据库的Statement(PreparedStatement)执行操作，它是四大对象的核心，起到承上启下的作用。
+ * ParameterHandler：用于SQL对参数的处理
+ * ResultHandler：是进行最后数据集（ResultSet）的封装返回处理的
+ *
+ * @author Clinton Begin
+ */
+public interface SqlSession extends Closeable {
+
+    // 声明：所有的入参statement表示select、insert、update、delete的语句的id，或者Mapper接口及对应的方法名
+
+    <T> T selectOne(String statement);
+    <T> T selectOne(String statement, Object parameter);
+
+    <E> List<E> selectList(String statement);
+    <E> List<E> selectList(String statement, Object parameter);
+    <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds);
+
+    <K, V> Map<K, V> selectMap(String statement, String mapKey);
+    <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey);
+    <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds);
+
+    <T> Cursor<T> selectCursor(String statement);
+    <T> Cursor<T> selectCursor(String statement, Object parameter);
+    <T> Cursor<T> selectCursor(String statement, Object parameter, RowBounds rowBounds);
+
+    void select(String statement, Object parameter, ResultHandler handler);
+    void select(String statement, ResultHandler handler);
+    void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler);
+
+    int insert(String statement);
+    int insert(String statement, Object parameter);
+
+    int update(String statement);
+    int update(String statement, Object parameter);
+
+    int delete(String statement);
+    int delete(String statement, Object parameter);
+
+    void commit();
+    void commit(boolean force);
+    void rollback();
+    void rollback(boolean force);
+
+
+
+    /**
+     * 清空Statement实例：
+     * 比如，批量执行器，则会将多个Statement实例缓存起来，在该方法中一起执行，执行完成后则关闭和清空相关的Statement实例；
+     * 再比如，复用执行器，会将执行过的Statement实例缓存起来，方便下次在里利用；
+     *
+     * @return
+     */
+    List<BatchResult> flushStatements();
+
+    /**
+     * 关闭session
+     */
+    @Override
+    void close();
+
+    /**
+     * 清除session缓存（mybatis一级缓存）
+     */
+    void clearCache();
+
+    /**
+     * Retrieves current configuration
+     *
+     * @return
+     */
+    Configuration getConfiguration();
+
+    /**
+     * 根据 type 获取Mapper接口
+     *
+     * @param type
+     * @param <T>
+     * @return
+     */
+    <T> T getMapper(Class<T> type);
+
+    /**
+     * Retrieves inner database connection
+     *
+     * @return
+     */
+    Connection getConnection();
+}
+```
+
+
+
+###映射器：Mapper
+
+​		映射器是一些由你创建的、绑定你映射的语句的接口。映射器接口的实例是从 SqlSession 中获得的。因此从技术层面讲，任何映射器实例的最大作用域是和请求它们的 SqlSession 相同的。尽管如此，映射器实例的最佳作用域是方法作用域。 也就是说，映射器实例应该在调用它们的方法中被请求，用过之后即可丢弃。 并不需要显式地关闭映射器实例，尽管在整个请求作用域保持映射器实例也不会有什么问题，但是你很快会发现，像 SqlSession 一样，在这个作用域上管理太多的资源的话会难于控制。 为了避免这种复杂性，最好把映射器放在方法作用域内。下面的示例就展示了这个实践：
+
+```java
+try (SqlSession session = sqlSessionFactory.openSession()) {
+  BlogMapper mapper = session.getMapper(BlogMapper.class);
+  // 你的应用逻辑代码
+}
+```
+
+
+
+### 执行器：Executor
 
 ​		Mybastic中执行器Executor起到了至关重要的作用。它是一个真正执行java和数据库交互的东西。在MyBatis中存在三种执行器。我们可以在配置文件进行配置。
 
@@ -163,7 +444,7 @@ public interface Executor {
 
 
 
-###主键生成：KeyGenerator
+###Key生成器：KeyGenerator
 
 ​	当mybatis中<setting> 设置了允许 JDBC 支持自动生成主键，会创建KeyGenerator接口的一个实例，在平时开发的时候经常会有这样的需求，插入数据返回主键，或者插入数据之前需要获取主键，这样的需求在 mybatis 中也是支持的，其中主要的逻辑部分就在 KeyGenerator 中，下面是他的几种实现：
 
@@ -265,7 +546,7 @@ mybastic使用DOM的方式解析xml配置文件；
 
 ###1. \<properties/>
 
-properties是一个配置属性的元素，能让我们在配置文件的上下中使用配置的属性，Mybatis提供了3种配置方式：
+​		properties是一个配置属性的元素，能让我们在配置文件的上下中使用配置的属性，Mybatis提供了3种配置方式：
 
 * Xml配置
 * .properties文件配置
@@ -347,15 +628,15 @@ sqlSessionFactory = new SqlSessionFactoryBuilder().build(cfg,Reader, properties)
 
 如果属性在不只一个地方进行了配置，那么MyBatis 将按照下面的顺序来加载：
 
-* 在properties 元素体内指定的属性首先被读取。
+* Mybastic中setting标签对应的properties 元素体内指定的属性首先被读取。
 
 * 然后根据properties 元素中的resource 属性读取类路径下属性文件或根据url 属性指定的路径读取属性文件，并覆盖已读取的同名属性。
 
 * 最后读取作为方法参数传递的属性，并覆盖已读取的同名属性。
 
-​		因此，**通过方法参数传递的属性具有最高优先级，resource/url 属性中指定的配置文件次之，最低优先级的是properties属性中指定的属性。实际操作中我们推荐使用.properties文件的方式，尽量避免使用混合的方式。**
+​		因此，**通过方法参数传递的属性具有最高优先级，resource/url 属性中指定的配置文件次之，最低优先级的是Mybastic配置中的setting标签对应的properties属性中指定的属性。实际操作中我们推荐使用.properties文件的方式，尽量避免使用混合的方式。**
 
-**优先级：**参数传递 > .properties文件 > xml配置
+**优先级：**参数传递 > .properties文件 > Mybastic的xml配置
 
 
 
@@ -420,7 +701,47 @@ settings标签的配置示例如下：
 
 ###3. \<typeAliases/>
 
-​		别名是一个指代的名称。因为有时候我们遇到的类权限定名过长，所以我们希望使用一个简短的名称去指代它，而这个名称可以在mybatis上下文中使用。别名在Mybatis中分为系统别名和自定义别名两类。**注意，别名是不区分大小写的。**
+​		别名是一个指代的名称。因为有时候我们遇到的类权限定名过长，所以我们希望使用一个简短的名称去指代它，而这个名称可以在mybatis上下文中使用。类型别名是为 Java 类型设置一个短的名字。 它只和 XML 配置有关，存在的意义仅在于用来减少类完全限定名的冗余。例如：
+
+```xml
+<typeAliases>
+  <typeAlias alias="Author" type="domain.blog.Author"/>
+  <typeAlias alias="Blog" type="domain.blog.Blog"/>
+  <typeAlias alias="Comment" type="domain.blog.Comment"/>
+  <typeAlias alias="Post" type="domain.blog.Post"/>
+  <typeAlias alias="Section" type="domain.blog.Section"/>
+  <typeAlias alias="Tag" type="domain.blog.Tag"/>
+</typeAliases>
+```
+
+当这样配置时，`Blog` 可以用在任何使用 `domain.blog.Blog` 的地方。
+
+**包路径扫描指定java bean别名：**
+
+也可以指定一个包名，MyBatis 会在包名下面搜索需要的 Java Bean，比如：
+
+```xml
+<typeAliases>
+  <package name="domain.blog"/>
+</typeAliases>
+```
+
+**注解指定别名：**
+
+每一个在包 `domain.blog` 中的 Java Bean，在没有注解的情况下，会使用 Bean 的首字母小写的非限定类名来作为它的别名。 比如 `domain.blog.Author` 的别名为 `author`；若有注解，则别名为其注解值。见下面的例子：
+
+```java
+@Alias("author")
+public class Author {
+    ...
+}
+```
+
+这是一些为常见的 Java 类型内建的相应的类型别名。它们都是不区分大小写的，注意对基本类型名称重复采取的特殊命名风格。
+
+
+
+别名在Mybatis中分为系统别名和自定义别名两类。**注意，别名是不区分大小写的。**
 
 ####系统别名
 
@@ -724,13 +1045,55 @@ public class ExampleObjectFactory extends DefaultObjectFactory {
 
 ###5. \<plugins/>
 
-。。。
+​		MyBatis 允许你在已映射语句执行过程中的某一点进行拦截调用。默认情况下，MyBatis 允许使用插件来拦截的方法调用包括：
+
+- Executor (update, query, flushStatements, commit, rollback, getTransaction, close, isClosed)
+- ParameterHandler (getParameterObject, setParameters)
+- ResultSetHandler (handleResultSets, handleOutputParameters)
+- StatementHandler (prepare, parameterize, batch, update, query)
+
+这些类中方法的细节可以通过查看每个方法的签名来发现，或者直接查看 MyBatis 发行包中的源代码。 如果你想做的不仅仅是监控方法的调用，那么你最好相当了解要重写的方法的行为。 因为如果在试图修改或重写已有方法的行为的时候，你很可能在破坏 MyBatis 的核心模块。 这些都是更低层的类和方法，所以使用插件的时候要特别当心。
+
+​		通过 MyBatis 提供的强大机制，使用插件是非常简单的，只需实现 Interceptor 接口，并指定想要拦截的方法签名即可。
+
+```java
+// ExamplePlugin.java
+@Intercepts({@Signature(
+  type= Executor.class,
+  method = "update",
+  args = {MappedStatement.class,Object.class})})
+public class ExamplePlugin implements Interceptor {
+  private Properties properties = new Properties();
+  public Object intercept(Invocation invocation) throws Throwable {
+    // implement pre processing if need
+    Object returnObject = invocation.proceed();
+    // implement post processing if need
+    return returnObject;
+  }
+  public void setProperties(Properties properties) {
+    this.properties = properties;
+  }
+}
+
+<!-- mybatis-config.xml -->
+<plugins>
+  <plugin interceptor="org.mybatis.example.ExamplePlugin">
+    <property name="someProperty" value="100"/>
+  </plugin>
+</plugins>
+```
+
+上面的插件将会拦截在 Executor 实例中所有的 “update” 方法调用， 这里的 Executor 是负责执行低层映射语句的内部对象。
+
+**提示：覆盖配置类**
+
+除了用插件来修改 MyBatis 核心行为之外，还可以通过完全覆盖配置类来达到目的。只需继承后覆盖其中的每个方法，再把它传递到 SqlSessionFactoryBuilder.build(myConfig) 方法即可。再次重申，这可能会严重影响 MyBatis 的行为，务请慎之又慎。
 
 
 
 ###6. \<environments>
 
-​		Mybatis可以配置成适应多种环境，这种机制有助于将SQL映射应用于多种数据库之中，现实情况下有多种理由需要这么做。例如：开发，测试和生产环境需要不同的配置
+​		Mybatis可以配置成适应多种环境，这种机制有助于将SQL映射应用于多种数据库之中，现实情况下有多种理由需要这么做。例如：开发，测试和生产环境需要不同的配置。
 
 ​		配置环境可以注册多个数据源，每一个数据源分为两大部分：一个是数据库源的配置，另一个是数据库事物的配置。如：
 
@@ -753,15 +1116,13 @@ public class ExampleObjectFactory extends DefaultObjectFactory {
 </environments>
 ```
 
- 
-
 * environments中的属性default，标明在缺省的情况下，我们将启动哪个数据源配置。
 
 * environment元素是配置一个数据源的开始，属性id是设置这个数据源的标志，以便Mybatis上下文使用它。
 
  
 
-**数据库事务配置：**
+####数据库事务配置
 
 * transactionManager配置的是数据库事务，其中type属性有3种配置方式：
   * 1.      JDBC，采用JDBC方式管理事务，在独立编码中我们常常使用。
@@ -772,7 +1133,55 @@ public class ExampleObjectFactory extends DefaultObjectFactory {
 
  
 
-**数据源配置：**
+在 MyBatis 中有两种类型的事务管理器（也就是 type=”[JDBC|MANAGED]”）：
+
+- JDBC – 这个配置就是直接使用了 JDBC 的提交和回滚设置，它依赖于从数据源得到的连接来管理事务作用域。
+
+- MANAGED – 这个配置几乎没做什么。它从来不提交或回滚一个连接，而是让容器来管理事务的整个生命周期（比如 JEE 应用服务器的上下文）。 默认情况下它会关闭连接，然而一些容器并不希望这样，因此需要将 closeConnection 属性设置为 false 来阻止它默认的关闭行为。例如:
+
+  ```xml
+  <transactionManager type="MANAGED">
+    <property name="closeConnection" value="false"/>
+  </transactionManager>
+  ```
+
+**提示：**如果你正在使用 Spring + MyBatis，则没有必要配置事务管理器， 因为 Spring 模块会使用自带的管理器来覆盖前面的配置。
+
+
+
+这两种事务管理器类型都不需要设置任何属性。它们其实是类型别名，换句话说，你可以使用 TransactionFactory 接口的实现类的完全限定名或类型别名代替它们。
+
+```java
+public interface TransactionFactory {
+  default void setProperties(Properties props) { // Since 3.5.2, change to default method
+    // NOP
+  }
+  Transaction newTransaction(Connection conn);
+  Transaction newTransaction(DataSource dataSource, TransactionIsolationLevel level, boolean autoCommit);
+}
+```
+
+任何在 XML 中配置的属性在实例化之后将会被传递给 setProperties() 方法。你也需要创建一个 Transaction 接口的实现类，这个接口也很简单：
+
+```java
+public interface Transaction {
+  Connection getConnection() throws SQLException;
+  void commit() throws SQLException;
+  void rollback() throws SQLException;
+  void close() throws SQLException;
+  Integer getTimeout() throws SQLException;
+}
+```
+
+使用这两个接口，你可以完全自定义 MyBatis 对事务的处理。
+
+
+
+
+
+
+
+####数据源配置
 
 * dataSource标签，是配置数据源连接的信息，type属性是提供我们对数据库连接方式的配置，同样MyBatis提供这么几种配置方式：
 
@@ -788,7 +1197,34 @@ public class ExampleObjectFactory extends DefaultObjectFactory {
 
 ###7. \<databaseIdProvider/>
 
-。。。
+MyBatis 可以根据不同的数据库厂商执行不同的语句，这种多厂商的支持是基于映射语句中的 `databaseId` 属性。 MyBatis 会加载不带 `databaseId` 属性和带有匹配当前数据库 `databaseId` 属性的所有语句。 如果同时找到带有 `databaseId` 和不带 `databaseId` 的相同语句，则后者会被舍弃。 为支持多厂商特性只要像下面这样在 mybatis-config.xml 文件中加入 `databaseIdProvider` 即可：
+
+```xml
+<databaseIdProvider type="DB_VENDOR" />
+```
+
+DB_VENDOR 对应的 databaseIdProvider 实现会将 databaseId 设置为 `DatabaseMetaData#getDatabaseProductName()` 返回的字符串。 由于通常情况下这些字符串都非常长而且相同产品的不同版本会返回不同的值，所以你可能想通过设置属性别名来使其变短，如下：
+
+```xml
+<databaseIdProvider type="DB_VENDOR">
+  <property name="SQL Server" value="sqlserver"/>
+  <property name="DB2" value="db2"/>
+  <property name="Oracle" value="oracle" />
+</databaseIdProvider>
+```
+
+在提供了属性别名时，DB_VENDOR 的 databaseIdProvider 实现会将 databaseId 设置为第一个数据库产品名与属性中的名称相匹配的值，如果没有匹配的属性将会设置为 “null”。 在这个例子中，如果 `getDatabaseProductName()` 返回“Oracle (DataDirect)”，databaseId 将被设置为“oracle”。
+
+你可以通过实现接口 `org.apache.ibatis.mapping.DatabaseIdProvider` 并在 mybatis-config.xml 中注册来构建自己的 DatabaseIdProvider：
+
+```java
+public interface DatabaseIdProvider {
+  default void setProperties(Properties p) { // Since 3.5.2, change to default method
+    // NOP
+  }
+  String getDatabaseId(DataSource dataSource) throws SQLException;
+}
+```
 
  
 

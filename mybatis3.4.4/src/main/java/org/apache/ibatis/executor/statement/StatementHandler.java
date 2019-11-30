@@ -98,7 +98,7 @@ public interface StatementHandler {
     BoundSql getBoundSql();
 
     /**
-     * 获取参数处理器
+     * 获取参数处理器，用于设置{@code PreparedStatement}的参数
      *
      * @return
      */

@@ -31,7 +31,7 @@ import org.apache.ibatis.session.Configuration;
  *   User getUser(@Param("userId") String userId);
  * }
  *
- * 但是注解对动态SQL的支持一直差强人意，即使MyBatis提供了InsertProvider等*Provider注解来支持注解的Dynamic SQL，也没有降低SQL的编写难度，甚至比XML格式的SQL语句更难编写和维护。
+ * 但是注解对动态SQL的支持一直差强人意，即使MyBatis提供了InsertProvider等Provider注解来支持注解的Dynamic SQL，也没有降低SQL的编写难度，甚至比XML格式的SQL语句更难编写和维护。
  *
  * 注解的优势在于能清晰明了的看见接口所使用的SQL语句，抛弃了繁琐的XML编程方式。但没有良好的动态SQL支持，往往就会导致所编写的DAO层中的接口冗余，所编写的SQL语句很长，易读性差……
  * Mybatis在3.2版本之后，提供了LanguageDriver接口，我们可以使用该接口自定义SQL的解析方式

@@ -32,6 +32,10 @@ import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
  * 这里SqlSessionFactoryBuilder 创建的SqlSessionFactory都是使用DefaultSqlSessionFactory实现类，
  * 它通过输入mybatis配置文件的字节流或者字符流生成XMLConfigBuilder，XMLConfigBuilder再创建一个Configuration，
  * Configuration这个类中包含了mybatis的配置的一切信息，mybatis进行的所有操作都需要根据Configuration中的信息来进行。
+ *
+ * 这个类可以被实例化、使用和丢弃，一旦创建了 SqlSessionFactory，就不再需要它了。 因此 SqlSessionFactoryBuilder 实例的最佳作用域是方法作用域（也就是局部方法变量）。
+ * 你可以重用 SqlSessionFactoryBuilder 来创建多个 SqlSessionFactory 实例，但是最好还是不要让其一直存在，以保证所有的 XML 解析资源可以被释放给更重要的事情.
+ *
  */
 public class SqlSessionFactoryBuilder {
 
@@ -107,7 +111,7 @@ public class SqlSessionFactoryBuilder {
     /**
      * 配置文件解析后再内存中保存为一个 Configuration 对象，该方法使用 Configuration 对象创建一个 DefaultSqlSessionFactory
      *
-     * @param config
+     * @param config        Mybastic配合
      * @return
      */
     public SqlSessionFactory build(Configuration config) {
