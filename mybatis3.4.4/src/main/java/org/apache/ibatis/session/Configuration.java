@@ -107,9 +107,9 @@ public class Configuration {
     protected Environment environment;
     /** 表示配置文件中的 <properties/> 标签 */
     protected Properties variables = new Properties();
-    /** 表示配置文件中的 <reflectorFactory/> 标签 */
+    /** 表示配置文件中的 <reflectorFactory/> 标签，默认实现是DefaultReflectorFactory，该标签一般不用配置 */
     protected ReflectorFactory reflectorFactory = new DefaultReflectorFactory();
-    /** 表示配置文件中的 <objectFactory/> 标签 */
+    /** 表示配置文件中的 <objectFactory/> 标签，默认实现是DefaultObjectFactory，该标签一般不用配置 */
     protected ObjectFactory objectFactory = new DefaultObjectFactory();
     /** 表示配置文件中的 <objectWrapperFactory/> 标签 */
     protected ObjectWrapperFactory objectWrapperFactory = new DefaultObjectWrapperFactory();
@@ -121,7 +121,7 @@ public class Configuration {
     protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
     /** 别名注册表，表示配置文件中<typeAliases/> 标签的配置信息 */
     protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
-    /** <plugins/> 相关的配置 */
+    /** <plugins/> 相关的拦截器配置 */
     protected final InterceptorChain interceptorChain = new InterceptorChain();
 
     /** #224 Using internal Javassist instead of OGNL */

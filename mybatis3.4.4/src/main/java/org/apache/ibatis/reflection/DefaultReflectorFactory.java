@@ -19,22 +19,42 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class DefaultReflectorFactory implements ReflectorFactory {
+
+    /** 用于设置Class对应的Reflector实例是否可以缓存，默认可以缓存 */
     private boolean classCacheEnabled = true;
+
+    /** 保存Class对应的Reflector实例 */
     private final ConcurrentMap<Class<?>, Reflector> reflectorMap = new ConcurrentHashMap<Class<?>, Reflector>();
 
     public DefaultReflectorFactory() {
     }
 
+    /**
+     * 是否缓存Reflector实例
+     *
+     * @return
+     */
     @Override
     public boolean isClassCacheEnabled() {
         return classCacheEnabled;
     }
 
+    /**
+     * 设置Class对应的Reflector实例是否可以缓存
+     *
+     * @param classCacheEnabled
+     */
     @Override
     public void setClassCacheEnabled(boolean classCacheEnabled) {
         this.classCacheEnabled = classCacheEnabled;
     }
 
+    /**
+     * 获取type对应的Reflector实例
+     *
+     * @param type
+     * @return
+     */
     @Override
     public Reflector findForClass(Class<?> type) {
         if (classCacheEnabled) {

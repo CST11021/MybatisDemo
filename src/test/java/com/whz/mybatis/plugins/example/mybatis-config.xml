@@ -5,6 +5,8 @@
 
 <configuration>
 
+    <reflectorFactory type=""/>
+
     <plugins>
         <plugin interceptor="com.whz.mybatis.plugins.example.QueryPlugin">
 
