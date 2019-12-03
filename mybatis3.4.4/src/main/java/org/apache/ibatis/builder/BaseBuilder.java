@@ -151,6 +151,7 @@ public abstract class BaseBuilder {
         if (typeHandlerType == null) {
             return null;
         }
+
         // javaType ignored for injected handlers see issue #746 for full detail
         TypeHandler<?> handler = typeHandlerRegistry.getMappingTypeHandler(typeHandlerType);
         if (handler == null) {
@@ -160,10 +161,21 @@ public abstract class BaseBuilder {
         return handler;
     }
 
-    // 解析这个别名对应的类型
+    /**
+     * 解析这个别名对应的类型
+     *
+     * @param alias
+     * @return
+     */
     protected Class<?> resolveAlias(String alias) {
         return typeAliasRegistry.resolveAlias(alias);
     }
+
+    /**
+     * 获取Mybastic配置
+     *
+     * @return
+     */
     public Configuration getConfiguration() {
         return configuration;
     }

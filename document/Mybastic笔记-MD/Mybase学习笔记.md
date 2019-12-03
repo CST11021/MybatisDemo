@@ -358,19 +358,21 @@ try (SqlSession session = sqlSessionFactory.openSession()) {
 }
 ```
 
+​		映射器Mapper通过代理的方式，将CURD、事务commit/rollback操作交给了SqlSession实例，并且Mapper封装了事务相关的逻辑，Mapper仅关注于具体时间执行的SQL。
+
 
 
 ### 执行器：Executor
 
-​		Mybastic中执行器Executor起到了至关重要的作用。它是一个真正执行java和数据库交互的东西。在MyBatis中存在三种执行器。我们可以在配置文件进行配置。
+​		Mybastic中执行器Executor起到了至关重要的作用。我们从它的接口源码定义可以看出，Mybastic中的缓存机制的实现就是在这层实现的，另外它还管理Statement批量处理或Statement复用过程用到的Statement实例，它内部通过委托给StatementHandler进行更底层操作。
+
+在MyBatis中存在三种执行器。我们可以在配置文件进行配置。
 
 * SIMPLE，简单执行，它是默认的执行器，对应SimpleExecutor实现；
 * REUSE，是一种执行重用预处理语句，ReuseExecutor；
 * BATCH，执行器重用语句和批量更新，它是针对批量专用的执行器，对应BatchExecutor实现；
 
 在Mybastic中默认使用SimpleExecutor。另外，当开启二级缓存时，会使用CachingExecutor对执行器再次进行包装。
-
-
 
 执行进行数据操作时，需要准备好：MappedStatement、parameter、rowBounds以及ResultHandler。
 
@@ -388,51 +390,129 @@ try (SqlSession session = sqlSessionFactory.openSession()) {
 
 ​		
 
-Mybastic中Executor的内部实现机制是通过StatementHandler来执行SQL， StatementHandler 是对JDBC的 Statement 做进一步的封装，所有的数据库操作，最终其实都是由 Statement 来完成的
-
-
-
-StatementHandler的作用是用来处理动态SQL及对返回的结果集进行进一步的封装；
-
-
-
-StatementHandler接口的实现有三种：
-
-SimpleStatementHandler：使用JDBC中的Statement实现来完成数据库操作
-PreparedStatementHandler：使用JDBC中的PreparedStatement实现来完成数据库操作
-CallableStatementHandler：使用JDBC中的CallableStatement实现来完成数据库操作
-
-RoutingStatementHandler可以理解为工厂，Mybastic中都是通过该Handler来处理所有的SQL，它的内部委托给了以上三种Handler来处理SQL；
-
-
-
-
-
-执行器接口如下：
+执行器接口源码如下：
 
 ```java
+/**
+ * 执行器Executor起到了至关重要的作用。它是一个真正执行java和数据库交互的东西。在MyBatis中存在三种执行器。我们可以在配置文件进行配置。
+ *
+ * SIMPLE，简单执行，它是默认的执行器
+ * REUSE，是一种执行重用预处理语句。
+ * BATCH，执行器重用语句和批量更新，它是针对批量专用的执行器
+ *
+ *
+ * 执行进行数据操作时，需要准备好：MappedStatement、parameter、rowBounds以及一个ResultHandler对象
+ *
+ * @author Clinton Begin
+ */
 public interface Executor {
 
+    /** 表示一个null的查询结果 */
+    ResultHandler NO_RESULT_HANDLER = null;
+
+    // --------------------
     // Mybatis 的所有 更新、插入和删除 操作，最终都将调用该方法来操作数据库
+    // --------------------
+
     int update(MappedStatement ms, Object parameter) throws SQLException;
 
+    // --------------------
     // 查询方法最终调用以下三个方法的其中一个来操作数据库
+    // --------------------
+
     <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql) throws SQLException;
     <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException;
     <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException;
 
 
+    /**
+     * 清空Statement实例：
+     * 比如，批量执行器，则会将多个Statement实例缓存起来，在该方法中一起执行，执行完成后则关闭和清空相关的Statement实例；
+     * 再比如，复用执行器，会将执行过的Statement实例缓存起来，方便下次在里利用；
+     *
+     * @return
+     * @throws SQLException
+     */
     List<BatchResult> flushStatements() throws SQLException;
+
+    /**
+     * 提交事务：执行器的事务提交实现委托给了{@link Transaction}去实现，执行器层的事务提交是对Statement实例缓存和查询结果缓存做了一层封装，保证了事务提交前都能清楚Statement缓存和Mybastic的一级缓存
+     *
+     * @param required      是否执行事务提交操作
+     * @throws SQLException
+     */
     void commit(boolean required) throws SQLException;
+
+    /**
+     * 回滚事务：执行器的事务回滚实现委托给了{@link Transaction}去实现，执行器层的事务回滚是对Statement实例缓存和查询结果缓存做了一层封装，保证了事务回滚前都能清除Statement缓存和Mybastic的一级缓存
+     *
+     * @param required
+     * @throws SQLException
+     */
     void rollback(boolean required) throws SQLException;
-    // 创建一个CacheKey对象
+
+    /**
+     * 创建一个CacheKey对象
+     *
+     * @param ms                    MappedStatement
+     * @param parameterObject       本次执行的参数
+     * @param rowBounds             分页信息
+     * @param boundSql              本次执行的SQL相关信息
+     * @return
+     */
     CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql);
+
+    /**
+     * 判断该缓存key是否存在缓存
+     *
+     * @param ms
+     * @param key
+     * @return
+     */
     boolean isCached(MappedStatement ms, CacheKey key);
+
+    /**
+     * 用于清除会话缓存，当执行器执行更新操作前，会调用该方法清除会话缓存；也可以通过{@link SqlSession#clearCache()}方法手动清除缓存
+     */
     void clearLocalCache();
+
+    /**
+     * 结果集处理器在每次处理执行结果的时候会来调该方法，缓存查询结果
+     *
+     * @param ms                本次执行MappedStatement
+     * @param resultObject      结果集对应的MetaObject
+     * @param property
+     * @param key               缓存key
+     * @param targetType
+     */
     void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key, Class<?> targetType);
+
+    /**
+     * 获取一个事务实例
+     *
+     * @return
+     */
     Transaction getTransaction();
+
+    /**
+     * 关闭执行器，会话关闭时会关闭对应的执行器
+     *
+     * @param forceRollback 关闭会话时，是否强制回滚事务，为false时，事务会默认提交
+     */
     void close(boolean forceRollback);
+
+    /**
+     * 执行器是否已经关闭
+     *
+     * @return
+     */
     boolean isClosed();
+
+    /**
+     * 设置保存执行器，{@link BatchExecutor}、{@link ReuseExecutor}和{@link SimpleExecutor}会调用该方法，一般设置的包装执行器是缓存执行器，缓存执行器在最外层
+     *
+     * @param executor
+     */
     void setExecutorWrapper(Executor executor);
 
 }
@@ -440,7 +520,102 @@ public interface Executor {
 
 
 
+### StatementHandler
 
+StatementHandler接口的实现有三种：
+
+* SimpleStatementHandler：使用JDBC中的Statement实现来完成数据库操作
+* PreparedStatementHandler：使用JDBC中的PreparedStatement实现来完成数据库操作
+* CallableStatementHandler：使用JDBC中的CallableStatement实现来完成数据库操作
+
+RoutingStatementHandler可以理解为工厂，Mybastic中都是通过该Handler来处理所有的SQL，它的内部委托给了以上三种Handler来处理SQL；
+
+
+
+StatementHandler接口源码，从以下接口方法我可以看出，StatementHandler的作用是用来处理根据配置信息创建Statement实例、PreparedStatement类型的参数预处理，以及动态SQL和对返回的结果集进行进一步的封装：
+
+```java
+/**
+ * StatementHandler 是对JDBC的 Statement 做进一步的封装，所有的数据库操作，最终其实都是由 java.sql.Statement 来完成的
+ *
+ * @author Clinton Begin
+ */
+public interface StatementHandler {
+
+    /**
+     * 根据数据库的连接实例创建一个Statement对象
+     *
+     * @param connection            数据库连接实例
+     * @param transactionTimeout    事务超时时间
+     * @return
+     * @throws SQLException
+     */
+    Statement prepare(Connection connection, Integer transactionTimeout) throws SQLException;
+
+    /**
+     * 用来设置参数：
+     * 因为当使用预编译时，一开始SQL编译的时候是不需要设置参数的，所以当要真正执行SQL时，需要设置参数；
+     * 如果是使用 Statement 的方式，则该实现为空，因为Statement执行SQL的时候，参数就已经设置好了
+     *
+     * @param statement
+     * @throws SQLException
+     */
+    void parameterize(Statement statement) throws SQLException;
+
+    /**
+     * 批处理的方式，JDBC仅支持批量新增、更新和删除操作，不支持批量查询
+     *
+     * @param statement
+     * @throws SQLException
+     */
+    void batch(Statement statement) throws SQLException;
+
+    /**
+     * 执行更新操作时会调用给方法，这里的更新操作包括：insert、update和delete
+     *
+     * @param statement
+     * @return 返回影响的行数
+     * @throws SQLException
+     */
+    int update(Statement statement) throws SQLException;
+
+    /**
+     * 执行查询
+     *
+     * @param statement
+     * @param resultHandler
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
+    <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException;
+
+    /**
+     * 执行查询，并以游标的方式返回结果集
+     *
+     * @param statement
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
+    <E> Cursor<E> queryCursor(Statement statement) throws SQLException;
+
+    /**
+     * 获取本次要执行的SQL相关信息
+     *
+     * @return
+     */
+    BoundSql getBoundSql();
+
+    /**
+     * 获取参数处理器，用于设置{@code PreparedStatement}的参数
+     *
+     * @return
+     */
+    ParameterHandler getParameterHandler();
+
+}
+```
 
 
 
@@ -456,39 +631,7 @@ Oracle不支持主键自增，因为oracle不存在mysql的自增方法auto_incr
 
 
 
-
-
-
-
 SelectKeyGenerator：主要是通过 XML 配置或者注解设置 selectKey ，然后单独发出查询语句，在返回拦截方法中使用反射设置主键，其中两个拦截方法只能使用其一，默认 使用 processBefore，在 selectKey.order 属性中设置 AFTER|BEFORE 来确定；
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
