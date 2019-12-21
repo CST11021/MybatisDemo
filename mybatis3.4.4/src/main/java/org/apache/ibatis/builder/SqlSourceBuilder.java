@@ -39,10 +39,21 @@ public class SqlSourceBuilder extends BaseBuilder {
         super(configuration);
     }
 
+    /**
+     * 返回一个静态的SqlSource
+     *
+     * @param originalSql               原始的SQL，不包含动态标签，但是SQL参数还未被解析，还是例如#{name}的形式
+     * @param parameterType             SQL入参的类型
+     * @param additionalParameters      所有的SQL入参对应的key-value
+     * @return
+     */
     public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
         ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType, additionalParameters);
+
+        // 处理#{}参数，获取一个解析的后的sql，例如：select * from `t_employeer` where employeer_department = ? and employeer_worktype = ?
         GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
         String sql = parser.parse(originalSql);
+
         return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
     }
 

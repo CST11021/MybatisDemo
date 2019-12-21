@@ -36,8 +36,11 @@ import org.w3c.dom.NodeList;
  */
 public class XMLScriptBuilder extends BaseBuilder {
 
+    /** 表示select|insert|update|delete 这些节点 */
     private XNode context;
+    /** 表示对应的节点是否为包含动态标签 */
     private boolean isDynamic;
+    /** 对应的参数类型 */
     private Class<?> parameterType;
 
     public XMLScriptBuilder(Configuration configuration, XNode context) {
@@ -62,13 +65,20 @@ public class XMLScriptBuilder extends BaseBuilder {
         return sqlSource;
     }
 
-    // 解析动态标签
+    /**
+     * 解析动态标签
+     *
+     * @param node  表示select|insert|update|delete 这些节点
+     * @return
+     */
     List<SqlNode> parseDynamicTags(XNode node) {
         List<SqlNode> contents = new ArrayList<SqlNode>();
         NodeList children = node.getNode().getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
             XNode child = node.newXNode(children.item(i));
+
             if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
+                // 获取select|insert|update|delete 这些节点的内容
                 String data = child.getStringBody("");
                 TextSqlNode textSqlNode = new TextSqlNode(data);
                 if (textSqlNode.isDynamic()) {
@@ -89,7 +99,13 @@ public class XMLScriptBuilder extends BaseBuilder {
         }
         return contents;
     }
-    // 根据给定的动态节点，返回不同的处理器，动态节点包括：trim、where、set、foreach、if、choose、when、otherwise、bind
+
+    /**
+     * 根据给定的动态节点，返回不同的处理器，动态节点包括：trim、where、set、foreach、if、choose、when、otherwise、bind
+     *
+     * @param nodeName
+     * @return
+     */
     NodeHandler nodeHandlers(String nodeName) {
         Map<String, NodeHandler> map = new HashMap<String, NodeHandler>();
         map.put("trim", new TrimHandler());
@@ -218,25 +234,37 @@ public class XMLScriptBuilder extends BaseBuilder {
         public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
             List<SqlNode> whenSqlNodes = new ArrayList<SqlNode>();
             List<SqlNode> otherwiseSqlNodes = new ArrayList<SqlNode>();
+
             handleWhenOtherwiseNodes(nodeToHandle, whenSqlNodes, otherwiseSqlNodes);
+
             SqlNode defaultSqlNode = getDefaultSqlNode(otherwiseSqlNodes);
             ChooseSqlNode chooseSqlNode = new ChooseSqlNode(whenSqlNodes, defaultSqlNode);
             targetContents.add(chooseSqlNode);
         }
 
         private void handleWhenOtherwiseNodes(XNode chooseSqlNode, List<SqlNode> ifSqlNodes, List<SqlNode> defaultSqlNodes) {
+            // 获取<choose>的子节点
             List<XNode> children = chooseSqlNode.getChildren();
             for (XNode child : children) {
                 String nodeName = child.getNode().getNodeName();
                 NodeHandler handler = nodeHandlers(nodeName);
+
                 if (handler instanceof IfHandler) {
+                    // 处理<when>标签
                     handler.handleNode(child, ifSqlNodes);
                 } else if (handler instanceof OtherwiseHandler) {
+                    // 处理<otherwise>标签
                     handler.handleNode(child, defaultSqlNodes);
                 }
             }
         }
 
+        /**
+         * 获取<otherwise>标签，当所有when都不满足条件时，则使用otherwise
+         *
+         * @param defaultSqlNodes
+         * @return
+         */
         private SqlNode getDefaultSqlNode(List<SqlNode> defaultSqlNodes) {
             SqlNode defaultSqlNode = null;
             if (defaultSqlNodes.size() == 1) {

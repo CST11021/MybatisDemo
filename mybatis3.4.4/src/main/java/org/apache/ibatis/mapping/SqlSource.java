@@ -21,7 +21,7 @@ package org.apache.ibatis.mapping;
  * <if/>节点的计算，是由SqlSource对象完成的。SqlSource最常用的实现类是DynamicSqlSource
  *
  *
- * 表示从XML文件或注释读取的映射语句的内容。
+ * 表示从XML文件或注释读取的映射语句的内容。该接口的实例，仅对应带有占位符的SQL和参数类型进行封装，不封装实际的参数值，SqlSource + 参数值后，得到一个可以交给Statement处理的BoundSql实例
  *
  * It creates the SQL that will be passed to the database out of the input parameter received from the user.（它创建将从用户接收的输入参数传递到数据库的SQL。）
  *
@@ -30,7 +30,8 @@ package org.apache.ibatis.mapping;
 public interface SqlSource {
 
     /**
-     * 实现该方法将SQL和占位符参照封装为一个 BoundSql 对象
+     * 实现该方法：将SQL和占位符参数封装为一个 BoundSql 对象
+     * SqlSource + 参数值后，得到一个可以交给Statement处理的BoundSql实例
      *
      * @param parameterObject   表示SQL的入参
      * @return

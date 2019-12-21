@@ -16,6 +16,16 @@
 package org.apache.ibatis.scripting.xmltags;
 
 /**
+ * 用于处理<bind>标签：
+ * bind 元素可以使用 OGNL 表达式创建一个变量并将其绑定到当前SQL节点的上下文。
+ *
+ * <select id="selectBlogsLike" parameterType="BlogQuery" resultType="Blog">
+ *   <bind name="pattern" value="'%' + title + '%'" />
+ *   SELECT * FROM BLOG
+ *   WHERE title LIKE #{pattern}
+ * </select>
+ * 对于这种情况，bind还可以用来预防 SQL 注入。
+ *
  * @author Frank D. Martinez [mnesarco]
  */
 public class VarDeclSqlNode implements SqlNode {

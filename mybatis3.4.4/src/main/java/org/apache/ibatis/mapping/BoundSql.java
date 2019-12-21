@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class BoundSql {
 
-    /** 表示每次实际数据库操作的SQL */
+    /** 表示每次实际数据库操作的SQL，例如：select * from `t_employeer` where employeer_department = ? and employeer_worktype = ? */
     private String sql;
 
     private List<ParameterMapping> parameterMappings;

@@ -54,7 +54,7 @@ public interface LanguageDriver {
      * 创建一个{@link SqlSource}来保存从映射器xml文件中读取的语句。
      *
      * @param configuration     MyBatis配置
-     * @param script            从XML文件解析的XNode
+     * @param script            从XML文件解析的XNode，例如：select|insert|update|delete 这些节点
      * @param parameterType     从mapper方法获取或在parameterType xml属性中指定的输入参数类型。可以为空。
      * @return
      */

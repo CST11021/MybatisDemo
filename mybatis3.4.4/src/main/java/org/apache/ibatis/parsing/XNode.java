@@ -15,16 +15,13 @@
  */
 package org.apache.ibatis.parsing;
 
+import org.w3c.dom.CharacterData;
+import org.w3c.dom.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import org.w3c.dom.CharacterData;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * @author Clinton Begin
@@ -36,6 +33,7 @@ public class XNode {
     private String body;
     private Properties attributes;
     private Properties variables;
+    /** xml节点解析器 */
     private XPathParser xpathParser;
 
     public XNode(XPathParser xpathParser, Node node, Properties variables) {
@@ -99,11 +97,9 @@ public class XNode {
     public String evalString(String expression) {
         return xpathParser.evalString(node, expression);
     }
-
     public Boolean evalBoolean(String expression) {
         return xpathParser.evalBoolean(node, expression);
     }
-
     public Double evalDouble(String expression) {
         return xpathParser.evalDouble(node, expression);
     }
@@ -112,6 +108,12 @@ public class XNode {
         return xpathParser.evalNodes(node, expression);
     }
 
+    /**
+     * 根据节点名称获取对应的节点
+     *
+     * @param expression
+     * @return
+     */
     public XNode evalNode(String expression) {
         return xpathParser.evalNode(node, expression);
     }
@@ -376,8 +378,9 @@ public class XNode {
     }
 
     private String getBodyData(Node child) {
-        if (child.getNodeType() == Node.CDATA_SECTION_NODE
-                || child.getNodeType() == Node.TEXT_NODE) {
+        // Node.CDATA_SECTION_NODE：代表文档中的 CDATA 部（不会由解析器解析的文本）
+        // Node.TEXT_NODE：代表元素或属性中的文本内容
+        if (child.getNodeType() == Node.CDATA_SECTION_NODE || child.getNodeType() == Node.TEXT_NODE) {
             String data = ((CharacterData) child).getData();
             data = PropertyParser.parse(data, variables);
             return data;

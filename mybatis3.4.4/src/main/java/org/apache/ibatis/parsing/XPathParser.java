@@ -39,7 +39,9 @@ import java.util.Properties;
  */
 public class XPathParser {
 
+    /** 表示要解析的xml文档 */
     private Document document;
+    /** 解析xml时，是否启用schema校验 */
     private boolean validation;
     private EntityResolver entityResolver;
     private Properties variables;
@@ -109,6 +111,13 @@ public class XPathParser {
         commonConstructor(validation, variables, entityResolver);
         this.document = document;
     }
+    private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
+        this.validation = validation;
+        this.entityResolver = entityResolver;
+        this.variables = variables;
+        XPathFactory factory = XPathFactory.newInstance();
+        this.xpath = factory.newXPath();
+    }
 
 
     public void setVariables(Properties variables) {
@@ -118,57 +127,44 @@ public class XPathParser {
     public String evalString(String expression) {
         return evalString(document, expression);
     }
-
     public String evalString(Object root, String expression) {
         String result = (String) evaluate(expression, root, XPathConstants.STRING);
         result = PropertyParser.parse(result, variables);
         return result;
     }
-
     public Boolean evalBoolean(String expression) {
         return evalBoolean(document, expression);
     }
-
     public Boolean evalBoolean(Object root, String expression) {
         return (Boolean) evaluate(expression, root, XPathConstants.BOOLEAN);
     }
-
     public Short evalShort(String expression) {
         return evalShort(document, expression);
     }
-
     public Short evalShort(Object root, String expression) {
         return Short.valueOf(evalString(root, expression));
     }
-
     public Integer evalInteger(String expression) {
         return evalInteger(document, expression);
     }
-
     public Integer evalInteger(Object root, String expression) {
         return Integer.valueOf(evalString(root, expression));
     }
-
     public Long evalLong(String expression) {
         return evalLong(document, expression);
     }
-
     public Long evalLong(Object root, String expression) {
         return Long.valueOf(evalString(root, expression));
     }
-
     public Float evalFloat(String expression) {
         return evalFloat(document, expression);
     }
-
     public Float evalFloat(Object root, String expression) {
         return Float.valueOf(evalString(root, expression));
     }
-
     public Double evalDouble(String expression) {
         return evalDouble(document, expression);
     }
-
     public Double evalDouble(Object root, String expression) {
         return (Double) evaluate(expression, root, XPathConstants.NUMBER);
     }
@@ -186,10 +182,23 @@ public class XPathParser {
         return xnodes;
     }
 
+    /**
+     * 根据节点的路径返回对应的xml节点
+     *
+     * @param expression    节点路径，例如："/configuration"，返回对应的<configuration>节点
+     * @return
+     */
     public XNode evalNode(String expression) {
         return evalNode(document, expression);
     }
 
+    /**
+     * 根据xml文档的根节点和对应的节点路径返回对应的节点
+     *
+     * @param root
+     * @param expression
+     * @return
+     */
     public XNode evalNode(Object root, String expression) {
         Node node = (Node) evaluate(expression, root, XPathConstants.NODE);
         if (node == null) {
@@ -206,6 +215,12 @@ public class XPathParser {
         }
     }
 
+    /**
+     * 根据InputSource创建一个Document实例
+     *
+     * @param inputSource
+     * @return
+     */
     private Document createDocument(InputSource inputSource) {
         // important: this must only be called AFTER common constructor
         try {
@@ -239,14 +254,6 @@ public class XPathParser {
         } catch (Exception e) {
             throw new BuilderException("Error creating document instance.  Cause: " + e, e);
         }
-    }
-
-    private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
-        this.validation = validation;
-        this.entityResolver = entityResolver;
-        this.variables = variables;
-        XPathFactory factory = XPathFactory.newInstance();
-        this.xpath = factory.newXPath();
     }
 
 }

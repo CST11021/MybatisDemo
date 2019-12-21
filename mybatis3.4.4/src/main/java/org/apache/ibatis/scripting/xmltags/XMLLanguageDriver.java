@@ -33,17 +33,38 @@ import org.apache.ibatis.session.Configuration;
  */
 public class XMLLanguageDriver implements LanguageDriver {
 
+    /**
+     *
+     * @param mappedStatement   正在执行的映射语句
+     * @param parameterObject   SQL参数
+     * @param boundSql          动态语言执行后的结果SQL。
+     * @return
+     */
     @Override
     public ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
         return new DefaultParameterHandler(mappedStatement, parameterObject, boundSql);
     }
 
+    /**
+     *
+     * @param configuration     MyBatis配置
+     * @param script            从XML文件解析的XNode，例如：select|insert|update|delete 这些节点
+     * @param parameterType     从mapper方法获取或在parameterType xml属性中指定的输入参数类型。可以为空。
+     * @return
+     */
     @Override
     public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {
         XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType);
         return builder.parseScriptNode();
     }
 
+    /**
+     *
+     * @param configuration     MyBatis配置
+     * @param script            注解配置的内容
+     * @param parameterType     从mapper方法获取或在parameterType xml属性中指定的输入参数类型。可以为空。
+     * @return
+     */
     @Override
     public SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType) {
         // issue #3
