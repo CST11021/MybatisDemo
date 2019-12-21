@@ -22,6 +22,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Mybastic中插件都需要通过该注解来修饰
+ *
  * @author Clinton Begin
  */
 @Documented

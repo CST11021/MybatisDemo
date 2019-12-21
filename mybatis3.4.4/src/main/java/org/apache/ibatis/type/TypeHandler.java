@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * 类型处理器：用于处理PreparedStatement、CallableStatement中的参数到java类型的转换，以及ResultSet对应的java类型的转换
  *
  * @author Clinton Begin
  */

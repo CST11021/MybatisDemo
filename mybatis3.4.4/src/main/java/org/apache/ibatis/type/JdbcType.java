@@ -76,6 +76,7 @@ public enum JdbcType {
     DATETIMEOFFSET(-155);
 
     public final int TYPE_CODE;
+
     private static Map<Integer, JdbcType> codeLookup = new HashMap<Integer, JdbcType>();
 
     static {
@@ -88,6 +89,12 @@ public enum JdbcType {
         this.TYPE_CODE = code;
     }
 
+    /**
+     * 根据JdbcType的值，返回对应的JdbcType
+     *
+     * @param code
+     * @return
+     */
     public static JdbcType forCode(int code) {
         return codeLookup.get(code);
     }
