@@ -33,6 +33,8 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
+ * 参数处理器，用于设置{@code PreparedStatement}的参数
+ *
  * @author Clinton Begin
  * @author Eduardo Macarron
  */

@@ -30,7 +30,9 @@ package org.apache.ibatis.scripting.xmltags;
  */
 public class VarDeclSqlNode implements SqlNode {
 
+    /** 对应<bind>标签的name属性 */
     private final String name;
+    /** 对应<bind>标签的value属性，这里是一个OGNL表达式 */
     private final String expression;
 
     public VarDeclSqlNode(String var, String exp) {
@@ -40,6 +42,7 @@ public class VarDeclSqlNode implements SqlNode {
 
     @Override
     public boolean apply(DynamicContext context) {
+        // 计算表达式的值
         final Object value = OgnlCache.getValue(expression, context.getBindings());
         context.bind(name, value);
         return true;
