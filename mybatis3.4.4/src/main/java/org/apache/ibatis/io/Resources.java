@@ -29,18 +29,27 @@ import java.util.Properties;
 public class Resources {
 
     private static ClassLoaderWrapper classLoaderWrapper = new ClassLoaderWrapper();
-    // Charset to use when calling getResourceAsReader. null means use the system default.
+    /** 调用getResourceAsReader时使用的字符集。 null表示使用系统默认值 */
     private static Charset charset;
 
     public Resources() {
     }
 
-    // 如：URL url = resources.getResourceURL("com/whz/mybatis/resources/test.properties");
+    // --------------------------------
+    // 基于类的跟路径返回资源文件对应的 URL
+    // --------------------------------
+
+    /**
+     * 如：
+     * URL url = resources.getResourceURL("log4j.properties");
+     *
+     * @param resource
+     * @return
+     * @throws IOException
+     */
     public static URL getResourceURL(String resource) throws IOException {
-        // issue #625
         return getResourceURL(null, resource);
     }
-
     public static URL getResourceURL(ClassLoader loader, String resource) throws IOException {
         URL url = classLoaderWrapper.getResourceAsURL(resource, loader);
         if (url == null) {
@@ -49,11 +58,28 @@ public class Resources {
         return url;
     }
 
-    // 根据资源文件的类路径返回一个InputStream 对象
+    // --------------------------------
+    // 基于类的跟路径返回资源文件对应的 InputStream
+    // --------------------------------
+
+    /**
+     * 根据资源文件的类路径返回一个 InputStream 对象
+     *
+     * @param resource
+     * @return
+     * @throws IOException
+     */
     public static InputStream getResourceAsStream(String resource) throws IOException {
         return getResourceAsStream(null, resource);
     }
-    // 根据资源文件的类路径返回一个InputStream 对象，使用指定类加载器加载资源文件
+    /**
+     * 根据资源文件的类路径返回一个InputStream 对象，优先使用指定类加载器加载资源文件
+     *
+     * @param loader
+     * @param resource
+     * @return
+     * @throws IOException
+     */
     public static InputStream getResourceAsStream(ClassLoader loader, String resource) throws IOException {
         InputStream in = classLoaderWrapper.getResourceAsStream(resource, loader);
         if (in == null) {
@@ -97,6 +123,7 @@ public class Resources {
         }
         return reader;
     }
+
     // File file = resources.getResourceAsFile("com/whz/mybatis/resources/test.properties");
     public static File getResourceAsFile(String resource) throws IOException {
         return new File(getResourceURL(resource).getFile());
@@ -133,7 +160,7 @@ public class Resources {
 
 
     /**
-     * Loads a class
+     * 加载一个类
      *
      * @param className - the class to fetch
      * @return The loaded class

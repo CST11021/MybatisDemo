@@ -39,19 +39,19 @@ Mybatis由以下几个核心组件构成：
 主流程伪代码如下：
 
 ```java
-// 获取配置文件
+// 1、获取配置文件
 InputStream inputStream = Resources.getResourceAsStream("mybatis-config.xml");
 
-// 根据配置文件加载SqlSessionFactory
+// 2、根据配置文件加载SqlSessionFactory
 SqlSessionFactory sqlSessionFactory = SqlSessionFactoryBuilder.build(inputStream);
 
-// 获取Session
+// 3、获取Session
 SqlSession session = sqlSessionFactory.openSession();
 
-// 执行CURD
+// 4.1、执行CURD
 int resultCount = session.insert("com.whz.mapperinterface.IEmployeerMapper.addEmployeer", employeer );
 
-// 使用Mapper接口：Mapper接口通过代理的方式，最终也是调用session执行CURD操作
+// 4.2、使用Mapper接口：Mapper接口通过代理的方式，最终也是调用session执行CURD操作
 IEmployeerMapper iEmployeerMapper = sqlSession.getMapper(IEmployeerMapper.class);
 List<Employeer> employeers = iEmployeerMapper.findAllEmployeer();
 ```
@@ -66,7 +66,7 @@ List<Employeer> employeers = iEmployeerMapper.findAllEmployeer();
 
 ###SqlSessionFactoryBuilder
 
-​		SqlSessionFactoryBuilder通过类名就可以看出这个类的主要作用就是创建一个SqlSessionFactory(SqlSessionFactory有两个实现类：DefaultSqlSessionFactory 和 SqlSessionManager)。
+​		SqlSessionFactoryBuilder通过类名就可以看出这个类的主要作用就是创建一个SqlSessionFactory，SqlSessionFactory有两个实现类：DefaultSqlSessionFactory 和 SqlSessionManager。
 
 ​		SqlSessionFactoryBuilder创建的SqlSessionFactory都是使用DefaultSqlSessionFactory实现类，
 它通过输入mybatis配置文件的字节流或者字符流生成XMLConfigBuilder，XMLConfigBuilder再创建一个Configuration，Configuration这个类中包含了mybatis的配置的一切信息，mybatis进行的所有操作都需要根据Configuration中的信息来进行。
@@ -140,7 +140,7 @@ List<Employeer> employeers = iEmployeerMapper.findAllEmployeer();
 
 ​		SqlSessionFactory 一旦被创建就应该在应用的运行期间一直存在，没有任何理由丢弃它或重新创建另一个实例。 使用 SqlSessionFactory 的最佳实践是在应用运行期间不要重复创建多次，多次重建 SqlSessionFactory 被视为一种代码“坏味道（bad smell）”。因此 SqlSessionFactory 的最佳作用域是应用作用域。 有很多方法可以做到，最简单的就是使用单例模式或者静态单例模式。
 
-​		SqlSessionFactory创建SqlSession实例时，可以从已有连接对象Connection或数据源来创建，也可以使用数据源创建会话：
+​		SqlSessionFactory创建SqlSession实例时，可以从已有连接对象Connection创建会话，也可以使用数据源创建会话：
 
 1、当使用数据源创建会话时，需要指定事务隔离级别和是否自动提交。
 

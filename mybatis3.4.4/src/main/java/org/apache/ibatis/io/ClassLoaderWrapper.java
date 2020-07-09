@@ -25,14 +25,9 @@ import java.net.URL;
  */
 public class ClassLoaderWrapper {
 
-    /**
-     * 默认的类加载器
-     */
+    /** 默认的类加载器 */
     ClassLoader defaultClassLoader;
-
-    /**
-     * 系统类加载器
-     */
+    /** 系统类加载器 */
     ClassLoader systemClassLoader;
 
     ClassLoaderWrapper() {
@@ -43,7 +38,16 @@ public class ClassLoaderWrapper {
         }
     }
 
-    // Get a resource as a URL using the current class path
+    // --------------------------
+    // 读取资源文件，通过 URL 返回
+    // --------------------------
+
+    /**
+     * 使用当前类路径获取资源作为URL
+     *
+     * @param resource
+     * @return
+     */
     public URL getResourceAsURL(String resource) {
         return getResourceAsURL(resource, getClassLoaders(null));
     }
@@ -60,17 +64,16 @@ public class ClassLoaderWrapper {
 
             if (null != cl) {
 
-                // look for the resource as passed in...
+                // 寻找传入的资源...
                 url = cl.getResource(resource);
 
-                // ...but some class loaders want this leading "/", so we'll add it
-                // and try again if we didn't find the resource
+                // ...但是某些类加载器需要此前导“ /”，因此我们将其添加并在找不到资源的情况下重试
                 if (null == url) {
                     url = cl.getResource("/" + resource);
                 }
 
-                // "It's always in the last place I look for it!"
-                // ... because only an idiot would keep looking for it after finding it, so stop looking already.
+                // “它总是在我寻找的最后一个地方！”
+                // ...因为只有白痴在找到它后会继续寻找它，所以就不要再寻找了。
                 if (null != url) {
                     return url;
                 }
@@ -83,6 +86,11 @@ public class ClassLoaderWrapper {
         return null;
 
     }
+
+
+    // --------------------------
+    // 读取资源文件，通过 InputStream 返回
+    // --------------------------
 
     public InputStream getResourceAsStream(String resource) {
         return getResourceAsStream(resource, getClassLoaders(null));
@@ -111,6 +119,11 @@ public class ClassLoaderWrapper {
         }
         return null;
     }
+
+
+    // --------------------------
+    // 加载Class<?>
+    // --------------------------
 
     public Class<?> classForName(String name) throws ClassNotFoundException {
         return classForName(name, getClassLoaders(null));

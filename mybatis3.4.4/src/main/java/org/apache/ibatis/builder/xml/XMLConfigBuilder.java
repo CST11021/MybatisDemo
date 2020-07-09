@@ -449,7 +449,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 		</environment>
 	</environments>
 	*/
-    // 如上，这里的入参 id 表示上面配置中的 id 属性配置，该方法用来判断这个id和上面配置的default属性是相同
+    // 如上，这里的入参 id 表示上面配置中的 id 属性配置，该方法用来判断这个id和上面配置的default属性是否相同
     private boolean isSpecifiedEnvironment(String id) {
         if (environment == null) {
             throw new BuilderException("No environment specified.");

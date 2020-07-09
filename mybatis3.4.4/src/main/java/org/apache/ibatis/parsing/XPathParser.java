@@ -41,10 +41,12 @@ public class XPathParser {
 
     /** 表示要解析的xml文档 */
     private Document document;
-    /** 解析xml时，是否启用schema校验 */
+    /** 解析xml时，是否启用schema校验，Mybastic默认启用，启用后如果xml配置不满足schema的约束，则解析的时候会报错，否则跳过解析 */
     private boolean validation;
     private EntityResolver entityResolver;
+    /** 解析${key}对应的值 */
     private Properties variables;
+    /** javax.xml中，用于标签节点或者属性的类 */
     private XPath xpath;
 
     public XPathParser(String xml) {
@@ -172,7 +174,6 @@ public class XPathParser {
     public List<XNode> evalNodes(String expression) {
         return evalNodes(document, expression);
     }
-
     public List<XNode> evalNodes(Object root, String expression) {
         List<XNode> xnodes = new ArrayList<XNode>();
         NodeList nodes = (NodeList) evaluate(expression, root, XPathConstants.NODESET);
@@ -191,7 +192,6 @@ public class XPathParser {
     public XNode evalNode(String expression) {
         return evalNode(document, expression);
     }
-
     /**
      * 根据xml文档的根节点和对应的节点路径返回对应的节点
      *
