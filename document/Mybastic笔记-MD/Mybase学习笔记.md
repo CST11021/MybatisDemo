@@ -1234,6 +1234,14 @@ public class ExamplePlugin implements Interceptor {
 
 
 
+
+
+
+
+
+
+
+
 ###6. \<environments>
 
 ​		Mybatis可以配置成适应多种环境，这种机制有助于将SQL映射应用于多种数据库之中，现实情况下有多种理由需要这么做。例如：开发，测试和生产环境需要不同的配置。
@@ -1586,4 +1594,238 @@ Mapper.xml中的配置如下：
 ​       
 
  
+
+
+
+
+
+# PageHelper5.x使用示例
+
+参考链接：http://blog.csdn.net/appleyk/article/details/77318175
+
+##一、引入pagehelper插件包
+
+```xml
+<dependency>
+    <groupId>com.github.pagehelper</groupId>
+    <artifactId>pagehelper</artifactId>
+    <version>5.1.2</version>
+</dependency>
+```
+
+##二、配置pagehelper插件
+
+### 1、在Mybatis-config.xml中配置（推荐）
+
+```xml
+<plugins>
+
+    <!-- 注意：这里使用的是PageInterceptor，低版本的插件使用的是PageHelper -->
+    <plugin interceptor="com.github.pagehelper.PageInterceptor">
+        <!-- 指明使用的是什么数据库，高版本不要配置该参数，否则可能报ClassNotFoundException异常 -->
+        <!--<property name="dialect" value="mysql"/>-->
+        <!-- 默认false，设置为true时，会将RowBounds第一个参数offset当成pageNum页码使用 -->
+        <!-- 和startPage中的pageNum效果一样-->
+        <property name="offsetAsPageNum" value="true"/>
+
+        <!-- 默认false，设置为true时，使用RowBounds分页会进行count查询 -->
+        <property name="rowBoundsWithCount" value="true"/>
+
+        <!-- 设置为true时，如果pageSize=0或者RowBounds.limit = 0就会查询出全部的结果（相当于没有分页，但是返回结果仍然是Page类型）-->
+        <property name="pageSizeZero" value="true"/>
+
+        <!-- 3.3.0版本可用 - 分页参数合理化，默认false禁用 -->
+        <!-- 启用合理化时，如果pageNum<1会查询第一页，如果pageNum>pages会查询最后一页 -->
+        <!-- 禁用合理化时，如果pageNum<1或pageNum>pages会返回空数据 -->
+        <property name="reasonable" value="true"/>
+
+        <!-- 3.5.0版本可用 - 为了支持startPage(Object params)方法 -->
+        <!-- 增加了一个`params`参数来配置参数映射，用于从Map或ServletRequest中取值 -->
+        <!-- 可以配置pageNum,pageSize,count,pageSizeZero,reasonable,orderBy,不配置映射的用默认值 -->
+        <!-- 不理解该含义的前提下，不要随便复制该配置 -->
+        <property name="params" value="pageNum=start;pageSize=limit;"/>
+
+        <!-- 支持通过Mapper接口参数来传递分页参数 -->
+        <property name="supportMethodsArguments" value="true"/>
+
+        <!-- always总是返回PageInfo类型,check检查返回类型是否为PageInfo,none返回Page -->
+        <property name="returnPageInfo" value="check"/>
+    </plugin>
+
+</plugins>
+```
+
+### 2、在SqlSessionFactoryBean中配置
+
+```xml
+<!-- 配置sqlSessionFactory -->
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+
+    <!-- 数据库连接池 -->
+    <property name="dataSource" ref="dataSource"/>
+    <property name="typeAliasesPackage" value="com.group.meal.dao.dataobject"/>
+
+    <!-- 加载Mybatis全局配置文件 -->
+    <property name="configLocation" value="classpath:/mybatis-config.xml"/>
+    <property name="mapperLocations" value="classpath:sqlmappers/*Mapper.xml"/>
+
+    <!-- 配置分页插件 -->
+    <property name="plugins">
+        <array>
+            <!--低版本配置使用PageHelp，高版本的插件不需要配置dialect-->
+            <bean class="com.github.pagehelper.PageInterceptor">
+                <property name="properties">
+                    <value>
+                        <!--dialect=mysql-->
+                        reasonable=true
+                    </value>
+                </property>
+            </bean>
+        </array>
+    </property>
+</bean>
+```
+
+##三、Service、DAO及SQL
+###ServiceImpl
+
+```java
+@Override
+public PageInfo<GroupCompanyDO> queryPage(int pageNum, int pageSize) {
+    PageHelper.startPage(pageNum, pageSize);
+    List<GroupCompanyDO> deskDOS = groupCompanyDao.selectAll();
+    PageInfo pageInfo = new PageInfo<>(deskDOS);
+     //pageInfo.getList();返回当前页数据信息
+    return pageInfo;
+}
+```
+
+###DAO接口
+
+```java
+List<GroupCompanyDO> selectAll();
+```
+
+###SQL
+
+```xml
+<select id="selectAll" resultMap="BaseResultMap">
+    SELECT * from group_company
+</select>
+```
+
+
+
+##原理说明
+1、设置分页信息保存到threadlocal中：
+
+```java
+PageHelper.startPage(1, 10);
+```
+
+2、紧跟着的第一个select方法会被分页，contryMapper会被PageInterceptor截拦，截拦器会从threadlocal中取出分页信息，把分页
+
+信息加到sql语句中，实现了分页查旬：
+
+```
+List<Country> list = countryMapper.selectIf(1);
+```
+
+
+
+PageInterceptor插件源代码如下：
+
+```java
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014-2017 abel533@gmail.com
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+package com.github.pagehelper;
+
+import org.apache.ibatis.cache.CacheKey;
+import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.plugin.*;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
+
+import java.util.Properties;
+
+/**
+ * QueryInterceptor 规范
+ *
+ * 详细说明见文档：https://github.com/pagehelper/Mybatis-PageHelper/blob/master/wikis/zh/Interceptor.md
+ *
+ * @author liuzh/abel533/isea533
+ * @version 1.0.0
+ */
+@Intercepts(
+    {
+        @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}),
+        @Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class, CacheKey.class, BoundSql.class}),
+    }
+)
+public class QueryInterceptor implements Interceptor {
+
+    @Override
+    public Object intercept(Invocation invocation) throws Throwable {
+        Object[] args = invocation.getArgs();
+        MappedStatement ms = (MappedStatement) args[0];
+        Object parameter = args[1];
+        RowBounds rowBounds = (RowBounds) args[2];
+        ResultHandler resultHandler = (ResultHandler) args[3];
+        Executor executor = (Executor) invocation.getTarget();
+        CacheKey cacheKey;
+        BoundSql boundSql;
+        //由于逻辑关系，只会进入一次
+        if(args.length == 4){
+            //4 个参数时
+            boundSql = ms.getBoundSql(parameter);
+            cacheKey = executor.createCacheKey(ms, parameter, rowBounds, boundSql);
+        } else {
+            //6 个参数时
+            cacheKey = (CacheKey) args[4];
+            boundSql = (BoundSql) args[5];
+        }
+        //TODO 自己要进行的各种处理
+        //注：下面的方法可以根据自己的逻辑调用多次，在分页插件中，count 和 page 各调用了一次
+        return executor.query(ms, parameter, rowBounds, resultHandler, cacheKey, boundSql);
+    }
+
+    @Override
+    public Object plugin(Object target) {
+        return Plugin.wrap(target, this);
+    }
+
+    @Override
+    public void setProperties(Properties properties) {
+    }
+
+}
+```
+
+
+
+
 
