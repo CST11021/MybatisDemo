@@ -224,8 +224,7 @@ public class Configuration {
     // FAILING: 映射失败 (抛出 SqlSessionException)
     protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior = AutoMappingUnknownColumnBehavior.NONE;
     /**
-     * Configuration factory class.
-     * Used to create Configuration for loading deserialized unread properties.
+     * 配置工厂类，用于创建配置以加载反序列化的未读属性
      *
      * @see <a href='https://code.google.com/p/mybatis/issues/detail?id=300'>Issue 300 (google code)</a>
      */

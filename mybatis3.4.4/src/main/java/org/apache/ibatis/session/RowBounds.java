@@ -22,23 +22,16 @@ package org.apache.ibatis.session;
  */
 public class RowBounds {
 
+    /** 默认的分页起始偏移量：0 */
     public static final int NO_ROW_OFFSET = 0;
-
+    /** 分页最大偏移量 */
     public static final int NO_ROW_LIMIT = Integer.MAX_VALUE;
-
-    /**
-     * 表示默认的分页条件
-     */
+    /** 表示默认的分页条件 */
     public static final RowBounds DEFAULT = new RowBounds();
 
-    /**
-     * 起始索引
-     */
+    /** 起始索引 */
     private int offset;
-
-    /**
-     * 每页大小
-     */
+    /** 每页大小 */
     private int limit;
 
     public RowBounds() {

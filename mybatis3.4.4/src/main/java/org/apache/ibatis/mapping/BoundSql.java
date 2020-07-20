@@ -28,12 +28,9 @@ import java.util.Map;
  * <if/>节点的计算，是由SqlSource对象完成的。
  *
  * <p>
- * An actual SQL String got from an {@link SqlSource} after having processed any dynamic content.
- * The SQL may have SQL placeholders "?" and an list (ordered) of an parameter mappings
- * with the additional information for each parameter (at least the property name of the input object to read
- * the value from).
- * </br>
- * Can also have additional parameters that are created by the dynamic language (for loops, bind...).
+ * 处理任何动态内容后，从{@link SqlSource}获取的实际SQL字符串.
+ * SQL可能具有SQL占位符“？”以及参数映射的列表（有序）以及每个参数的附加信息（至少是从中读取值的输入对象的属性名称）.
+ * 也可以具有由动态语言创建的其他参数（用于循环，绑定...）.
  *
  * @author Clinton Begin
  */

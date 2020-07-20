@@ -422,7 +422,7 @@ public class XMLConfigBuilder extends BaseBuilder {
                         XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
                         mapperParser.parse();
                     }
-                    // 使用rul属性
+                    // 使用url属性
                     else if (resource == null && url != null && mapperClass == null) {
                         ErrorContext.instance().resource(url);
                         InputStream inputStream = Resources.getUrlAsStream(url);

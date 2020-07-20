@@ -32,8 +32,11 @@ public class MetaObject {
 
     /** 原始的一个对象 */
     private Object originalObject;
-    private ObjectWrapper objectWrapper;
+
     private ObjectFactory objectFactory;
+    /** 对象包装器 */
+    private ObjectWrapper objectWrapper;
+    /** 对象包装器工厂：用于获取 */
     private ObjectWrapperFactory objectWrapperFactory;
     private ReflectorFactory reflectorFactory;
 

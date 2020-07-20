@@ -58,7 +58,23 @@ public class ErrorContext {
     }
 
     /**
-     * 保存当前线程的上下文
+     * 重置上下文，并将从当前线程移除，一般在创建SqlSession的时候，会将当前上下文reset调
+     *
+     * @return
+     */
+    public ErrorContext reset() {
+        resource = null;
+        activity = null;
+        object = null;
+        message = null;
+        sql = null;
+        cause = null;
+        LOCAL.remove();
+        return this;
+    }
+
+    /**
+     * 创建并返回一个ErrorContext实例，并保存当前线程的上下文
      *
      * @return
      */
@@ -83,6 +99,7 @@ public class ErrorContext {
 
     /**
      * 设置当前error上下文来自于哪个mapper.xml文件
+     *
      * @param resource
      * @return
      */
@@ -134,21 +151,7 @@ public class ErrorContext {
         return this;
     }
 
-    /**
-     * 重置上下文，并将从当前线程移除
-     *
-     * @return
-     */
-    public ErrorContext reset() {
-        resource = null;
-        activity = null;
-        object = null;
-        message = null;
-        sql = null;
-        cause = null;
-        LOCAL.remove();
-        return this;
-    }
+
 
     @Override
     public String toString() {

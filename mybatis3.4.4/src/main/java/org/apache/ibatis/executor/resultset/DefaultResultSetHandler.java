@@ -140,40 +140,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     }
 
 
-    // HANDLE OUTPUT PARAMETER
-    @Override
-    public void handleOutputParameters(CallableStatement cs) throws SQLException {
-        final Object parameterObject = parameterHandler.getParameterObject();
-        final MetaObject metaParam = configuration.newMetaObject(parameterObject);
-        final List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
-        for (int i = 0; i < parameterMappings.size(); i++) {
-            final ParameterMapping parameterMapping = parameterMappings.get(i);
-            if (parameterMapping.getMode() == ParameterMode.OUT || parameterMapping.getMode() == ParameterMode.INOUT) {
-                if (ResultSet.class.equals(parameterMapping.getJavaType())) {
-                    handleRefCursorOutputParameter((ResultSet) cs.getObject(i + 1), parameterMapping, metaParam);
-                } else {
-                    final TypeHandler<?> typeHandler = parameterMapping.getTypeHandler();
-                    metaParam.setValue(parameterMapping.getProperty(), typeHandler.getResult(cs, i + 1));
-                }
-            }
-        }
-    }
-    private void handleRefCursorOutputParameter(ResultSet rs, ParameterMapping parameterMapping, MetaObject metaParam) throws SQLException {
-        if (rs == null) {
-            return;
-        }
-        try {
-            final String resultMapId = parameterMapping.getResultMapId();
-            final ResultMap resultMap = configuration.getResultMap(resultMapId);
-            final DefaultResultHandler resultHandler = new DefaultResultHandler(objectFactory);
-            final ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration);
-            handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
-            metaParam.setValue(parameterMapping.getProperty(), resultHandler.getResultList());
-        } finally {
-            // issue #228 (close resultsets)
-            closeResultSet(rs);
-        }
-    }
+
 
 
 
@@ -181,7 +148,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     /* --------------------------------------- 处理结果 ---------------------------------------------- */
 
-    // 程序执行调用该方法前，已经通过 statement.execute()方法执行了sql语句，该方法主要对结果集进行处理
+    /**
+     * 处理集合类型的结果集
+     *
+     * @param stmt
+     * @return
+     * @throws SQLException
+     */
     @Override
     public List<Object> handleResultSets(Statement stmt) throws SQLException {
         ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
@@ -225,6 +198,14 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         return collapseSingleResultList(multipleResults);
     }
 
+    /**
+     * 处理游标类型的结果集
+     *
+     * @param stmt
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
     @Override
     public <E> Cursor<E> handleCursorResultSets(Statement stmt) throws SQLException {
         ErrorContext.instance().activity("handling cursor results").object(mappedStatement.getId());
@@ -241,6 +222,46 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
         ResultMap resultMap = resultMaps.get(0);
         return new DefaultCursor<E>(this, resultMap, rsw, rowBounds);
+    }
+
+    /**
+     * 处理存储过程的结果集
+     *
+     * @param cs
+     * @throws SQLException
+     */
+    @Override
+    public void handleOutputParameters(CallableStatement cs) throws SQLException {
+        final Object parameterObject = parameterHandler.getParameterObject();
+        final MetaObject metaParam = configuration.newMetaObject(parameterObject);
+        final List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+        for (int i = 0; i < parameterMappings.size(); i++) {
+            final ParameterMapping parameterMapping = parameterMappings.get(i);
+            if (parameterMapping.getMode() == ParameterMode.OUT || parameterMapping.getMode() == ParameterMode.INOUT) {
+                if (ResultSet.class.equals(parameterMapping.getJavaType())) {
+                    handleRefCursorOutputParameter((ResultSet) cs.getObject(i + 1), parameterMapping, metaParam);
+                } else {
+                    final TypeHandler<?> typeHandler = parameterMapping.getTypeHandler();
+                    metaParam.setValue(parameterMapping.getProperty(), typeHandler.getResult(cs, i + 1));
+                }
+            }
+        }
+    }
+    private void handleRefCursorOutputParameter(ResultSet rs, ParameterMapping parameterMapping, MetaObject metaParam) throws SQLException {
+        if (rs == null) {
+            return;
+        }
+        try {
+            final String resultMapId = parameterMapping.getResultMapId();
+            final ResultMap resultMap = configuration.getResultMap(resultMapId);
+            final DefaultResultHandler resultHandler = new DefaultResultHandler(objectFactory);
+            final ResultSetWrapper rsw = new ResultSetWrapper(rs, configuration);
+            handleRowValues(rsw, resultMap, resultHandler, new RowBounds(), null);
+            metaParam.setValue(parameterMapping.getProperty(), resultHandler.getResultList());
+        } finally {
+            // issue #228 (close resultsets)
+            closeResultSet(rs);
+        }
     }
 
     /* --------------------------------------- 处理结果 ---------------------------------------------- */
@@ -289,9 +310,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             closeResultSet(rsw.getResultSet());
         }
     }
-    // HANDLE ROWS FOR SIMPLE RESULTMAP
+    // handle rows for simple resultmap
     public void handleRowValues(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler, RowBounds rowBounds, ResultMapping parentMapping) throws SQLException {
         if (resultMap.hasNestedResultMaps()) {
+            // 检查是否带有offset和limit分页条件，如果safeRowBoundsEnabled = true（即启用行内嵌套语句），并且设置了分页条件，则报错
             ensureNoRowBounds();
             checkResultHandler();
             handleRowValuesForNestedResultMap(rsw, resultMap, resultHandler, rowBounds, parentMapping);
@@ -308,6 +330,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             // ignore
         }
     }
+
+    /**
+     * 检查是否带有offset和limit分页条件，如果safeRowBoundsEnabled = true（即启用行内嵌套语句），并且设置了分页条件，则报错
+     */
     private void ensureNoRowBounds() {
         if (configuration.isSafeRowBoundsEnabled() && rowBounds != null && (rowBounds.getLimit() < RowBounds.NO_ROW_LIMIT || rowBounds.getOffset() > RowBounds.NO_ROW_OFFSET)) {
             throw new ExecutorException("Mapped Statements with nested result mappings cannot be safely constrained by RowBounds. "
@@ -315,6 +341,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         }
     }
     protected void checkResultHandler() {
+        // 允许在嵌套语句中使用分页（ResultHandler），默认true
         if (resultHandler != null && configuration.isSafeResultHandlerEnabled() && !mappedStatement.isResultOrdered()) {
             throw new ExecutorException("Mapped Statements with nested result mappings cannot be safely used with a custom ResultHandler. "
                     + "Use safeResultHandlerEnabled=false setting to bypass this check "

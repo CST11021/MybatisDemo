@@ -23,11 +23,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ *
+ *
  * @author Clinton Begin
  */
 public abstract class BaseWrapper implements ObjectWrapper {
 
     protected static final Object[] NO_ARGUMENTS = new Object[0];
+
     protected MetaObject metaObject;
 
     protected BaseWrapper(MetaObject metaObject) {

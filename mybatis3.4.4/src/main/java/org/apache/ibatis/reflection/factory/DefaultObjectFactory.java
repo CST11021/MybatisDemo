@@ -28,11 +28,25 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
 
     private static final long serialVersionUID = -8855120656740914948L;
 
+    /**
+     * 使用默认构造器创建一个 T 的实例
+     *
+     * @param type Object type
+     * @return
+     */
     @Override
     public <T> T create(Class<T> type) {
         return create(type, null, null);
     }
 
+    /**
+     * 使用自定义的构造器和参数来创建一个 T 实例
+     *
+     * @param type                  T实例的类型
+     * @param constructorArgTypes   构造器的参数类型
+     * @param constructorArgs       构造器的参数值
+     * @return
+     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T create(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
@@ -41,11 +55,25 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
         return (T) instantiateClass(classToCreate, constructorArgTypes, constructorArgs);
     }
 
+    /**
+     * 设置对象的属性
+     *
+     * @param properties configuration properties
+     */
     @Override
     public void setProperties(Properties properties) {
         // no props for default
     }
 
+    /**
+     * 初始化一个类实例
+     *
+     * @param type
+     * @param constructorArgTypes
+     * @param constructorArgs
+     * @param <T>
+     * @return
+     */
     <T> T instantiateClass(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
         try {
             Constructor<T> constructor;
@@ -88,7 +116,11 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
     }
 
     /**
-     * 处理接口类型对应的实现类型
+     * 处理接口类型对应的实现类型：
+     * List -> ArrayList
+     * Set -> HashSet
+     * Map -> HashMap
+     * SortedSet -> TreeSet
      *
      * @param type
      * @return
@@ -110,6 +142,16 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
         return classToCreate;
     }
 
+    /**
+     * 判断 T 是否为集合类型
+     *
+     * Returns true if this object can have a set of other objects.
+     * It's main purpose is to support non-java.util.Collection objects like Scala collections.
+     *
+     * @param type T实例的类型
+     * @return whether it is a collection or not
+     * @since 3.1.0
+     */
     @Override
     public <T> boolean isCollection(Class<T> type) {
         return Collection.class.isAssignableFrom(type);

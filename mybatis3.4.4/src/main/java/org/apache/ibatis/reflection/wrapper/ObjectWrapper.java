@@ -22,7 +22,7 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import java.util.List;
 
 /**
- * 对应包装器：
+ * 对象包装器
  *
  * @author Clinton Begin
  */

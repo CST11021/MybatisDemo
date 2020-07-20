@@ -40,7 +40,7 @@ public class DefaultSqlSessionTest {
         params.put("worktype","开发工程师");
 
         SqlSession session = sqlSessionFactory.openSession();
-        Map<String, Map<String,String>> result = session.selectMap("findEmployeerByDepartmentAndWorktype", params, "employeer_id");
+        Map<String, Map<String, String>> result = session.selectMap("findEmployeerByDepartmentAndWorktype", params, "employeer_id");
         System.out.println(result);
 
         session.close();

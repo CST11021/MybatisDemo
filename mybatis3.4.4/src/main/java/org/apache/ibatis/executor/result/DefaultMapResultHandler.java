@@ -31,8 +31,9 @@ import org.apache.ibatis.session.ResultHandler;
  */
 public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
 
+    /** 默认使用HashMap实现 */
     private final Map<K, V> mappedResults;
-    /** 表示map中对应的key */
+    /** 表示map中对应的key的属性名，对应SQL中的字段名，例如：employeer_id */
     private final String mapKey;
     /** 用于将结果对象转为{@link MetaObject}的对象工厂 */
     private final ObjectFactory objectFactory;
@@ -50,9 +51,10 @@ public class DefaultMapResultHandler<K, V> implements ResultHandler<V> {
 
     @Override
     public void handleResult(ResultContext<? extends V> context) {
+        // 获取SQL执行后的结果集，可能是单条，也可能是多条，也可能是数值
         final V value = context.getResultObject();
         final MetaObject mo = MetaObject.forObject(value, objectFactory, objectWrapperFactory, reflectorFactory);
-        // TODO is that assignment always true?
+        // 获取key的值
         final K key = (K) mo.getValue(mapKey);
         mappedResults.put(key, value);
     }
