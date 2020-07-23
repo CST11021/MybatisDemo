@@ -50,9 +50,10 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
         this.sqlSessionFactory = sqlSessionFactory;
 
         // 使用JDK动态代理创建一个 SqlSession 代理对象
-        this.sqlSessionProxy = (SqlSession)Proxy.newProxyInstance(SqlSessionFactory.class.getClassLoader(),
-                                                                  new Class[] {SqlSession.class},
-                                                                  new SqlSessionInterceptor());
+        this.sqlSessionProxy = (SqlSession) Proxy.newProxyInstance(
+                SqlSessionFactory.class.getClassLoader(),
+                new Class[] { SqlSession.class },
+                new SqlSessionInterceptor());
     }
 
     public static SqlSessionManager newInstance(Reader reader) {
