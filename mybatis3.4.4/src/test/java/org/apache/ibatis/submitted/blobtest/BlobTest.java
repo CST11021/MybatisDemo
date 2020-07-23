@@ -40,7 +40,7 @@ public class BlobTest {
 
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            conn = DriverManager.getConnection("jdbc:hsqldb:mem:blobtest", "sa",
+            conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:blobtest", "sa",
                     "");
 
             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/blobtest/CreateDB.sql");

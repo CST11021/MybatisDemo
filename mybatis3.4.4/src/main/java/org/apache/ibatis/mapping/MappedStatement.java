@@ -50,38 +50,43 @@ public final class MappedStatement {
      * Employeer employeer = session.selectOne("com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
      */
     private String id;
-
     /** 如果没有特别指定fetchSize，默认为null */
     private Integer fetchSize;
     /** 如果没有特别指定timeout，默认为null */
     private Integer timeout;
-
-    /** 表示 Statement 接口的实现类型，Mybastic中有STATEMENT, PREPARED, CALLABLE三种类型，分别对应底层JDBC执行数据库操作的三种实现方式，它们分别是：Statement、PreparedStatement和CallableStatement的三种方式 */
+    /** 表示 Statement 接口的实现类型，对应CURD SQL的 statementType 属性配置，Mybastic中有STATEMENT, PREPARED, CALLABLE三种类型，分别对应底层JDBC执行数据库操作的三种实现方式，它们分别是：Statement、PreparedStatement和CallableStatement的三种方式 */
     private StatementType statementType;
+    /** 对应CURD SQL的 resultSetType 属性配置 */
     private ResultSetType resultSetType;
     /** 封装对应的SQL语句，SqlSource接口有多个实现，解析时根据不同的sql类型，使用不同的实现类 */
     private SqlSource sqlSource;
+    /** 对应二级缓存的缓存实例，二级缓存是mapper级别的缓存，也就是同一个namespace的mappe.xml，当多个SqlSession使用同一个Mapper操作数据库的时候，得到的数据会缓存在同一个二级缓存区域 */
     private Cache cache;
     /** 封装对应的 parameterType 属性配置 */
     private ParameterMap parameterMap;
-    /** 封装对应的 resultMap 属性配置 */
+    /** 封装对应的<resultMap>标签配置，一个Mapper接口可以配置多个<resultMap>标签，所以是一个集合类型 */
     private List<ResultMap> resultMaps;
     /** 对应flushCache 属性配置，缓存相关配置表示是否及时清空缓存 */
     private boolean flushCacheRequired;
+    /** 对应的CURD SQL的 useCache 属性配置，表示是否启用/禁用二级缓存 */
     private boolean useCache;
+    /** 这个设置仅针对嵌套结果 select 语句：如果为 true，将会假设包含了嵌套结果集或是分组，当返回一个主结果行时，就不会产生对前面结果集的引用。 这就使得在获取嵌套结果集的时候不至于内存不够用。默认值：false。 */
     private boolean resultOrdered;
     private SqlCommandType sqlCommandType;
     /** 对应返回主键相关配置，如：useGeneratedKeys="true" keyProperty="employeer_id" */
     private KeyGenerator keyGenerator;
-    /**  */
+    /** selectKey 语句结果应该被设置到的目标属性。如果生成列不止一个，可以用逗号分隔多个属性名称 */
     private String[] keyProperties;
+    /** 返回结果集中生成列属性的列名。如果生成列不止一个，可以用逗号分隔多个属性名称 */
     private String[] keyColumns;
 
     private boolean hasNestedResultMaps;
+    /** 如果配置了数据库厂商标识（databaseIdProvider），MyBatis 会加载所有不带 databaseId 或匹配当前 databaseId 的语句；如果带和不带的语句都有，则不带的会被忽略 */
     private String databaseId;
     /** 表示相应的日志实现 */
     private Log statementLog;
     private LanguageDriver lang;
+    /** 这个设置仅适用于多结果集的情况。它将列出语句执行后返回的结果集并赋予每个结果集一个名称，多个名称之间以逗号分隔 */
     private String[] resultSets;
 
     /**
@@ -208,6 +213,12 @@ public final class MappedStatement {
             return mappedStatement;
         }
     }
+    /**
+     * 将输入的字符串","分隔，以数组的方式返回
+     *
+     * @param in
+     * @return
+     */
     private static String[] delimitedStringToArray(String in) {
         if (in == null || in.trim().length() == 0) {
             return null;

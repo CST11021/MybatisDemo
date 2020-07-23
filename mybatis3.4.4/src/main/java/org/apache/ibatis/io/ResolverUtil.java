@@ -25,10 +25,11 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
 /**
- * <p>ResolverUtil is used to locate classes that are available in the/a class path and meet
- * arbitrary conditions. The two most common conditions are that a class implements/extends
- * another class, or that is it annotated with a specific annotation. However, through the use
- * of the {@link Test} class it is possible to search using arbitrary conditions.</p>
+ * 用于查找某个类的类实例
+ *
+ *
+ * <p>ResolverUtil用于查找例如：/a类路径中可用并满足任意条件的类.
+ * 最常见的两个条件是，一个类实现/扩展了另一个类，或者用特定的注释对其进行了注释。但是，通过使用{@link Test}类，可以使用任意条件进行搜索。
  *
  * <p>A ClassLoader is used to locate all locations (directories and jar files) in the class
  * path that contain classes within certain packages, and then to load those classes and
@@ -60,25 +61,40 @@ public class ResolverUtil<T> {
 
     private static final Log log = LogFactory.getLog(ResolverUtil.class);
 
-    // ResolverUtil产生的一个结果集
+    /** ResolverUtil产生的一个结果集 */
     private Set<Class<? extends T>> matches = new HashSet<Class<? extends T>>();
     private ClassLoader classloader;
 
-    // 定义一个接口，用于确定它们是否被包含在由resolverutil产生的结果
+    /**
+     * 定义一个接口，用于确定它们是否被包含在由resolverutil产生的结果
+     */
     public static interface Test {
-        // 将多次调用候选的class，如果这个方法返回true，则表示这个Class可以注册到matches
+        /**
+         * 将多次调用候选的class，如果这个方法返回true，则表示这个Class可以注册到matches
+         *
+         * @param type
+         * @return
+         */
         boolean matches(Class<?> type);
     }
 
-    // 封装一个父类的Class，并实现Test接口，用于匹配这个parent的所有对象
+    /**
+     * 如果type可以是parent的实例，则返回true
+     */
     public static class IsA implements Test {
+
         private Class<?> parent;
 
         public IsA(Class<?> parentType) {
             this.parent = parentType;
         }
 
-        // 如果type可以是parent的对象，则返回true
+        /**
+         * 如果type可以是parent的实例，则返回true
+         *
+         * @param type
+         * @return
+         */
         @Override
         public boolean matches(Class<?> type) {
             return type != null && parent.isAssignableFrom(type);
@@ -90,7 +106,9 @@ public class ResolverUtil<T> {
         }
     }
 
-    // 同IsA（针对注解类）
+    /**
+     * 同IsA（针对注解类）
+     */
     public static class AnnotatedWith implements Test {
         private Class<? extends Annotation> annotation;
 
@@ -109,6 +127,14 @@ public class ResolverUtil<T> {
         }
     }
 
+
+    /**
+     * 查找指定包路径下的所有类，如果是parent的类实例，则将其添加到matches
+     *
+     * @param parent
+     * @param packageNames
+     * @return
+     */
     public ResolverUtil<T> findImplementations(Class<?> parent, String... packageNames) {
         if (packageNames == null) {
             return this;
@@ -135,7 +161,13 @@ public class ResolverUtil<T> {
         return this;
     }
 
-    // 查找这packageName包路径下所有的class，如果匹配这个test则将其注册到matches
+    /**
+     * 查找这packageName包路径下所有的class，如果匹配这个test则将其注册到matches
+     *
+     * @param test
+     * @param packageName
+     * @return
+     */
     public ResolverUtil<T> find(Test test, String packageName) {
         String path = getPackagePath(packageName);
 
@@ -154,13 +186,22 @@ public class ResolverUtil<T> {
         return this;
     }
 
-    // 将包名转化为包路径，如：java.lang.util --> java/lang/util
+    /**
+     * 将包名转化为包路径，如：java.lang.util --> java/lang/util
+     *
+     * @param packageName
+     * @return
+     */
     protected String getPackagePath(String packageName) {
         return packageName == null ? null : packageName.replace('.', '/');
     }
 
-    // fqn表示一个class的包路径，比如：com/whz/mapperinterface/com.whz.mapperinterface.IEmployeerMapper.class
-    // 如果这个fqn表示的类是这个test中父类的对象，则将该类加入到matches
+    /**
+     * 如果fqn对应的类是 test 对应的parent Class的实例，则将该类加入到matches
+     *
+     * @param test  封装一个Class，并提供一个指定的类型是否为该class的实例的方法
+     * @param fqn   fqn表示一个class类的路径，比如：com/whz/mapperinterface/com.whz.mapperinterface.IEmployeerMapper.class
+     */
     @SuppressWarnings("unchecked")
     protected void addIfMatching(Test test, String fqn) {
         try {
@@ -181,15 +222,17 @@ public class ResolverUtil<T> {
         }
     }
 
+
+
+
     public Set<Class<? extends T>> getClasses() {
         return matches;
     }
-
     public ClassLoader getClassLoader() {
         return classloader == null ? Thread.currentThread().getContextClassLoader() : classloader;
     }
-
     public void setClassLoader(ClassLoader classloader) {
         this.classloader = classloader;
     }
+
 }

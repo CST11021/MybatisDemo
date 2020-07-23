@@ -42,7 +42,7 @@ public final class ImmutablePOJOTest {
 
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            conn = DriverManager.getConnection("jdbc:hsqldb:mem:lazy_immutable", "sa", "");
+            conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:lazy_immutable", "sa", "");
 
             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/lazy_immutable/CreateDB.sql");
 

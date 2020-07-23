@@ -35,7 +35,7 @@ public class AwfulTableTest {
   @Before
   public void setUp() throws Exception {
     Class.forName("org.hsqldb.jdbcDriver");
-    Connection conn = DriverManager.getConnection("jdbc:hsqldb:mem:attest", "sa", "");
+    Connection conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:attest", "sa", "");
 
     Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/awful_table/CreateDB.sql");
 

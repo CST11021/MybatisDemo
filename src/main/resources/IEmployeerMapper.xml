@@ -113,45 +113,4 @@
         where employeer_id = #{employeer_id}
     </update>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!--    <parameterMap id="" type=""></parameterMap>
-    <sql></sql>
-    <resultMap></resultMap>
-    <cache></cache>
-    <cache-ref></cache-ref>-->
-
-<!--    <select
-            id="select1"
-            parameterType="int"
-            parameterMap=""
-            resultType="employeer"
-            resultMap=""
-            flushCache=""
-            useCache=""
-            timeout=""
-            fetchSize=""
-            statementType=""
-            resultSetType=""
-            resultOrdered=""
-            resultSets=""
-            databaseId=""
-    >
-        select * from `t_employeer`
-        wheidr_id eidr_id}
-    </select>-->
-
 </mapper>

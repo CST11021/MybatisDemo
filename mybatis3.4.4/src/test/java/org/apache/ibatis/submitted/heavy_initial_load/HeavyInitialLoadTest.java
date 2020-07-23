@@ -40,7 +40,7 @@ public class HeavyInitialLoadTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:heavy_initial_load", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:heavy_initial_load", "sa", "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/heavy_initial_load/ibatisConfig.xml");
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);

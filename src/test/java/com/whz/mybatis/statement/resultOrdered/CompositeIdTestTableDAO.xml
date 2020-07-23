@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.whz.mybatis.statement.resultOrdered.CompositeIdTestTableDAO">
+
+    <select id="getAll" resultType="com.whz.mybatis.statement.resultOrdered.CompositeIdTestTableVO">
+        select * from composite_id_test_table
+    </select>
+
+</mapper>

@@ -18,6 +18,8 @@ package org.apache.ibatis.cache;
 import java.util.concurrent.locks.ReadWriteLock;
 
 /**
+ * 缓存相关参考：https://mybatis.org/mybatis-3/zh/sqlmap-xml.html#cache
+ *
  * 用于缓存提供程序的SPI。
  * 将为每个名称空间创建一个缓存实例。
  * 缓存实现必须有一个将缓存id作为字符串参数接收的构造函数。

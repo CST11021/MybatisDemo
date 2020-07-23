@@ -303,6 +303,11 @@ public class XNode {
         return children;
     }
 
+    /**
+     * 获取所有的子标签，并将子标签中的name和value属性返回
+     *
+     * @return
+     */
     public Properties getChildrenAsProperties() {
         Properties properties = new Properties();
         for (XNode child : getChildren()) {

@@ -40,7 +40,7 @@ public class OrderPrefixRemoved {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:order_prefix_removed", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:order_prefix_removed", "sa", "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/order_prefix_removed/CreateDB.sql");
 

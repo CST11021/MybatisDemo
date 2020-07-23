@@ -39,7 +39,7 @@ public class CountTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:gname", "sa",
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:gname", "sa",
           "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/count/CreateDB.sql");

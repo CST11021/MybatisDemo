@@ -231,7 +231,7 @@ public class XmlConfigBuilderTest {
     InputStream inputStream = Resources.getResourceAsStream(resource);
     XMLConfigBuilder builder = new XMLConfigBuilder(inputStream);
     Configuration config = builder.parse();
-    assertThat(config.getVariables().get("driver").toString(), is("org.apache.derby.jdbc.EmbeddedDriver"));
+    assertThat(config.getVariables().get("driver").toString(), is("org.apache.derby.jdbcBase.EmbeddedDriver"));
     assertThat(config.getVariables().get("prop1").toString(), is("bbbb"));
 
   }
@@ -287,7 +287,7 @@ public class XmlConfigBuilderTest {
     final String MAPPER_CONFIG = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
             + "<!DOCTYPE configuration PUBLIC \"-//mybatis.org//DTD Config 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-config.dtd\">\n"
             + "<configuration>\n"
-            + "  <properties resource=\"a/b/c/foo.properties\" url=\"file:./a/b/c/jdbc.properties\"/>\n"
+            + "  <properties resource=\"a/b/c/foo.properties\" url=\"file:./a/b/c/jdbcBase.properties\"/>\n"
             + "</configuration>\n";
 
     expectedException.expect(BuilderException.class);

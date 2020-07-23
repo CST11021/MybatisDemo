@@ -38,7 +38,7 @@ public class ComplexColumnTest {
 
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            conn = DriverManager.getConnection("jdbc:hsqldb:mem:complex_column", "sa",
+            conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:complex_column", "sa",
                     "");
 
             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/complex_column/CreateDB.sql");

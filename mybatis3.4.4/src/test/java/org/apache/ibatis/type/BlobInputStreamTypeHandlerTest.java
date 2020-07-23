@@ -56,7 +56,7 @@ public class BlobInputStreamTypeHandlerTest extends BaseTypeHandlerTest {
 
   @BeforeClass
   public static void setupSqlSessionFactory() throws Exception {
-    DataSource dataSource = BaseDataTest.createUnpooledDataSource("org/apache/ibatis/type/jdbc.properties");
+    DataSource dataSource = BaseDataTest.createUnpooledDataSource("org/apache/ibatis/type/jdbcBase.properties");
     BaseDataTest.runScript(dataSource, "org/apache/ibatis/type/BlobInputStreamTypeHandlerTest.sql");
     TransactionFactory transactionFactory = new JdbcTransactionFactory();
     Environment environment = new Environment("Production", transactionFactory, dataSource);

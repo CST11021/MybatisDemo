@@ -27,7 +27,7 @@ import java.util.HashMap;
  * inline-parameter = (propertyName | expression) oldJdbcType attributes
  * propertyName = /expression language's property navigation path/
  * expression = '(' /expression language's expression/ ')'
- * oldJdbcType = ':' /any valid jdbc type/
+ * oldJdbcType = ':' /any valid jdbcBase type/
  * attributes = (',' attribute)*
  * attribute = name '=' value
  * </pre>

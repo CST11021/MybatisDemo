@@ -45,7 +45,7 @@ public final class ImmutablePOJOTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:immutable_constructor", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:immutable_constructor", "sa", "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/immutable_constructor/CreateDB.sql");
 

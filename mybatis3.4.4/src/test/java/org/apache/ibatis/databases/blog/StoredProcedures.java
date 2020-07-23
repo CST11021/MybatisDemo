@@ -19,7 +19,7 @@ import java.sql.*;
 
 public class StoredProcedures {
   public static void selectTwoSetsOfTwoAuthors(int p1, int p2, ResultSet[] rs1, ResultSet[] rs2) throws SQLException {
-    Connection conn = DriverManager.getConnection("jdbc:default:connection");
+    Connection conn = DriverManager.getConnection("jdbcBase:default:connection");
     PreparedStatement ps1 = conn.prepareStatement("select * from author where id in (?,?)");
     ps1.setInt(1, p1);
     ps1.setInt(2, p2);
@@ -32,7 +32,7 @@ public class StoredProcedures {
   }
 
   public static void insertAuthor(int id, String username, String password, String email) throws SQLException {
-    Connection conn = DriverManager.getConnection("jdbc:default:connection");
+    Connection conn = DriverManager.getConnection("jdbcBase:default:connection");
     try {
       PreparedStatement ps = conn.prepareStatement("INSERT INTO author (id, username, password, email) VALUES (?,?,?,?)");
       ps.setInt(1, id);
@@ -46,7 +46,7 @@ public class StoredProcedures {
   }
 
   public static void selectAuthorViaOutParams(int id, String[] username, String[] password, String[] email, String[] bio) throws SQLException {
-    Connection conn = DriverManager.getConnection("jdbc:default:connection");
+    Connection conn = DriverManager.getConnection("jdbcBase:default:connection");
     PreparedStatement ps = conn.prepareStatement("select * from author where id = ?");
     ps.setInt(1, id);
     ResultSet rs = ps.executeQuery();

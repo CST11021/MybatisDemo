@@ -44,7 +44,7 @@ public class ForceFlushOnSelectTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:force_flush_on_select", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:force_flush_on_select", "sa", "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/force_flush_on_select/CreateDB.sql");
       ScriptRunner runner = new ScriptRunner(conn);

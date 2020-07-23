@@ -42,7 +42,7 @@ public class NestedForEachTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:nested", "sa",
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:nested", "sa",
           "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/nested/CreateDB.sql");

@@ -45,7 +45,7 @@ public class ConfigurationTest {
 
     Assert.assertThat(configuration.getJdbcTypeForNull(), Is.is(JdbcType.NULL));
     Assert.assertThat(((UnpooledDataSource) configuration.getEnvironment().getDataSource()).getUrl(),
-        Is.is("jdbc:hsqldb:mem:global_variables_defaults"));
+        Is.is("jdbcBase:hsqldb:mem:global_variables_defaults"));
     Assert.assertThat(configuration.getDatabaseId(), Is.is("hsql"));
     Assert.assertThat(((SupportClasses.CustomObjectFactory) configuration.getObjectFactory()).getProperties().getProperty("name"),
         Is.is("default"));
@@ -68,7 +68,7 @@ public class ConfigurationTest {
 
     Assert.assertThat(configuration.getJdbcTypeForNull(), Is.is(JdbcType.CHAR));
     Assert.assertThat(((UnpooledDataSource) configuration.getEnvironment().getDataSource()).getUrl(),
-        Is.is("jdbc:hsqldb:mem:global_variables_defaults_custom"));
+        Is.is("jdbcBase:hsqldb:mem:global_variables_defaults_custom"));
     Assert.assertThat(configuration.getDatabaseId(), IsNull.nullValue());
     Assert.assertThat(((SupportClasses.CustomObjectFactory) configuration.getObjectFactory()).getProperties().getProperty("name"),
         Is.is("custom"));

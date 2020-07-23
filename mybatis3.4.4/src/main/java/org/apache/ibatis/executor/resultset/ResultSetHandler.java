@@ -30,7 +30,20 @@ import java.util.List;
 public interface ResultSetHandler {
 
     /**
-     * 处理集合类型的结果集
+     * 处理集合类型的结果集，JDBC代码如下：
+     *
+     *         Class.forName(driver);
+     *         Connection connection = DriverManager.getConnection(url,username,password);
+     *         Statement statement = connection.createStatement();
+     *
+     *         statement.execute("SELECT * FROM USER");
+     *         ResultSet resultSet = statement.getResultSet();
+     *         while(resultSet.next()){
+     *             System.out.println("name: " + resultSet.getString("name"));
+     *         }
+     *
+     * Statement 执行完SQL后，可以通过Statement#getResultSet()获取结果集ResultSet对象，该方法用于将ResultSet中的数据转成myBastic
+     * 中配置的数据结构
      *
      * @param stmt
      * @param <E>

@@ -41,7 +41,7 @@ public class CriterionTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:aname", "sa",
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:aname", "sa",
           "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/criterion/CreateDB.sql");

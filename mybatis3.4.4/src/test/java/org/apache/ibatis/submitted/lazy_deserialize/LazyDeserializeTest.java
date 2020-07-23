@@ -63,7 +63,7 @@ public final class LazyDeserializeTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:lazy_deserialize", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:lazy_deserialize", "sa", "");
 
       Reader reader = Resources
           .getResourceAsReader("org/apache/ibatis/submitted/lazy_deserialize/CreateDB.sql");

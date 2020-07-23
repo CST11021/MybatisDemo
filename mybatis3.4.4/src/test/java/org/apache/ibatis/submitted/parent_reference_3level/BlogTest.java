@@ -44,7 +44,7 @@ public class BlogTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:parent_reference_3level", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:parent_reference_3level", "sa", "");
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/parent_reference_3level/CreateDB.sql");
       ScriptRunner runner = new ScriptRunner(conn);
       runner.setLogWriter(null);

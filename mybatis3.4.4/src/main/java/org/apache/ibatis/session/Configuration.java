@@ -100,7 +100,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  */
 public class Configuration {
 
-    /** 表示要解析的配置文件的文件名，例如：IEmployeerMapper.xml，配置文件可能有多个， */
+    /** 表示mybastic要解析的相关配置资源，包括.xml配置和Mapper接口 */
     protected final Set<String> loadedResources = new HashSet<String>();
 
     /** 表示当前环境对应的 environmentId，比如生产环境、测试环境等 */
@@ -128,10 +128,16 @@ public class Configuration {
     protected ProxyFactory proxyFactory = new JavassistProxyFactory();
     protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
 
+
     /** 在配置文件中<mapper/>里配置的<select>、<update>、<insert>和<delete>都会生成一个 MappedStatement 对象 */
     protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection");
     /** 保存所有的缓存实例Map<Mapper对应的命名空间, 对应的缓存实例> */
     protected final Map<String, Cache> caches = new StrictMap<Cache>("Caches collection");
+    /**
+     * 映射包含缓存-引用关系：关键字是引用绑定到另一个名称空间的缓存的名称空间，而值是实际缓存绑定到的名称空间
+     * 对某一命名空间的语句，只会使用该命名空间的缓存进行缓存或刷新，但你可能会想要在多个命名空间中共享相同的缓存配置和实例，要实现这种需求，你可以使用 cache-ref 元素来引用另一个缓存
+     */
+    protected final Map<String, String> cacheRefMap = new HashMap<String, String>();
     /**
      * 配置文件中<mapper/>里配置的<resultMap>解析完后都会注册到这里，并且特别需要注意的是，同一个ResultMap对象，会注册两次，分别使用不同的key进行注册，详细请看StrictMap的put方法
      */
@@ -163,8 +169,6 @@ public class Configuration {
     /** 保存未被加载的Method配置 */
     protected final Collection<MethodResolver> incompleteMethods = new LinkedList<MethodResolver>();
 
-    /** A map holds cache-ref relationship. The key is the namespace that references a cache bound to another namespace and the value is the namespace which the actual cache is bound to. */
-    protected final Map<String, String> cacheRefMap = new HashMap<String, String>();
 
 
 
@@ -578,7 +582,14 @@ public class Configuration {
         return mappedStatements.containsKey(statementName);
     }
 
+    /**
+     *
+     *
+     * @param namespace
+     * @param referencedNamespace
+     */
     public void addCacheRef(String namespace, String referencedNamespace) {
+        // 应用某命名空间引用的其他命名空间缓存
         cacheRefMap.put(namespace, referencedNamespace);
     }
 

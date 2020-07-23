@@ -49,28 +49,58 @@ public abstract class BaseBuilder {
     }
 
 
-
-
-
-
+    /**
+     * 解析正则表达式，并返回一个Pattern实例
+     *
+     * @param regex             正则表达式
+     * @param defaultValue      默认值的正则表达式
+     * @return
+     */
     protected Pattern parseExpression(String regex, String defaultValue) {
         return Pattern.compile(regex == null ? defaultValue : regex);
     }
 
-    // 将value解析为对应类型的值，如果value为空，则使用默认值
+    /**
+     * 将字符串value解析为boolean类型，如果value为空，则使用默认值
+     *
+     * @param value
+     * @param defaultValue
+     * @return
+     */
     protected Boolean booleanValueOf(String value, Boolean defaultValue) {
         return value == null ? defaultValue : Boolean.valueOf(value);
     }
+
+    /**
+     * 将字符串value解析为int类型，如果value为空，则使用默认值
+     *
+     * @param value
+     * @param defaultValue
+     * @return
+     */
     protected Integer integerValueOf(String value, Integer defaultValue) {
         return value == null ? defaultValue : Integer.valueOf(value);
     }
+
+    /**
+     * 将字符串value解析为Set<String>类型，多个值之间用逗号隔开，如果value为空，则使用默认值
+     *
+     * @param value
+     * @param defaultValue
+     * @return
+     */
     protected Set<String> stringSetValueOf(String value, String defaultValue) {
         value = (value == null ? defaultValue : value);
         return new HashSet<String>(Arrays.asList(value.split(",")));
     }
 
 
-    // 解析这个别名对应的jdbcType
+    /**
+     * 解析这个别名对应的jdbcType
+     *
+     * @param alias
+     * @return
+     */
     protected JdbcType resolveJdbcType(String alias) {
         if (alias == null) {
             return null;
@@ -82,7 +112,12 @@ public abstract class BaseBuilder {
         }
     }
 
-    // 解析这个结果集别名对应的，ResultSet类型，如：ResultSet.TYPE_FORWARD_ONLY、ResultSet.TYPE_SCROLL_INSENSITIVE、ResultSet.TYPE_SCROLL_SENSITIVE
+    /**
+     * 解析这个结果集别名对应的，ResultSet类型，如：ResultSet.TYPE_FORWARD_ONLY、ResultSet.TYPE_SCROLL_INSENSITIVE、ResultSet.TYPE_SCROLL_SENSITIVE
+     *
+     * @param alias
+     * @return
+     */
     protected ResultSetType resolveResultSetType(String alias) {
         if (alias == null) {
             return null;
@@ -94,6 +129,12 @@ public abstract class BaseBuilder {
         }
     }
 
+    /**
+     * 解析别名对应的ParameterMode，例如：IN, OUT, INOUT
+     *
+     * @param alias
+     * @return
+     */
     protected ParameterMode resolveParameterMode(String alias) {
         if (alias == null) {
             return null;
@@ -105,11 +146,18 @@ public abstract class BaseBuilder {
         }
     }
 
+    /**
+     * 根据别名对应的Class，创建相应的实例
+     *
+     * @param alias
+     * @return
+     */
     protected Object createInstance(String alias) {
         Class<?> clazz = resolveClass(alias);
         if (clazz == null) {
             return null;
         }
+
         try {
             return resolveClass(alias).newInstance();
         } catch (Exception e) {
@@ -118,7 +166,7 @@ public abstract class BaseBuilder {
     }
 
     /**
-     * 根据别名获取对应的java类型
+     * 根据别名获取对应的Class
      *
      * @param alias
      * @return
@@ -142,8 +190,10 @@ public abstract class BaseBuilder {
         if (type != null && !TypeHandler.class.isAssignableFrom(type)) {
             throw new BuilderException("Type " + type.getName() + " is not a valid TypeHandler because it does not implement TypeHandler interface");
         }
-        @SuppressWarnings("unchecked") // already verified it is a TypeHandler
-                Class<? extends TypeHandler<?>> typeHandlerType = (Class<? extends TypeHandler<?>>) type;
+
+        // already verified it is a TypeHandler
+        @SuppressWarnings("unchecked")
+        Class<? extends TypeHandler<?>> typeHandlerType = (Class<? extends TypeHandler<?>>) type;
         return resolveTypeHandler(javaType, typeHandlerType);
     }
 

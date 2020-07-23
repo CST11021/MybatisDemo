@@ -44,7 +44,7 @@ public class CommonPropertyDeferLoadError {
 
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            conn = DriverManager.getConnection("jdbc:hsqldb:mem:deferload_common_property", "sa",
+            conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:deferload_common_property", "sa",
                     "");
 
             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/deferload_common_property/CreateDB.sql");

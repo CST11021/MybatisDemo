@@ -23,9 +23,9 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 import java.sql.ResultSet;
 
 /**
- * 对应的mysql配置
+ * 对应的<parameterMap>的子标签<parameter>配置:
  *
- * <parameterMap class="User" id="insertUser-param">
+ * <parameterMap type="User" id="insertUser-param">
  *     <parameter property="username"/>
  *     <parameter property="password"/>
  * </parameterMap>
@@ -59,7 +59,9 @@ public class ParameterMapping {
     private Integer numericScale;
     /** 参数类型转换器 */
     private TypeHandler<?> typeHandler;
+    /** 对应<resultMap>的id属性 */
     private String resultMapId;
+    /**  */
     private String jdbcTypeName;
     private String expression;
 
@@ -163,7 +165,6 @@ public class ParameterMapping {
     public String getProperty() {
         return property;
     }
-
     /**
      * Used for handling output of callable statements
      * @return
@@ -171,7 +172,6 @@ public class ParameterMapping {
     public ParameterMode getMode() {
         return mode;
     }
-
     /**
      * Used for handling output of callable statements
      * @return
@@ -179,7 +179,6 @@ public class ParameterMapping {
     public Class<?> getJavaType() {
         return javaType;
     }
-
     /**
      * Used in the UnknownTypeHandler in case there is no handler for the property type
      * @return
@@ -187,7 +186,6 @@ public class ParameterMapping {
     public JdbcType getJdbcType() {
         return jdbcType;
     }
-
     /**
      * Used for handling output of callable statements
      * @return
@@ -195,7 +193,6 @@ public class ParameterMapping {
     public Integer getNumericScale() {
         return numericScale;
     }
-
     /**
      * Used when setting parameters to the PreparedStatement
      * @return
@@ -203,7 +200,6 @@ public class ParameterMapping {
     public TypeHandler<?> getTypeHandler() {
         return typeHandler;
     }
-
     /**
      * Used for handling output of callable statements
      * @return
@@ -211,7 +207,6 @@ public class ParameterMapping {
     public String getResultMapId() {
         return resultMapId;
     }
-
     /**
      * Used for handling output of callable statements
      * @return
@@ -219,7 +214,6 @@ public class ParameterMapping {
     public String getJdbcTypeName() {
         return jdbcTypeName;
     }
-
     /**
      * Not used
      * @return

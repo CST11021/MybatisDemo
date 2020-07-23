@@ -100,13 +100,13 @@ public class PooledDataSourceTest extends BaseDataTest {
     //  - CREATE DATABASE `test`;
     //  - SET GLOBAL wait_timeout=3;
     // 3. Tweak the connection info below.
-    final String URL = "jdbc:mysql://localhost:3306/test";
+    final String URL = "jdbcBase:mysql://localhost:3306/test";
     final String USERNAME = "admin";
     final String PASSWORD = "";
 
     Connection con;
     PooledDataSource ds = new PooledDataSource();
-    ds.setDriver("com.mysql.jdbc.Driver");
+    ds.setDriver("com.mysql.jdbcBase.Driver");
     ds.setUrl(URL);
     ds.setUsername(USERNAME);
     ds.setPassword(PASSWORD);

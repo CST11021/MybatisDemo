@@ -58,12 +58,11 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
     /** 表示 <mapper namespace="xxx"> 配置的命名空间，例如：<mapper namespace="com.whz.mapperinterface.IEmployeerMapper"> */
     private String currentNamespace;
-    /** 表示对应的配置文件 */
+    /** 表示当前解析对应的配置资源，一般对应的配置文件：IEmployeerMapper.xml，也有可能是使用注解的接口类 */
     private String resource;
     /** 表示命名空间对应的缓存实例 */
     private Cache currentCache;
     /** 表示当前命名空间共享的缓存实例是否还未被加载，比如：命名空间A和B、A引用的B的缓存，当加载A的缓存实例时，B还未加载 */
-    // issue #676
     private boolean unresolvedCacheRef;
 
     public MapperBuilderAssistant(Configuration configuration, String resource) {
@@ -73,9 +72,9 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
 
     /**
-     * 添加命名空间的引用，例如：
+     * 添加命名空间的前缀，例如：
      *
-     * @param base
+     * @param base          对应各类标签的id，例如：<sql id="whereCondition">, <select id="findAllEmployeer">等
      * @param isReference   是否引用当前的命名空间，如果为true，一般该配置的作用域对应每个mapper接口下
      * @return
      */
@@ -85,13 +84,12 @@ public class MapperBuilderAssistant extends BaseBuilder {
         }
 
         if (isReference) {
-            // is it qualified with any namespace yet?
-            // 它是否已经限定了任何名称空间?
+            // 它符合任何名称空间吗？
             if (base.contains(".")) {
                 return base;
             }
         } else {
-            // is it qualified with this namespace yet?
+            // 它符合此名称空间吗？
             if (base.startsWith(currentNamespace + ".")) {
                 return base;
             }
@@ -161,11 +159,21 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
 
     /**
-     * 获取一个<parameterMap>配置的实例
+     * build ParameterMap实例，并添加全局配置后返回
+     *
+     * <parameterMap type="User" id="insertUser-param">
+     *     <parameter property="username"/>
+     *     <parameter property="password"/>
+     * </parameterMap>
+     *
+     * <insert id="insertUser" parameterMap="insertUser-param">
+     *     insert into t_user values (null,?,?)
+     * </insert>
+     *
      *
      * @param id                    对应<parameterMap>的id配置
      * @param parameterClass        对应<parameterMap>的type配置
-     * @param parameterMappings     表示一个<parameterMap>配置的详细信息
+     * @param parameterMappings     表示一个<parameterMap>配置的详细信息，对应<parameter>标签配置
      * @return
      */
     public ParameterMap addParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
@@ -175,10 +183,22 @@ public class MapperBuilderAssistant extends BaseBuilder {
         return parameterMap;
     }
 
+    /**
+     * build ParameterMapping，入参对应<parameterMap>标签的属性
+     *
+     * @param parameterType     对应<parameterMap>标签的 type 属性
+     * @param property          对应<parameterMap>标签的 property 属性
+     * @param javaType          对应<parameterMap>标签的 javaType 属性
+     * @param jdbcType          对应<parameterMap>标签的 jdbcType 属性
+     * @param resultMap         对应<parameterMap>标签的 reusltMap 属性
+     * @param parameterMode     对应<parameterMap>标签的 model 属性
+     * @param typeHandler       对应<parameterMap>标签的 typeHandler 属性
+     * @param numericScale      对应<parameterMap>标签的 scale 属性
+     * @return
+     */
     public ParameterMapping buildParameterMapping(Class<?> parameterType, String property, Class<?> javaType, JdbcType jdbcType, String resultMap, ParameterMode parameterMode, Class<? extends TypeHandler<?>> typeHandler, Integer numericScale) {
         resultMap = applyCurrentNamespace(resultMap, true);
 
-        // Class parameterType = parameterMapBuilder.type();
         Class<?> javaTypeClass = resolveParameterJavaType(parameterType, property, javaType, jdbcType);
         TypeHandler<?> typeHandlerInstance = resolveTypeHandler(javaTypeClass, typeHandler);
 
@@ -534,7 +554,6 @@ public class MapperBuilderAssistant extends BaseBuilder {
     public String getCurrentNamespace() {
         return currentNamespace;
     }
-
     /**
      * 设置命名空间
      *
@@ -546,8 +565,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         }
 
         if (this.currentNamespace != null && !this.currentNamespace.equals(currentNamespace)) {
-            throw new BuilderException("Wrong namespace. Expected '"
-                    + this.currentNamespace + "' but found '" + currentNamespace + "'.");
+            throw new BuilderException("Wrong namespace. Expected '" + this.currentNamespace + "' but found '" + currentNamespace + "'.");
         }
 
         this.currentNamespace = currentNamespace;

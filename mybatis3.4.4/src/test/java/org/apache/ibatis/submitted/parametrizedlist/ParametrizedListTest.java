@@ -42,7 +42,7 @@ public class ParametrizedListTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:parametrizedlist", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:parametrizedlist", "sa", "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/parametrizedlist/CreateDB.sql");
 

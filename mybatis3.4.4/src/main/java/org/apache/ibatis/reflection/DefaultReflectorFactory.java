@@ -18,6 +18,9 @@ package org.apache.ibatis.reflection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * 获取Class对应的Reflector实例，Reflector封装了一些常用的反射方法
+ */
 public class DefaultReflectorFactory implements ReflectorFactory {
 
     /** 用于设置Class对应的Reflector实例是否可以缓存，默认可以缓存 */

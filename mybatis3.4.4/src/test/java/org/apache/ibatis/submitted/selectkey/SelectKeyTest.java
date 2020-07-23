@@ -44,7 +44,7 @@ public class SelectKeyTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:lname", "sa",
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:lname", "sa",
           "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/selectkey/CreateDB.sql");

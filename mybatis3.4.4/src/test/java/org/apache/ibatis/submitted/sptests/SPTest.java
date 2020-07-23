@@ -46,7 +46,7 @@ public class SPTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:sptest", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:sptest", "sa", "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/sptests/CreateDB.sql");
 

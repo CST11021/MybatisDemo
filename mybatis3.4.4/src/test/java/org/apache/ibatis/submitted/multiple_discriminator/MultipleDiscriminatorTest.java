@@ -38,7 +38,7 @@ public class MultipleDiscriminatorTest {
 
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            conn = DriverManager.getConnection("jdbc:hsqldb:mem:multiple_discriminator", "sa",
+            conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:multiple_discriminator", "sa",
                     "");
 
             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/multiple_discriminator/CreateDB.sql");

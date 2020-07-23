@@ -40,7 +40,7 @@ public class GenericTypesTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:generictypes", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:generictypes", "sa", "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/generictypes/CreateDB.sql");
 

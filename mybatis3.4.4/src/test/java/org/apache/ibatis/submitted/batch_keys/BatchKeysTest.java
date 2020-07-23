@@ -48,7 +48,7 @@ public class BatchKeysTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:batch_keys", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:batch_keys", "sa", "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/batch_keys/CreateDB.sql");
 

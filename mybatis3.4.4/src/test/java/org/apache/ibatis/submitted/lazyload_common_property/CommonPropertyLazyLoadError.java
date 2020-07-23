@@ -37,7 +37,7 @@ public class CommonPropertyLazyLoadError {
 
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            conn = DriverManager.getConnection("jdbc:hsqldb:mem:lazyload_common_property", "sa",
+            conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:lazyload_common_property", "sa",
                     "");
 
             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/lazyload_common_property/CreateDB.sql");

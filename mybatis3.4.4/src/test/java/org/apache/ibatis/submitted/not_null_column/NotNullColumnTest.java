@@ -39,7 +39,7 @@ public class NotNullColumnTest {
 
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            conn = DriverManager.getConnection("jdbc:hsqldb:mem:not_null_column", "sa",
+            conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:not_null_column", "sa",
                     "");
 
             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/not_null_column/CreateDB.sql");

@@ -35,7 +35,7 @@ public class FolderMapperTest {
 
   @Test
   public void testFindWithChildren() throws Exception {
-    Connection conn = DriverManager.getConnection("jdbc:hsqldb:mem:association_nested", "SA", "");
+    Connection conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:association_nested", "SA", "");
     Statement stmt = conn.createStatement();
     stmt.execute("create table folder (id int, name varchar(100), parent_id int)");
 

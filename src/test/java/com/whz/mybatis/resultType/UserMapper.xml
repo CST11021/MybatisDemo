@@ -8,7 +8,7 @@
     <setting name="mapUnderscoreToCamelCase" value="true"/> 注意需要设置启用驼峰命名，如果不设置，User#registerTime会为null，
     因为使用了resultType，如果不启用驼峰规则，POJO字段名必须和数据库字段一致才行
     -->
-    <select id="getAllUsers" resultType="com.whz.mybatis.resultType.User">
+    <select id="getAllUsers" resultType="com.whz.mybatis.resultType.User" resultSetType="FORWARD_ONLY">
         select * from user
     </select>
 

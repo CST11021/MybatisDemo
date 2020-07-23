@@ -48,7 +48,7 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 
 /**
- * 该类主要是用来解析 XxxMapper.xml 文件
+ * 该类主要是用来解析 XxxMapper.xml 文件，每个 Mapper.xml 配置文件（或者使用注解方式配置的接口类）对应一个XMLMapperBuilder实例
  *
  * @author Clinton Begin
  */
@@ -56,11 +56,11 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     /** 该对象封装了一个Document对象，用于表示将要解析的mybatis的配置文件 */
     private XPathParser parser;
-    /** 该变量在构造器的时候初始化 */
+    /** 该变量在构造器的时候初始化，用来解析<mapper>标签的辅助类 */
     private MapperBuilderAssistant builderAssistant;
     /** 表示sql碎片，解析<mapper>标签内的<sql>标签后，会将解析结果保存到 sqlFragments 中 */
     private Map<String, XNode> sqlFragments;
-    /** 表示要解析的配置文件路径 */
+    /** 表示当前要解析的配置文件路径 */
     private String resource;
 
     @Deprecated
@@ -102,9 +102,12 @@ public class XMLMapperBuilder extends BaseBuilder {
             bindMapperForNamespace();
         }
 
+        // 解析之前未解析的<resultMap>标签
         parsePendingResultMaps();
         // 解析哪些当前还未加载的缓存实例
         parsePendingCacheRefs();
+        // 在上面configurationElement()方法中，当解析Mapper对应的SQL无法解析时（例如：配置的<select>标签中引用其他配置的id，而该id
+        // Mybastic还未解析加载，则会导致当期的SQL无法解析），会将对应的XMLStatementBuilder解析器，添加到该变量中，等到都是解析完了，再来解析之前未解析的标签
         parsePendingStatements();
     }
 
@@ -203,9 +206,9 @@ public class XMLMapperBuilder extends BaseBuilder {
                 throw new BuilderException("Mapper's namespace cannot be empty");
             }
             builderAssistant.setCurrentNamespace(namespace);
-            // 解析<cache-ref>标签
+            // 解析<cache-ref>标签：缓存相关参考：https://mybatis.org/mybatis-3/zh/sqlmap-xml.html#cache
             cacheRefElement(context.evalNode("cache-ref"));
-            // 解析<cache>标签，缓存配置相关
+            // 解析<cache>标签，缓存配置相关：缓存相关参考：https://mybatis.org/mybatis-3/zh/sqlmap-xml.html#cache
             cacheElement(context.evalNode("cache"));
             // 解析<parameterMap>标签
             parameterMapElement(context.evalNodes("/mapper/parameterMap"));
@@ -247,13 +250,19 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
 
     /**
-     * 解析<cache-ref>标签
+     * 解析<cache-ref>标签：
+     * 对某一命名空间的语句，只会使用该命名空间的缓存进行缓存或刷新，但你可能会想要在多个命名空间中共享相同的缓存配置和实例，要实现这种需求，
+     * 你可以使用 cache-ref 元素来引用另一个缓存，例如：
+     *
+     *  <cache-ref namespace="com.someone.application.data.SomeMapper"/>
      *
      * @param context
      */
     private void cacheRefElement(XNode context) {
         if (context != null) {
+            // builderAssistant.getCurrentNamespace()：获取当前XxxMapper.xml文件的命名空间
             configuration.addCacheRef(builderAssistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
+
             CacheRefResolver cacheRefResolver = new CacheRefResolver(builderAssistant, context.getStringAttribute("namespace"));
             try {
                 cacheRefResolver.resolveCacheRef();
@@ -264,7 +273,10 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
 
     /**
-     * 解析<cache>标签，缓存配置相关
+     * 解析<cache>标签，缓存配置相关，例如：
+     * <cache-ref namespace="com.whz.mybatis.cache.IEmployeerMapper"/>
+     *
+     * <cache eviction="FIFO" flushInterval="60000" size="512" readOnly="true"/>
      *
      * @param context
      * @throws Exception
@@ -278,16 +290,16 @@ public class XMLMapperBuilder extends BaseBuilder {
             // 1. LRU， 最近最少使用的，移除最长时间不用的对象。
             // 2. FIFO，先进先出，按对象进入缓存的顺序来移除他们
             // 3. SOFT， 软引用，移除基于垃圾回收器状态和软引用规则的对象。
-            // 4. WEAK，若引用，更积极的移除基于垃圾收集器状态和若引用规则的对象
+            // 4. WEAK，弱引用，更积极的移除基于垃圾收集器状态和弱引用规则的对象
             String eviction = context.getStringAttribute("eviction", "LRU");
+            // 获取对应的缓存策略实现
             Class<? extends Cache> evictionClass = typeAliasRegistry.resolveAlias(eviction);
 
-            // 缓存刷新时间
+            // flushInterval（刷新间隔）属性可以被设置为任意的正整数，设置的值应该是一个以毫秒为单位的合理时间量。 默认情况是不设置，也就是没有刷新间隔，缓存仅仅会在调用语句时刷新。
             Long flushInterval = context.getLongAttribute("flushInterval");
-
-            // 设置缓存的最大大小
+            // 设置缓存的最大大小：size（引用数目）属性可以被设置为任意正整数，要注意欲缓存对象的大小和运行环境中可用的内存资源。默认值是 1024
             Integer size = context.getIntAttribute("size");
-            // 缓存是否只读，默认否
+            // readOnly（只读）属性可以被设置为 true 或 false。只读的缓存会给所有调用者返回缓存对象的相同实例。 因此这些对象不能被修改。这就提供了可观的性能提升。而可读写的缓存会（通过序列化）返回缓存对象的拷贝。 速度上会慢一些，但是更安全，因此默认值是 false。
             boolean readWrite = !context.getBooleanAttribute("readOnly", false);
             boolean blocking = context.getBooleanAttribute("blocking", false);
             Properties props = context.getChildrenAsProperties();
@@ -311,6 +323,7 @@ public class XMLMapperBuilder extends BaseBuilder {
             String type = parameterMapNode.getStringAttribute("type");
             Class<?> parameterClass = resolveClass(type);
 
+            // 解析子标签<parameter>
             List<XNode> parameterNodes = parameterMapNode.evalNodes("parameter");
             List<ParameterMapping> parameterMappings = new ArrayList<ParameterMapping>();
             for (XNode parameterNode : parameterNodes) {
@@ -324,13 +337,17 @@ public class XMLMapperBuilder extends BaseBuilder {
                 // 小数点后保留的位数
                 Integer numericScale = parameterNode.getIntAttribute("numericScale");
                 ParameterMode modeEnum = resolveParameterMode(mode);
+                // 获取javaType对应Java类型
                 Class<?> javaTypeClass = resolveClass(javaType);
+                // 获取jdbcType对应的jdbcType
                 JdbcType jdbcTypeEnum = resolveJdbcType(jdbcType);
                 @SuppressWarnings("unchecked")
                 Class<? extends TypeHandler<?>> typeHandlerClass = (Class<? extends TypeHandler<?>>) resolveClass(typeHandler);
                 ParameterMapping parameterMapping = builderAssistant.buildParameterMapping(parameterClass, property, javaTypeClass, jdbcTypeEnum, resultMap, modeEnum, typeHandlerClass, numericScale);
                 parameterMappings.add(parameterMapping);
             }
+
+            // build ParameterMap实例，并添加全局配置后返回
             builderAssistant.addParameterMap(id, parameterClass, parameterMappings);
         }
     }
@@ -352,7 +369,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
 
     /**
-     * 解析<resultMap> 标签
+     * 解析一个 <resultMap> 标签
      *
      * @param resultMapNode
      * @return

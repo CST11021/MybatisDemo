@@ -29,9 +29,9 @@ public final class PropertyNamer {
     }
 
     /**
-     * 方法名name对应的属性名，使用标准的驼峰命名规则
+     * 获取方法名name对应的属性名，使用标准的驼峰命名规则
      *
-     * @param name
+     * @param name  方法名
      * @return
      */
     public static String methodToProperty(String name) {

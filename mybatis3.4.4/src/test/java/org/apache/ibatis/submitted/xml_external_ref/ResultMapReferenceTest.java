@@ -73,12 +73,12 @@ public class ResultMapReferenceTest {
 
   private SqlSessionFactory getSqlSessionFactoryJavaConfig() throws Exception {
     Class.forName("org.hsqldb.jdbcDriver");
-    Connection c = DriverManager.getConnection("jdbc:hsqldb:mem:xmlextref", "sa", "");
+    Connection c = DriverManager.getConnection("jdbcBase:hsqldb:mem:xmlextref", "sa", "");
     initDb(c);
 
     Configuration configuration = new Configuration();
     Environment environment = new Environment("development", new JdbcTransactionFactory(), new UnpooledDataSource(
-        "org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:xmlextref", null));
+        "org.hsqldb.jdbcDriver", "jdbcBase:hsqldb:mem:xmlextref", null));
     configuration.setEnvironment(environment);
 
     configuration.addMapper(ResultMapReferencePersonMapper.class);

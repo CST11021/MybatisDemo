@@ -40,7 +40,7 @@ public class NonExistentVariablesTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:nonexistentvariables", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:nonexistentvariables", "sa", "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/nonexistentvariables/CreateDB.sql");
 

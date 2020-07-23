@@ -38,7 +38,7 @@ public class FlushStatementNpeTest {
 
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            conn = DriverManager.getConnection("jdbc:hsqldb:mem:flush_statement_npe", "sa",
+            conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:flush_statement_npe", "sa",
                     "");
 
             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/flush_statement_npe/CreateDB.sql");

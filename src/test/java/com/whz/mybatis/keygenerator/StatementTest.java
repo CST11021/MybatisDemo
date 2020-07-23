@@ -16,7 +16,7 @@ public class StatementTest {
     @Test
     public void getGeneratedKeysTest() {
         try {
-            String url = "jdbc:mysql://localhost:3306/group_meal?serverTimezone=GMT";
+            String url = "jdbcBase:mysql://localhost:3306/group_meal?serverTimezone=GMT";
             String sql = "INSERT INTO t_employeer(employeer_name, employeer_age, employeer_department, employeer_worktype) VALUES (?, ?, ?, ?)";
             Class.forName("com.mysql.jdbc.Driver");
             Connection conn = DriverManager.getConnection(url, "root", "123456");

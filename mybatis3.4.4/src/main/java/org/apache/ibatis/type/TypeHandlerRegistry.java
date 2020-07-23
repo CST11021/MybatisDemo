@@ -29,18 +29,22 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 类型转换器注册表
+ * 类型转换器注册表：
  *
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
 public final class TypeHandlerRegistry {
 
+    /** 保存jdbcType对应的类型处理器 */
     private final Map<JdbcType, TypeHandler<?>> JDBC_TYPE_HANDLER_MAP = new EnumMap<JdbcType, TypeHandler<?>>(JdbcType.class);
+    /** 一个java类型对应多个jdbc类型，例如：String对应mysql的：char、varchar、nvarchar、clob等 */
     private final Map<Type, Map<JdbcType, TypeHandler<?>>> TYPE_HANDLER_MAP = new ConcurrentHashMap<Type, Map<JdbcType, TypeHandler<?>>>();
+    /** 表示未知的类型处理器，java的Object类就没有对应的类型转换器 */
     private final TypeHandler<Object> UNKNOWN_TYPE_HANDLER = new UnknownTypeHandler(this);
+    /** 保存处理器类型对应的处理器实例 */
     private final Map<Class<?>, TypeHandler<?>> ALL_TYPE_HANDLERS_MAP = new HashMap<Class<?>, TypeHandler<?>>();
-
+    /** 保存jdbcType对应的类型处理器（用于处理null值的类型转换器） */
     private static final Map<JdbcType, TypeHandler<?>> NULL_TYPE_HANDLER_MAP = new HashMap<JdbcType, TypeHandler<?>>();
 
     public TypeHandlerRegistry() {
@@ -151,46 +155,122 @@ public final class TypeHandlerRegistry {
         register(char.class, new CharacterTypeHandler());
     }
 
+    /**
+     * 判断对应的java类型是有对应的类型处理器
+     *
+     * @param javaType
+     * @return
+     */
     public boolean hasTypeHandler(Class<?> javaType) {
         return hasTypeHandler(javaType, null);
     }
 
+    /**
+     * 判断泛型参数T，是否有对应的类型处理器
+     *
+     * @param javaTypeReference
+     * @return
+     */
     public boolean hasTypeHandler(TypeReference<?> javaTypeReference) {
         return hasTypeHandler(javaTypeReference, null);
     }
 
+    /**
+     * 判断javaType和jdbcType是否有对应的类型处理器
+     *
+     * @param javaType
+     * @param jdbcType
+     * @return
+     */
     public boolean hasTypeHandler(Class<?> javaType, JdbcType jdbcType) {
         return javaType != null && getTypeHandler((Type) javaType, jdbcType) != null;
     }
 
+    /**
+     * 判断泛型T和jdbcType是否有对应的类型处理器
+     *
+     * @param javaTypeReference
+     * @param jdbcType
+     * @return
+     */
     public boolean hasTypeHandler(TypeReference<?> javaTypeReference, JdbcType jdbcType) {
         return javaTypeReference != null && getTypeHandler(javaTypeReference, jdbcType) != null;
     }
 
+    /**
+     * 根据处理器类型获取处理器实例
+     *
+     * @param handlerType   处理器类型
+     * @return
+     */
     public TypeHandler<?> getMappingTypeHandler(Class<? extends TypeHandler<?>> handlerType) {
         return ALL_TYPE_HANDLERS_MAP.get(handlerType);
     }
 
+    /**
+     * 根据类类型，获取对应的处理器实例
+     *
+     * @param type
+     * @param <T>
+     * @return
+     */
     public <T> TypeHandler<T> getTypeHandler(Class<T> type) {
         return getTypeHandler((Type) type, null);
     }
 
+    /**
+     * 根据泛型类，获取对应的处理器实例
+     *
+     * @param javaTypeReference
+     * @param <T>
+     * @return
+     */
     public <T> TypeHandler<T> getTypeHandler(TypeReference<T> javaTypeReference) {
         return getTypeHandler(javaTypeReference, null);
     }
 
+    /**
+     * 根据jdbcType获取对应的处理器实例
+     *
+     * @param jdbcType
+     * @return
+     */
     public TypeHandler<?> getTypeHandler(JdbcType jdbcType) {
         return JDBC_TYPE_HANDLER_MAP.get(jdbcType);
     }
 
+    /**
+     * 根据类类型和jdbcType获取对应的处理器实例
+     *
+     * @param type
+     * @param jdbcType
+     * @param <T>
+     * @return
+     */
     public <T> TypeHandler<T> getTypeHandler(Class<T> type, JdbcType jdbcType) {
         return getTypeHandler((Type) type, jdbcType);
     }
 
+    /**
+     * 根据泛型类和jdbcType获取对应的处理器实例
+     *
+     * @param javaTypeReference
+     * @param jdbcType
+     * @param <T>
+     * @return
+     */
     public <T> TypeHandler<T> getTypeHandler(TypeReference<T> javaTypeReference, JdbcType jdbcType) {
         return getTypeHandler(javaTypeReference.getRawType(), jdbcType);
     }
 
+    /**
+     * 根据Type和jdbcType获取对应的处理器实例
+     *
+     * @param type
+     * @param jdbcType
+     * @param <T>
+     * @return
+     */
     @SuppressWarnings("unchecked")
     private <T> TypeHandler<T> getTypeHandler(Type type, JdbcType jdbcType) {
         Map<JdbcType, TypeHandler<?>> jdbcHandlerMap = getJdbcHandlerMap(type);
@@ -209,6 +289,12 @@ public final class TypeHandlerRegistry {
         return (TypeHandler<T>) handler;
     }
 
+    /**
+     * 根据Type获取所有的处理器，一个java类型对应多个jdbc类型，例如：String对应mysql的：char、varchar、nvarchar、clob等
+     *
+     * @param type
+     * @return
+     */
     @SuppressWarnings({"rawtypes", "unchecked"})
     private Map<JdbcType, TypeHandler<?>> getJdbcHandlerMap(Type type) {
         Map<JdbcType, TypeHandler<?>> jdbcHandlerMap = TYPE_HANDLER_MAP.get(type);
@@ -231,6 +317,12 @@ public final class TypeHandlerRegistry {
         return jdbcHandlerMap;
     }
 
+    /**
+     * 根据类类型获取所有的处理器，一个java类型对应多个jdbc类型，例如：String对应mysql的：char、varchar、nvarchar、clob等
+     *
+     * @param clazz
+     * @return
+     */
     private Map<JdbcType, TypeHandler<?>> getJdbcHandlerMapForEnumInterfaces(Class<?> clazz) {
         for (Class<?> iface : clazz.getInterfaces()) {
             Map<JdbcType, TypeHandler<?>> jdbcHandlerMap = TYPE_HANDLER_MAP.get(iface);
@@ -244,11 +336,18 @@ public final class TypeHandlerRegistry {
         return null;
     }
 
+    /**
+     * 获取指定类类型的Superclass对应的类型处理器
+     *
+     * @param clazz
+     * @return
+     */
     private Map<JdbcType, TypeHandler<?>> getJdbcHandlerMapForSuperclass(Class<?> clazz) {
         Class<?> superclass = clazz.getSuperclass();
         if (superclass == null || Object.class.equals(superclass)) {
             return null;
         }
+
         Map<JdbcType, TypeHandler<?>> jdbcHandlerMap = TYPE_HANDLER_MAP.get(superclass);
         if (jdbcHandlerMap != null) {
             return jdbcHandlerMap;
@@ -257,6 +356,12 @@ public final class TypeHandlerRegistry {
         }
     }
 
+    /**
+     * 判断jdbcHandlerMap中value的实例是否一样，如果一样返回value，否则返回null
+     *
+     * @param jdbcHandlerMap
+     * @return
+     */
     private TypeHandler<?> pickSoleHandler(Map<JdbcType, TypeHandler<?>> jdbcHandlerMap) {
         TypeHandler<?> soleHandler = null;
         for (TypeHandler<?> handler : jdbcHandlerMap.values()) {
@@ -270,40 +375,50 @@ public final class TypeHandlerRegistry {
         return soleHandler;
     }
 
+    /**
+     * 获取未知类型的处理器
+     *
+     * @return
+     */
     public TypeHandler<Object> getUnknownTypeHandler() {
         return UNKNOWN_TYPE_HANDLER;
     }
+
+
+
+
+
 
     public void register(JdbcType jdbcType, TypeHandler<?> handler) {
         JDBC_TYPE_HANDLER_MAP.put(jdbcType, handler);
     }
 
-    //
-    // REGISTER INSTANCE
-    //
-
-    // Only handler
-
     @SuppressWarnings("unchecked")
     public <T> void register(TypeHandler<T> typeHandler) {
         boolean mappedTypeFound = false;
+
+        // TypeHandler实现类的@MappedTypes注解，@MappedTypes注解中的value对应的是jdbcType
         MappedTypes mappedTypes = typeHandler.getClass().getAnnotation(MappedTypes.class);
         if (mappedTypes != null) {
             for (Class<?> handledType : mappedTypes.value()) {
+                // 注册jdbcType对应的类型处理器
                 register(handledType, typeHandler);
                 mappedTypeFound = true;
             }
         }
+
         // @since 3.1.0 - try to auto-discover the mapped type
         if (!mappedTypeFound && typeHandler instanceof TypeReference) {
             try {
                 TypeReference<T> typeReference = (TypeReference<T>) typeHandler;
+                //  注册自定义的类对应的类型处理器
                 register(typeReference.getRawType(), typeHandler);
                 mappedTypeFound = true;
             } catch (Throwable t) {
                 // maybe users define the TypeReference with a different type and are not assignable, so just ignore it
             }
         }
+
         if (!mappedTypeFound) {
             register((Class<T>) null, typeHandler);
         }
@@ -333,8 +448,14 @@ public final class TypeHandlerRegistry {
         register(javaTypeReference.getRawType(), handler);
     }
 
-    // java type + jdbc type + handler
-
+    /**
+     * java type + jdbcBase type + handler
+     *
+     * @param type          java类型
+     * @param jdbcType      jdbc类型
+     * @param handler       类型处理器
+     * @param <T>
+     */
     public <T> void register(Class<T> type, JdbcType jdbcType, TypeHandler<? extends T> handler) {
         register((Type) type, jdbcType, handler);
     }
@@ -381,7 +502,7 @@ public final class TypeHandlerRegistry {
         register(javaTypeClass, getInstance(javaTypeClass, typeHandlerClass));
     }
 
-    // java type + jdbc type + handler type
+    // java type + jdbcBase type + handler type
 
     public void register(Class<?> javaTypeClass, JdbcType jdbcType, Class<?> typeHandlerClass) {
         register(javaTypeClass, jdbcType, getInstance(javaTypeClass, typeHandlerClass));
@@ -409,8 +530,11 @@ public final class TypeHandlerRegistry {
         }
     }
 
-    // scan
-
+    /**
+     * 扫码指定包下的所有的TypeHandler类实现
+     *
+     * @param packageName
+     */
     public void register(String packageName) {
         ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<Class<?>>();
         resolverUtil.find(new ResolverUtil.IsA(TypeHandler.class), packageName);
@@ -422,6 +546,14 @@ public final class TypeHandlerRegistry {
             }
         }
     }
+
+
+
+
+
+
+
+
 
     // get information
 

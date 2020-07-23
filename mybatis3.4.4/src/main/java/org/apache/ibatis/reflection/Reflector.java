@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 /**
+ * 该类封装了一些常用的反射方法
  * 这个类表示一组缓存的类定义信息，允许在属性名和getter/setter方法之间进行简单的映射。
  *
  * @author Clinton Begin
@@ -212,6 +213,7 @@ public class Reflector {
      * @param clazz
      */
     private void addDefaultConstructor(Class<?> clazz) {
+        // 返回所有的构造器，包括私有的构造器
         Constructor<?>[] consts = clazz.getDeclaredConstructors();
         for (Constructor<?> constructor : consts) {
             if (constructor.getParameterTypes().length == 0) {
@@ -238,9 +240,12 @@ public class Reflector {
             if (method.getParameterTypes().length > 0) {
                 continue;
             }
+
             String name = method.getName();
             if ((name.startsWith("get") && name.length() > 3) || (name.startsWith("is") && name.length() > 2)) {
+                // 将方法名转为对应的属性名
                 name = PropertyNamer.methodToProperty(name);
+                // 将name和method添加到conflictingGetters
                 addMethodConflict(conflictingGetters, name, method);
             }
         }
@@ -305,6 +310,13 @@ public class Reflector {
         resolveSetterConflicts(conflictingSetters);
     }
 
+    /**
+     * 将方法追加到conflictingMethods中
+     *
+     * @param conflictingMethods        属性名对应的方法
+     * @param name                      类的属性名
+     * @param method                    属性名对应的方法
+     */
     private void addMethodConflict(Map<String, List<Method>> conflictingMethods, String name, Method method) {
         List<Method> list = conflictingMethods.get(name);
         if (list == null) {

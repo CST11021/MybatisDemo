@@ -38,7 +38,7 @@ public class CglibNPELazyTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:cglib_lazy_error", "sa",
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:cglib_lazy_error", "sa",
           "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/cglib_lazy_error/CreateDB.sql");

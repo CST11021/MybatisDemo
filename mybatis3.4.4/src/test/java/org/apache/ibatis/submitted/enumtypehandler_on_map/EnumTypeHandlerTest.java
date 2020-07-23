@@ -41,7 +41,7 @@ public class EnumTypeHandlerTest {
 
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            conn = DriverManager.getConnection("jdbc:hsqldb:mem:enumtypehandler_on_map", "sa",
+            conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:enumtypehandler_on_map", "sa",
                     "");
 
             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/enumtypehandler_on_map/CreateDB.sql");

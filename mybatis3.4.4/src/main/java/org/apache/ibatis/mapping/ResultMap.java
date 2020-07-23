@@ -34,6 +34,15 @@ import org.apache.ibatis.reflection.ParamNameUtil;
 import org.apache.ibatis.session.Configuration;
 
 /**
+ * 对应 <resultMap> 标签配置：
+ *
+ *     <resultMap id="BaseResultMap" type="com.tuya.hecate.core.entity.swo.WorkOrderDO">
+ *         <id column="id" property="id" javaType="Long"/>
+ *         <result column="order_code" property="orderCode" />
+ *         <result column="order_type" property="orderType" />
+ *
+ *     </resultMap>
+ *
  * @author Clinton Begin
  */
 public class ResultMap {
@@ -43,8 +52,11 @@ public class ResultMap {
     private String id;
     /** 表示返回结果集的类型 */
     private Class<?> type;
+    /**  对应<resultMap>里的<result>标签 */
     private List<ResultMapping> resultMappings;
+    /**  对应<resultMap>里的<id>标签 */
     private List<ResultMapping> idResultMappings;
+    /**  对应<resultMap>里的<constructor>标签 */
     private List<ResultMapping> constructorResultMappings;
     private List<ResultMapping> propertyResultMappings;
     private Set<String> mappedColumns;
@@ -52,7 +64,12 @@ public class ResultMap {
     private Discriminator discriminator;
     private boolean hasNestedResultMaps;
     private boolean hasNestedQueries;
-    /** 是否自动映射 */
+    /**
+     * 是否启用字段自动映射：
+     * 当自动映射查询结果时，MyBatis 会获取结果中返回的列名并在 Java 类中查找相同名字的属性（忽略大小写）。这意味着如果发现了ID列和id属性，
+     * MyBatis 会将列 ID 的值赋给 id 属性。通常数据库列使用大写字母组成的单词命名，单词间用下划线分隔；而 Java 属性一般遵循驼峰命名法约定。
+     * 为了在这两种命名方式之间启用自动映射，需要开启驼峰命名规则，将 mapUnderscoreToCamelCase 设置为 true。甚至在提供了结果映射后，自动映射也能工作。
+     */
     private Boolean autoMapping;
 
     private ResultMap() {}
@@ -89,6 +106,7 @@ public class ResultMap {
             resultMap.constructorResultMappings = new ArrayList<ResultMapping>();
             resultMap.propertyResultMappings = new ArrayList<ResultMapping>();
             final List<String> constructorArgNames = new ArrayList<String>();
+
             for (ResultMapping resultMapping : resultMap.resultMappings) {
                 resultMap.hasNestedQueries = resultMap.hasNestedQueries || resultMapping.getNestedQueryId() != null;
                 resultMap.hasNestedResultMaps = resultMap.hasNestedResultMaps || (resultMapping.getNestedResultMapId() != null && resultMapping.getResultSet() == null);
@@ -119,6 +137,7 @@ public class ResultMap {
                     resultMap.idResultMappings.add(resultMapping);
                 }
             }
+
             if (resultMap.idResultMappings.isEmpty()) {
                 resultMap.idResultMappings.addAll(resultMap.resultMappings);
             }

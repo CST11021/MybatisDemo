@@ -40,7 +40,7 @@ public class ColumnPrefixTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:clmpfx", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:clmpfx", "sa", "");
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/column_prefix/CreateDB.sql");
       ScriptRunner runner = new ScriptRunner(conn);
       runner.setLogWriter(null);

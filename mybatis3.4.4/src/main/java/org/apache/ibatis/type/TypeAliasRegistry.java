@@ -128,7 +128,12 @@ public class TypeAliasRegistry {
     public void registerAliases(String packageName) {
         registerAliases(packageName, Object.class);
     }
-
+    /**
+     * 为这个包路径下所有superType的实例类注册别名，默认是使用这些类的简单类型名注册
+     *
+     * @param packageName
+     * @param superType
+     */
     public void registerAliases(String packageName, Class<?> superType) {
         ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<Class<?>>();
         resolverUtil.find(new ResolverUtil.IsA(superType), packageName);

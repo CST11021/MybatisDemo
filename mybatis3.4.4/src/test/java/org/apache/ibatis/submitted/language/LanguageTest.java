@@ -44,7 +44,7 @@ public class LanguageTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:language", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:language", "sa", "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/language/CreateDB.sql");
 

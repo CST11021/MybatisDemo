@@ -44,7 +44,7 @@ public class XPathParser {
     /** 解析xml时，是否启用schema校验，Mybastic默认启用，启用后如果xml配置不满足schema的约束，则解析的时候会报错，否则跳过解析 */
     private boolean validation;
     private EntityResolver entityResolver;
-    /** 解析${key}对应的值 */
+    /** 保存${key}对应的值，保存Mybastic中<properties>标签对应的属性属性配置 */
     private Properties variables;
     /** javax.xml中，用于标签节点或者属性的类 */
     private XPath xpath;

@@ -41,7 +41,7 @@ public class EnumWithOgnlTest {
 
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            conn = DriverManager.getConnection("jdbc:hsqldb:mem:ognl_enum", "sa",
+            conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:ognl_enum", "sa",
                     "");
 
             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/ognl_enum/CreateDB.sql");

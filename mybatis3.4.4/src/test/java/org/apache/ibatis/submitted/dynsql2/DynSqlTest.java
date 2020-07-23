@@ -44,7 +44,7 @@ public class DynSqlTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:bname", "sa",
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:bname", "sa",
           "");
 
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/dynsql2/CreateDB.sql");

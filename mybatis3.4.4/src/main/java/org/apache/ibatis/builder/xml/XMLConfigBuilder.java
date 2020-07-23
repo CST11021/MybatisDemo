@@ -55,7 +55,29 @@ public class XMLConfigBuilder extends BaseBuilder {
     private boolean parsed;
     /** 该对象封装了将要被解析的配置文件信息 */
     private XPathParser parser;
+    /**
+     * 解析<environments>标签：
+     * Mybatis可以配置成适应多种环境，这种机制有助于将SQL映射应用于多种数据库之中，现实情况下有多种理由需要这么做。
+     * 例如：开发，测试和生产环境需要不同的配置。配置环境可以注册多个数据源，每一个数据源分为两大部分：一个是数据库源的配置，另一个是数据库事物的配置。如：
+     * <environments default="development">
+     *    <environment id="development">
+     *
+     *       <transactionManager type="JDBC" >
+     *          <property name="autoCommit" value="false"/>
+     *       </transactionManager>
+     *
+     *       <dataSource type="POOLED">
+     *          <property name="driver" value="${driver}" />
+     *          <property name="url" value="${url}" />
+     *          <property name="username" value="${username}" />
+     *          <property name="password" value="${password}" />
+     *       </dataSource>
+     *
+     *    </environment>
+     * </environments>
+     */
     private String environment;
+    /** Reflector工厂，用于获取Class对应的Reflector实例，默认实现带有缓存机制 */
     private ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();
 
     public XMLConfigBuilder(Reader reader) {
@@ -98,25 +120,50 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
 
     // 从根节点开始解析mybatis的配置文件
+    /**
+     * 从Mybastic的根节点开始解析xml配置，解析根节点下的所有标签和属性，并将解析后的数据保存到全局配置类{@link #configuration}
+     *
+     * @param root  表示mybastic的根节点<configuration>
+     */
     private void parseConfiguration(XNode root) {
         try {
-            //解析<properties>标签，并将解析结果封装到Configuration对象中
+            // 解析<properties>标签，并将解析结果封装到Configuration对象中
             propertiesElement(root.evalNode("properties"));
-            //解析<settings>标签，返回一个Properties对象
+
+            // 解析<settings>标签，返回一个Properties对象
             Properties settings = settingsAsProperties(root.evalNode("settings"));
+
+            // 加载<settings>标签配置的VFS
             loadCustomVfs(settings);
 
+            // 解析并注册类对应的别名
             typeAliasesElement(root.evalNode("typeAliases"));
+
+            // 解析<plugins>插件配置
             pluginElement(root.evalNode("plugins"));
+
+            // 解析<objectFactory>标签
             objectFactoryElement(root.evalNode("objectFactory"));
+
+            // 解析<objectWrapperFactory/>标签
             objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
+
+            // 解析<reflectorFactory/>标签
             reflectorFactoryElement(root.evalNode("reflectorFactory"));
 
+            // 将<settings>标签对应的配置set到全局配置类中
             settingsElement(settings);
-            // read it after objectFactory and objectWrapperFactory issue #631
+
+            // 解析<environments>标签：在objectFactory和objectWrapperFactory之后读取它
             environmentsElement(root.evalNode("environments"));
+
+            // 解析<databaseIdProvider>标签
             databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+
+            // 解析<typeHandlers/>标签
             typeHandlerElement(root.evalNode("typeHandlers"));
+
+            // 解析<mappers>标签
             mapperElement(root.evalNode("mappers"));
         } catch (Exception e) {
             throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -124,12 +171,33 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
 
     // 解析<settings>标签，并将解析结果封装到Properties对象中返回
+    /**
+     * 解析<settings>标签，并将解析结果封装到Properties对象中返回
+     *
+     * <settings>标签配置如下：
+     * 	<settings>
+     * 	    ...
+     * 		<setting name="cacheEnabled" value="true"/>
+     * 		<setting name="lazyLoadingEnabled" value="true"/>
+     * 		<setting name="multipleResultSetsEnabled" value="true"/>
+     * 		<setting name="useColumnLabel" value="true"/>
+     * 		<setting name="useGeneratedKeys" value="true"/>
+     * 		<setting name="defaultExecutorType" value="SIMPLE"/>
+     * 		<setting name="defaultStatementTimeout" value="25000"/>
+     * 	    ...
+     * 	</settings>
+     *
+     * @param context   表示<settings>标签
+     * @return  返回<settings>标签配置信息
+     */
     private Properties settingsAsProperties(XNode context) {
         if (context == null) {
             return new Properties();
         }
+
+        // 获取所有的子标签，并将子标签中的name和value属性返回
         Properties props = context.getChildrenAsProperties();
-        // Check that all settings are known to the configuration class
+        // 校验<settings>标签中的配置是否正确，方式属性名配置错，导致Mybastic无法处理
         MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
         for (Object key : props.keySet()) {
             if (!metaConfig.hasSetter(String.valueOf(key))) {
@@ -140,8 +208,18 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
 
     // 如果配置vfs实现，则加载这个vfs
+
+    /**
+     * 检查<settings>标签中是否配置vfsImpl属性，如果配置了，将vfsImpl实现类添加到全局配置中
+     *
+     * @param props
+     * @throws ClassNotFoundException
+     */
     private void loadCustomVfs(Properties props) throws ClassNotFoundException {
+        // 判断<settings>标签中是否配置vfsImpl属性
         String value = props.getProperty("vfsImpl");
+
+        // 如果配置了，将vfsImpl实现类添加到全局配置中
         if (value != null) {
             String[] clazzes = value.split(",");
             for (String clazz : clazzes) {
@@ -155,6 +233,16 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
 
     // 解析<typeAliases>标签，并完成别名注册
+    /**
+     * 解析<typeAliases>标签，并完成别名注册，配置例如：
+     *
+     * <typeAliases>
+     *  <package name="com.whz"/>
+     *  <typeAlias type="com.whz.User" alias="user"/>
+     * </typeAliases>
+     *
+     * @param parent
+     */
     private void typeAliasesElement(XNode parent) {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
@@ -185,30 +273,70 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
 
     // 解析<plugins>插件配置
+
+    /**
+     * 例如：<plugins>
+     *         <plugin interceptor="com.whz.mybatis.plugins.example.QueryPlugin">
+     *             <property name="" value=""/>
+     *         </plugin>
+     *     </plugins>
+     *
+     * @param parent
+     * @throws Exception
+     */
     private void pluginElement(XNode parent) throws Exception {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
+                // 获取<plugin>标签的interceptor属性，mybastic插件的本质就是拦截器
                 String interceptor = child.getStringAttribute("interceptor");
+                // 获取插件的自定义配置属性
                 Properties properties = child.getChildrenAsProperties();
+                // 实例化插件类
                 Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).newInstance();
+                // 注入自定义属性
                 interceptorInstance.setProperties(properties);
+                // 添加到全局配置
                 configuration.addInterceptor(interceptorInstance);
             }
         }
     }
 
     // 解析<objectFactory>标签
+
+    /**
+     * 解析<objectFactory>标签，例如：
+     *
+     * <objectFactory type="com.whz.MyObjectFactory">
+     * 		<property name="" value=""/>
+     * 	</objectFactory>
+     *
+     * @param context
+     * @throws Exception
+     */
     private void objectFactoryElement(XNode context) throws Exception {
         if (context != null) {
+            // 获取 ObjectFactory 实现类
             String type = context.getStringAttribute("type");
+            // 获取自定义属性
             Properties properties = context.getChildrenAsProperties();
+            // 实例化ObjectFactory
             ObjectFactory factory = (ObjectFactory) resolveClass(type).newInstance();
+            // 注入自定义属性
             factory.setProperties(properties);
+            // 添加全局配置
             configuration.setObjectFactory(factory);
         }
     }
 
     // 解析<objectWrapperFactory/>标签
+    /**
+     * 解析<objectWrapperFactory/>标签，配置例如：
+     *
+     * <objectWrapperFactory type=""/>
+     *
+     * @param context
+     * @throws Exception
+     */
     private void objectWrapperFactoryElement(XNode context) throws Exception {
         if (context != null) {
             String type = context.getStringAttribute("type");
@@ -227,23 +355,43 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
 
     // 解析<properties>标签
+
+    /**
+     * 配置示例：
+     * <properties resource="mysql.properties" url="file:///D:/test.properties"/>
+     *
+     * 	<properties>
+     * 		<property name="" value=""/>
+     * 		...
+     * 	</properties>
+     *
+     * @param context
+     * @throws Exception
+     */
     private void propertiesElement(XNode context) throws Exception {
         if (context != null) {
+            // 获取所有<properties>的子标签
             Properties defaults = context.getChildrenAsProperties();
+
             String resource = context.getStringAttribute("resource");
             String url = context.getStringAttribute("url");
+            // <properties>标签不允许同时配置resource属性和url属性
             if (resource != null && url != null) {
                 throw new BuilderException("The properties element cannot specify both a URL and a resource based property file reference.  Please specify one or the other.");
             }
+
             if (resource != null) {
                 defaults.putAll(Resources.getResourceAsProperties(resource));
             } else if (url != null) {
                 defaults.putAll(Resources.getUrlAsProperties(url));
             }
+
             Properties vars = configuration.getVariables();
             if (vars != null) {
                 defaults.putAll(vars);
             }
+
+            // 将<properties>配置设置到解析器中和全局配置类configuration中
             parser.setVariables(defaults);
             configuration.setVariables(defaults);
         }
@@ -353,18 +501,30 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
 
     // 解析<databaseIdProvider>标签
+    /**
+     * 解析<databaseIdProvider>标签，例如：
+     *
+     * 	<databaseIdProvider type="">
+     * 		<property name="" value=""/>
+     * 	</databaseIdProvider>
+     *
+     * @param context
+     * @throws Exception
+     */
     private void databaseIdProviderElement(XNode context) throws Exception {
         DatabaseIdProvider databaseIdProvider = null;
         if (context != null) {
             String type = context.getStringAttribute("type");
-            // awful patch to keep backward compatibility
+            // 糟糕的补丁以保持向后兼容性
             if ("VENDOR".equals(type)) {
                 type = "DB_VENDOR";
             }
+
             Properties properties = context.getChildrenAsProperties();
             databaseIdProvider = (DatabaseIdProvider) resolveClass(type).newInstance();
             databaseIdProvider.setProperties(properties);
         }
+
         Environment environment = configuration.getEnvironment();
         if (environment != null && databaseIdProvider != null) {
             String databaseId = databaseIdProvider.getDatabaseId(environment.getDataSource());
@@ -373,13 +533,26 @@ public class XMLConfigBuilder extends BaseBuilder {
     }
 
     // 解析<typeHandlers/>标签
+    /**
+     * 解析<typeHandlers/>标签，例如：
+     * 	<typeHandlers>
+     * 		<package name=""/>
+     * 		<typeHandler handler="" jdbcType="" javaType=""/>
+     * 	</typeHandlers>
+     * @param parent
+     * @throws Exception
+     */
     private void typeHandlerElement(XNode parent) throws Exception {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
+                // 扫码指定包下的所有的TypeHandler类实现
                 if ("package".equals(child.getName())) {
                     String typeHandlerPackage = child.getStringAttribute("name");
                     typeHandlerRegistry.register(typeHandlerPackage);
                 } else {
+
+                    // 解析单个TypeHandler类实现
+
                     String javaTypeName = child.getStringAttribute("javaType");
                     String jdbcTypeName = child.getStringAttribute("jdbcType");
                     String handlerTypeName = child.getStringAttribute("handler");
@@ -422,6 +595,7 @@ public class XMLConfigBuilder extends BaseBuilder {
                         XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
                         mapperParser.parse();
                     }
+
                     // 使用url属性
                     else if (resource == null && url != null && mapperClass == null) {
                         ErrorContext.instance().resource(url);
@@ -429,6 +603,7 @@ public class XMLConfigBuilder extends BaseBuilder {
                         XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
                         mapperParser.parse();
                     }
+
                     // 使用class属性
                     else if (resource == null && url == null && mapperClass != null) {
                         Class<?> mapperInterface = Resources.classForName(mapperClass);

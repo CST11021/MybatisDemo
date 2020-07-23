@@ -54,7 +54,7 @@ public class EnumTypeHandlerUsingAnnotationTest {
 
         try {
             Class.forName("org.hsqldb.jdbcDriver");
-            conn = DriverManager.getConnection("jdbc:hsqldb:mem:enumtypehandler_on_annotation", "sa", "");
+            conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:enumtypehandler_on_annotation", "sa", "");
 
             Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/enumtypehandler_on_annotation/CreateDB.sql");
 

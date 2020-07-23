@@ -40,7 +40,7 @@ public class CamelCaseMappingTest {
 
     try {
       Class.forName("org.hsqldb.jdbcDriver");
-      conn = DriverManager.getConnection("jdbc:hsqldb:mem:gname", "sa", "");
+      conn = DriverManager.getConnection("jdbcBase:hsqldb:mem:gname", "sa", "");
       Reader reader = Resources.getResourceAsReader("org/apache/ibatis/submitted/camelcase/CreateDB.sql");
       ScriptRunner runner = new ScriptRunner(conn);
       runner.setLogWriter(null);
