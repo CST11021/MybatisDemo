@@ -30,16 +30,19 @@ import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
+ * SqlSessionManager：提供了SqlSessionFactory和SqlSession的能力，当创建SqlSession后，会将SqlSession保存到当前的线程上下文中
+ *
  * @author Larry Meadors
  */
 public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
-
-    private final SqlSessionFactory sqlSessionFactory;
-
+    /** 代理当前线程的SqlSession */
     private final SqlSession sqlSessionProxy;
 
-    // SqlSession 对象通过 ThreadLocal 来进行包装
+    /** 用于创建SqlSession的工厂 */
+    private final SqlSessionFactory sqlSessionFactory;
+
+    /** 通过 ThreadLocal 保存当前线程的 SqlSession */
     private ThreadLocal<SqlSession> localSqlSession = new ThreadLocal<SqlSession>();
 
     // 唯一的一个私有构造器
