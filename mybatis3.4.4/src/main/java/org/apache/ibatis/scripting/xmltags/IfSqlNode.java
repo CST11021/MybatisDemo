@@ -42,7 +42,9 @@ public class IfSqlNode implements SqlNode {
      */
     @Override
     public boolean apply(DynamicContext context) {
+        // 解析<if>标签的test表达式是否为true
         if (evaluator.evaluateBoolean(test, context.getBindings())) {
+            // 将<if>标签的内容追加到SQL文本中
             contents.apply(context);
             return true;
         }

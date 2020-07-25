@@ -87,12 +87,13 @@ public class XMLStatementBuilder extends BaseBuilder {
         StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
         ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
 
+        // 获取节点名称，如：select|insert|update|delete
         String nodeName = context.getNode().getNodeName();
 
         // 获取SQL命令的类型
         SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
         boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
-        // 不是select语句默认都清楚缓存
+        // 不是select语句默认都清除缓存
         boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
         boolean useCache = context.getBooleanAttribute("useCache", isSelect);
         boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
@@ -102,10 +103,10 @@ public class XMLStatementBuilder extends BaseBuilder {
         XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
         includeParser.applyIncludes(context.getNode());
 
-        // Parse selectKey after includes and remove them.
+        // 包含之后解析selectKey并将其删除
         processSelectKeyNodes(id, parameterTypeClass, langDriver);
 
-        // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
+        // 解析SQL（之前已解析并删除了<selectKey>和<include>）
         // 将sql语句解析完后，封装到 SqlSource 对象中，另外，那些动态的sql语句也都在这里进行处理的
         SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
         String resultSets = context.getStringAttribute("resultSets");
@@ -115,15 +116,17 @@ public class XMLStatementBuilder extends BaseBuilder {
         KeyGenerator keyGenerator;
         String keyStatementId = id + SelectKeyGenerator.SELECT_KEY_SUFFIX;
         keyStatementId = builderAssistant.applyCurrentNamespace(keyStatementId, true);
+        // 使用 useGeneratedKeys：对于支持自动生成记录主键的数据库，如：MySQL，SQL Server，此时设置useGeneratedKeys参数值为true，在执行添加记录之后可以获取到数据库自动生成的主键ID。
         if (configuration.hasKeyGenerator(keyStatementId)) {
             keyGenerator = configuration.getKeyGenerator(keyStatementId);
         } else {
-            //
+            // 使用SelectKey：SelectKey在Mybatis中是为了解决Insert数据时不支持主键自动生成的问题，他可以很随意的设置生成主键的方式
             keyGenerator = context.getBooleanAttribute("useGeneratedKeys",
                     configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))
                     ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
         }
 
+        // 解析完后保存一个MappedStatement实例
         builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType,
                 fetchSize, timeout, parameterMap, parameterTypeClass, resultMap, resultTypeClass,
                 resultSetTypeEnum, flushCache, useCache, resultOrdered,

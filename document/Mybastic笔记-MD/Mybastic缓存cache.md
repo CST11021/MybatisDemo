@@ -1,5 +1,9 @@
 # Mybastic缓存cache的使用
 
+参考文档：https://ethendev.github.io/2017/02/13/mysql-cache/
+
+
+
 ​		MyBatis提供了缓存机制减轻数据库压力，提高数据库性能，但在没有配置的默认情况下，它只开启一级缓存。
 
 ​	mybatis的缓存分为两级：一级缓存、二级缓存

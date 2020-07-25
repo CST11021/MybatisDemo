@@ -52,6 +52,11 @@ public class XMLScriptBuilder extends BaseBuilder {
         this.parameterType = parameterType;
     }
 
+    /**
+     * 解析动态标签
+     *
+     * @return
+     */
     public SqlSource parseScriptNode() {
         List<SqlNode> contents = parseDynamicTags(context);
         MixedSqlNode rootSqlNode = new MixedSqlNode(contents);
@@ -81,18 +86,23 @@ public class XMLScriptBuilder extends BaseBuilder {
                 // 获取select|insert|update|delete 这些节点的内容
                 String data = child.getStringBody("");
                 TextSqlNode textSqlNode = new TextSqlNode(data);
+                // 判断节点的内容是否为动态的，这里的动态是指SQL中是否包含#{}、${}
                 if (textSqlNode.isDynamic()) {
+                    // 添加动态的SQL文本
                     contents.add(textSqlNode);
                     isDynamic = true;
                 } else {
+                    // 添加静态的SQL文本
                     contents.add(new StaticTextSqlNode(data));
                 }
-            } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
+            } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) {
                 String nodeName = child.getNode().getNodeName();
+                // 根据给定的动态节点，返回不同的处理器，动态节点包括：trim、where、set、foreach、if、choose、when、otherwise、bind
                 NodeHandler handler = nodeHandlers(nodeName);
                 if (handler == null) {
                     throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
                 }
+                // 处理动态标签
                 handler.handleNode(child, contents);
                 isDynamic = true;
             }
@@ -199,6 +209,9 @@ public class XMLScriptBuilder extends BaseBuilder {
             targetContents.add(forEachSqlNode);
         }
     }
+    /**
+     * 处理<if>标签处理器
+     */
     private class IfHandler implements NodeHandler {
         public IfHandler() {
             // Prevent Synthetic Access
@@ -208,6 +221,7 @@ public class XMLScriptBuilder extends BaseBuilder {
         public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
             List<SqlNode> contents = parseDynamicTags(nodeToHandle);
             MixedSqlNode mixedSqlNode = new MixedSqlNode(contents);
+            // 获取<if>标签的test属性配置
             String test = nodeToHandle.getStringAttribute("test");
             IfSqlNode ifSqlNode = new IfSqlNode(mixedSqlNode, test);
             targetContents.add(ifSqlNode);

@@ -290,7 +290,7 @@ public abstract class BaseExecutor implements Executor {
             throw new ExecutorException("Cannot commit, transaction is already closed");
         }
 
-        // 情况本地缓存和缓存的Statement实例
+        // 清空本地缓存和缓存的Statement实例
         clearLocalCache();
         flushStatements();
         if (required) {

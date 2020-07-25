@@ -257,6 +257,7 @@ public class DefaultSqlSession implements SqlSession {
      * @return
      */
     private boolean isCommitOrRollbackRequired(boolean force) {
+        // 如果未设置强制提交，则当是非自动提交并且是之前执行过写操作但未提交时，才提交事务
         return (!autoCommit && dirty) || force;
     }
 

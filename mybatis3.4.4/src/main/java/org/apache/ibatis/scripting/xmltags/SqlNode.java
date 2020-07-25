@@ -19,6 +19,10 @@ package org.apache.ibatis.scripting.xmltags;
  * 传统的使用JDBC的方法，相信大家在组合复杂的的SQL语句的时候，需要去拼接，稍不注意哪怕少了个空格，都会导致错误。
  * Mybatis的动态SQL功能正是为了解决这种问题，其通过if, choose, when, otherwise, trim, where, set, foreach标签，可组合成非常灵活的SQL语句，从而提高开发人员的效率
  *
+ *
+ * 装饰器模式
+ *
+ *
  * @author Clinton Begin
  */
 public interface SqlNode {

@@ -194,6 +194,11 @@ public class Configuration {
     protected boolean useColumnLabel = true;
     /** 该配置影响的所有映射器中配置的缓存的全局开关。 */
     protected boolean cacheEnabled = true;
+    /**
+     * 配置一级缓存的作用域：MyBatis 利用本地缓存机制（Local Cache）防止循环引用（circular references）和加速重复嵌套查询。
+     * 默认值为 SESSION，这种情况下会缓存一个会话中执行的所有查询。 若设置值为 STATEMENT，本地会话仅用在语句执行上，对相同 SqlSession 的不同调用将不会共享数据。
+     */
+    protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION;
     /** 指定当结果集中值为 null 的时候是否调用映射对象的 setter（map 对象时为 put）方法，这对于有 Map.keySet() 依赖或 null 值初始化的时候是有用的。注意基本类型（int、boolean等）是不能设置成 null 的。 */
     protected boolean callSettersOnNulls;
     /** 允许使用方法签名中的名称作为语句参数名称。 为了使用该特性，你的工程必须采用Java 8编译，并且加上-parameters选项。（从3.4.1开始） */
@@ -207,8 +212,6 @@ public class Configuration {
     /** 指定 MyBatis 所用日志的具体实现，未指定时将自动查找:SLF4J | LOG4J | LOG4J2 | JDK_LOGGING | COMMONS_LOGGING | STDOUT_LOGGING | NO_LOGGING */
     protected Class<? extends Log> logImpl;
     protected Class<? extends VFS> vfsImpl;
-    /** MyBatis 利用本地缓存机制（Local Cache）防止循环引用（circular references）和加速重复嵌套查询。 默认值为 SESSION，这种情况下会缓存一个会话中执行的所有查询。 若设置值为 STATEMENT，本地会话仅用在语句执行上，对相同 SqlSession 的不同调用将不会共享数据。 */
-    protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION;
     /** 当没有为参数提供特定的 JDBC 类型时，为空值指定 JDBC 类型。 某些驱动需要指定列的 JDBC 类型，多数情况直接用一般类型即可，比如 NULL、VARCHAR 或 OTHER。 */
     protected JdbcType jdbcTypeForNull = JdbcType.OTHER;
     /** 指定哪个对象的方法触发一次延迟加载 */
@@ -384,6 +387,13 @@ public class Configuration {
     }
 
     // 创建一个执行器对象
+
+    /**
+     * 根据事务对象和默认的执行器类型（SimpleExecutor）创建一个mybastic执行器
+     *
+     * @param transaction
+     * @return
+     */
     public Executor newExecutor(Transaction transaction) {
         return newExecutor(transaction, defaultExecutorType);
     }
@@ -400,6 +410,8 @@ public class Configuration {
         } else {
             executor = new SimpleExecutor(this, transaction);
         }
+
+        // 如果启用了缓存
         if (cacheEnabled) {
             executor = new CachingExecutor(executor);
         }
