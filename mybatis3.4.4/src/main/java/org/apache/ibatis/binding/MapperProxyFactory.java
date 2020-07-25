@@ -29,7 +29,7 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class MapperProxyFactory<T> {
 
-    // 表示mapper接口类型
+    /** 表示mapper接口类型 */
     private final Class<T> mapperInterface;
 
     private final Map<Method, MapperMethod> methodCache = new ConcurrentHashMap<Method, MapperMethod>();
@@ -40,7 +40,12 @@ public class MapperProxyFactory<T> {
     }
 
 
-    // 根据SqlSession创建，Mapper接口的一个代理实例
+    /**
+     * 根据SqlSession创建，Mapper接口的一个代理实例
+     *
+     * @param sqlSession
+     * @return
+     */
     public T newInstance(SqlSession sqlSession) {
         // 根据SqlSession、Mapper接口和方法缓存创建一个将被代理的Mapper对象
         // mybatis创建mapper接口实现类时，其实是将SqlSession织入到实现类中，

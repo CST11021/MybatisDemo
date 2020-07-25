@@ -20,7 +20,16 @@ import javax.sql.DataSource;
 import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
- * 表示 <environments> 标签内的配置，主要是事务和数据源相关的配置， <environments> 可以配置多个环境的数据源，这里表示单个环境的实例
+ * 表示 <environments> 标签内的配置，主要是事务和数据源相关的配置， <environments> 可以配置多个环境的数据源，如：
+ * <environments default="development">
+ * 		<environment id="development"> ... </environment>
+ * 		<environment id="daily"> ... </environment>
+ * 		<environment id="pre"> ... </environment>
+ * 		...
+ * 	</environments>
+ *
+ * 一个Environment实例表示上面是一个<environment>标签，表示单个环境的实例，mybastic启动的时候，会根据<environments default="development">
+ * 的default属性，选择对应的<environment>标签配置，从而加载相应环境的数据源
  *
  * @author Clinton Begin
  */

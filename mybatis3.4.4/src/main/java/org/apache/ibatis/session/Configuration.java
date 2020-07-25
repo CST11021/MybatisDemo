@@ -100,10 +100,15 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
  */
 public class Configuration {
 
-    /** 表示mybastic要解析的相关配置资源，包括.xml配置和Mapper接口 */
+    /**
+     * 表示mybastic要解析的相关配置资源，包括.xml配置和Mapper接口：
+     * com/whz/mybatis/resultType/UserMapper.xml
+     * namespace:com.whz.mybatis.resultType.UserMapper
+     * interface com.whz.mybatis.resultType.UserMapper
+     */
     protected final Set<String> loadedResources = new HashSet<String>();
 
-    /** 表示当前环境对应的 environmentId，比如生产环境、测试环境等 */
+    /** 表示当前环境对应的 environmentId，比如生产环境、测试环境等，通过该配置可以让mybastic灵活的切换数据源 */
     protected Environment environment;
     /** 表示配置文件中的 <properties/> 标签 */
     protected Properties variables = new Properties();

@@ -29,11 +29,11 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.session.SqlSession;
 
 /**
+ * MapperProxy实现了InvocationHandler接口，所以这里使用的是 JDK 动态代理
+ *
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
-//
-// MapperProxy实现了InvocationHandler接口，所以这里使用的是 JDK 动态代理
 public class MapperProxy<T> implements InvocationHandler, Serializable {
 
     private static final long serialVersionUID = -6424540398559729838L;
@@ -48,7 +48,15 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
     }
 
 
-    // 调用代理类对象的指定方法
+    /**
+     * 调用代理类对象的指定方法
+     *
+     * @param proxy
+     * @param method
+     * @param args
+     * @return
+     * @throws Throwable
+     */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         try {
@@ -82,7 +90,13 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
         // 执行调用方法（将Mapper接口的具体实现交给了MapperMethod进行处理），并将执行结果返回
         return mapperMethod.execute(sqlSession, args);
     }
-    // 将调用的方法缓存起来，缓存key是根据 会话、方法和方法参数 决定的
+
+    /**
+     * 将调用的方法缓存起来，缓存key是根据 会话、方法和方法参数 决定的
+     *
+     * @param method
+     * @return
+     */
     private MapperMethod cachedMapperMethod(Method method) {
         MapperMethod mapperMethod = methodCache.get(method);
         if (mapperMethod == null) {
@@ -92,7 +106,12 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
         return mapperMethod;
     }
 
-    // 判断method方法是否有被default关键字修饰
+    /**
+     * 判断method方法是否有被default关键字修饰
+     *
+     * @param method
+     * @return
+     */
     private boolean isDefaultMethod(Method method) {
         return (
                 (method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC)) == Modifier.PUBLIC)
