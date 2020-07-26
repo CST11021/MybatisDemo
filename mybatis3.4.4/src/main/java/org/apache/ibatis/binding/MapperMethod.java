@@ -35,17 +35,18 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 /**
+ * 表示Mapper接口中的方法，即对应配置文件中一个个select、update、insert和delete操作
+ *
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Lasse Voss
  */
-// 表示Mapper接口中的方法，即对应配置文件中一个个select、update、insert和delete操作
 public class MapperMethod {
 
-    // 封装Mapper接口方法名称和数据操作类型
+    /** 封装Mapper接口方法名称和数据操作类型 */
     private final SqlCommand command;
 
-    // 封装Mapper接口方法的一些参数信息，比如返回值类型、占位符入参类型和索引等
+    /** 封装Mapper接口方法的一些参数信息，比如返回值类型、占位符入参类型和索引等 */
     private final MethodSignature method;
 
     public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
@@ -54,7 +55,13 @@ public class MapperMethod {
     }
 
 
-    // 接口的代理对象会调用该方法，根据会话对象和SQL占位符参数，执行SQL语句操作
+    /**
+     * 接口的代理对象会调用该方法，根据会话对象和SQL占位符参数，执行SQL语句操作
+     *
+     * @param sqlSession
+     * @param args
+     * @return
+     */
     public Object execute(SqlSession sqlSession, Object[] args) {
         Object result;
         switch (command.getType()) {
@@ -103,7 +110,13 @@ public class MapperMethod {
         }
         return result;
     }
-    // 在插入、更新和删除操作时，如果定义的接口方法返回的是数值类型（表示所有多少行数据收影响），则使用该方法进行转换
+
+    /**
+     * 在插入、更新和删除操作时，如果定义的接口方法返回的是数值类型（表示所有多少行数据收影响），则使用该方法进行转换
+     *
+     * @param rowCount
+     * @return
+     */
     private Object rowCountResult(int rowCount) {
         final Object result;
         if (method.returnsVoid()) {
@@ -119,7 +132,13 @@ public class MapperMethod {
         }
         return result;
     }
-    /* 查询操作时，根据返回类型调用以下四个方法中的其中一个 */
+
+    /**
+     * 查询操作时，根据返回类型调用以下四个方法中的其中一个
+     *
+     * @param sqlSession
+     * @param args
+     */
     private void executeWithResultHandler(SqlSession sqlSession, Object[] args) {
         MappedStatement ms = sqlSession.getConfiguration().getMappedStatement(command.getName());
         if (void.class.equals(ms.getResultMaps().get(0).getType())) {
@@ -211,7 +230,10 @@ public class MapperMethod {
         }
 
     }
-    // 封装Mapper接口方法名称和数据操作类型
+
+    /**
+     * 封装Mapper接口方法名称和数据操作类型
+     */
     public static class SqlCommand {
         // 表示调用的接口方法名
         private final String name;
@@ -269,7 +291,10 @@ public class MapperMethod {
             return null;
         }
     }
-    // 封装Mapper接口方法的一些参数信息，比如返回值类型、占位符入参类型和索引等，
+
+    /**
+     * 封装Mapper接口方法的一些参数信息，比如返回值类型、占位符入参类型和索引等，
+     */
     public static class MethodSignature {
 
         // 以下四个boolean类型，表示方法的返回参数类型

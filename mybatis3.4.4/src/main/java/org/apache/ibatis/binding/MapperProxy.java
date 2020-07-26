@@ -77,8 +77,7 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
                 // 第二种：Employeer employeer = session.selectOne("com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
                 // 第三种：Employeer employeer = session.getMapper(com.whz.mapperinterface.IEmployeerMapper.class).findEmployeerByID(5);
 
-                // 补充说明一下：其实第一、二种方法的执行效率会比第三种效率来得高，因为生成的代理对象最终还会调用第一、二
-                // 种方法执行
+                // 补充说明一下：其实第一、二种方法的执行效率会比第三种效率来得高，因为生成的代理对象最终还会调用第一、二种方法执行
                 return invokeDefaultMethod(proxy, method, args);
             }
         } catch (Throwable t) {
