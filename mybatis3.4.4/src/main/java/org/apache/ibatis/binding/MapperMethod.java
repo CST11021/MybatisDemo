@@ -68,7 +68,7 @@ public class MapperMethod {
             case INSERT: {
                 // 将占位符参数封装为map结果的param返回
                 Object param = method.convertArgsToSqlCommandParam(args);
-                // 调用 sqlSession 执行 插入操作
+                // 调用 sqlSession 执行插入操作, 并返回影响行数
                 result = rowCountResult(sqlSession.insert(command.getName(), param));
                 break;
             }
@@ -197,7 +197,14 @@ public class MapperMethod {
         return result;
     }
 
-    // 查询操作时，根据方法返回的参数类型，做类型转换
+    /**
+     * 查询操作时，根据方法返回的参数类型，做类型转换
+     *
+     * @param config
+     * @param list
+     * @param <E>
+     * @return
+     */
     private <E> Object convertToDeclaredCollection(Configuration config, List<E> list) {
         Object collection = config.getObjectFactory().create(method.getReturnType());
         MetaObject metaObject = config.newMetaObject(collection);
@@ -298,14 +305,23 @@ public class MapperMethod {
     public static class MethodSignature {
 
         // 以下四个boolean类型，表示方法的返回参数类型
+
+        /** 是否返回多条数据 */
         private final boolean returnsMany;
+        /** 是否以Map结构的方式返回 */
         private final boolean returnsMap;
+        /** 是否void类型的返回 */
         private final boolean returnsVoid;
+        /** 是否返回的是游标类型的结果集 */
         private final boolean returnsCursor;
 
         // 表示返回类型，如果是返回值是如List<Employee>的泛型，则returnType表示Employee.class
+
+        /** 结果集对应的POJO类型 */
         private final Class<?> returnType;
+        /** 如果是以map结构的方式放回，对应的mapKey是那个字段 */
         private final String mapKey;
+        /**  */
         private final Integer resultHandlerIndex;
         private final Integer rowBoundsIndex;
         private final ParamNameResolver paramNameResolver;

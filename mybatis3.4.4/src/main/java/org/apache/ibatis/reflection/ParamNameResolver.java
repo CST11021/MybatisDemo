@@ -94,12 +94,9 @@ public class ParamNameResolver {
         return names.values().toArray(new String[0]);
     }
     /**
-     * <p>
-     * A single non-special parameter is returned without a name.<br />
-     * Multiple parameters are named using the naming rule.<br />
-     * In addition to the default names, this method also adds the generic names (param1, param2,
-     * ...).
-     * </p>
+     * 返回一个没有名称的非特殊参数
+     * 使用命名规则命名多个参数.
+     * 除了默认名称之外，此方法还添加了通用名称 (param1, param2, ...).
      */
     // 将数组类型的占位符参数转为 Map 结构，比如：Object[] = {"开发部们", "java工程师"} 经过该方法后：
     // "worktype" -> "开发工程师"

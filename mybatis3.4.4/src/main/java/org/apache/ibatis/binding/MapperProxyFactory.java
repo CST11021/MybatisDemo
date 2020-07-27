@@ -31,7 +31,7 @@ public class MapperProxyFactory<T> {
 
     /** 表示mapper接口类型 */
     private final Class<T> mapperInterface;
-
+    /** 保存mapper接口中的方法及对应的方法的代理实现 */
     private final Map<Method, MapperMethod> methodCache = new ConcurrentHashMap<Method, MapperMethod>();
 
 
