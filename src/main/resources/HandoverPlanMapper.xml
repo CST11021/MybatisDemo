@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whz.mapperinterface.HandoverPlanMapper">
+
+    <resultMap id="BaseResultMap" type="com.whz.handover.HandoverPlanDO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="wh_code" jdbcType="VARCHAR" property="whCode"/>
+        <result column="station_code" jdbcType="VARCHAR" property="stationCode"/>
+        <result column="biz_order_code" jdbcType="VARCHAR" property="bizOrderCode"/>
+        <result column="loading_no" jdbcType="VARCHAR" property="loadingNo"/>
+        <result column="entity_id" jdbcType="VARCHAR" property="entityId"/>
+        <result column="out_code" jdbcType="VARCHAR" property="outCode"/>
+        <result column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="spec" jdbcType="VARCHAR" property="spec"/>
+        <result column="image_url" jdbcType="LONGVARCHAR" property="imageUrl"/>
+        <result column="plan_pick_number" jdbcType="BIGINT" property="planPickNumber"/>
+        <result column="actual_pick_number" jdbcType="BIGINT" property="actualPickNumber"/>
+        <result column="expect_discharge_number" jdbcType="BIGINT" property="expectDischargeNumber"/>
+        <result column="plan_discharge_number" jdbcType="BIGINT" property="planDischargeNumber"/>
+        <result column="actual_discharge_number" jdbcType="BIGINT" property="actualDischargeNumber"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="operation_time" jdbcType="VARCHAR" property="operationTime"/>
+        <result column="attribute" jdbcType="LONGVARCHAR" property="attribute"/>
+    </resultMap>
+
+    <resultMap id="countPlanDischargeNumberResultMap" type="com.whz.handover.CountPlanDischargeNumberDO">
+        <result column="station_code" jdbcType="VARCHAR" property="stationCode"/>
+        <result column="num" jdbcType="BIGINT" property="planDischargeNumber"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+        id,
+        gmt_create,
+        gmt_modified,
+        wh_code,
+        station_code,
+        biz_order_code,
+        loading_no,
+        entity_id,
+        out_code,
+        code,
+        type,
+        name,
+        spec,
+        image_url,
+        plan_pick_number,
+        actual_pick_number,
+        expect_discharge_number,
+        plan_discharge_number,
+        actual_discharge_number,
+        status,
+        operation_time,
+        attribute
+     </sql>
+
+    <sql id="base_query">
+        <trim prefix="where" prefixOverrides="and |or">
+            <if test="whCode != null">
+                and wh_code = #{whCode}
+            </if>
+            <if test="loadingNo != null">
+                and loading_no = #{loadingNo}
+            </if>
+            <if test="stationCode != null">
+                and station_code = #{stationCode}
+            </if>
+            <if test="stationCodes != null and stationCodes.size()>0">
+                and station_code in
+                <foreach collection="stationCodes" item="item" index="index" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="bizOrderCode != null">
+                and biz_order_code = #{bizOrderCode}
+            </if>
+            <if test="outCode != null">
+                and out_code = #{outCode}
+            </if>
+            <if test="code != null">
+                and code = #{code}
+            </if>
+            <if test="nameLike != null">
+                and name like CONCAT(#{nameLike}, '%')
+            </if>
+        </trim>
+    </sql>
+
+    <insert id="batchInsert"
+            parameterType="com.whz.handover.HandoverPlanDO">
+        insert into tms_handover_plan(<include refid="base_column_list"/>)
+        values
+        <foreach collection="doList" item="item" index="index" separator=",">
+            (
+            #{item.id},
+            now(),
+            now(),
+            #{item.whCode},
+            #{item.stationCode},
+            #{item.bizOrderCode},
+            #{item.loadingNo},
+            #{item.entityId},
+            #{item.outCode},
+            #{item.code},
+            #{item.type},
+            #{item.name},
+            #{item.spec},
+            #{item.imageUrl},
+            #{item.planPickNumber},
+            #{item.actualPickNumber},
+            #{item.expectDischargeNumber},
+            #{item.planDischargeNumber},
+            #{item.actualDischargeNumber},
+            #{item.status},
+            #{item.operationTime},
+            #{item.attribute}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateSignQuantityByCode">
+        update tms_handover_plan
+        set
+        actual_discharge_number = #{actualDischargeNumber},
+        operation_time = now(),
+        gmt_modified = now()
+        where wh_code = #{whCode}
+        and biz_order_code = #{bizOrderCode, jdbcType=VARCHAR}
+        and code = #{code, jdbcType=VARCHAR}
+    </update>
+
+    <select id="list" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="base_column_list"/>
+        from tms_handover_plan
+        <include refid="base_query"/>
+    </select>
+
+    <delete id="deleteByBizOrderCode" >
+        delete from tms_handover_plan
+        where wh_code = #{whCode}
+        and station_code = #{stationCode, jdbcType=VARCHAR}
+        and biz_order_code = #{bizOrderCode, jdbcType=VARCHAR}
+    </delete>
+
+    <select id="countPlanDischargeNumberGroupStation" resultMap="countPlanDischargeNumberResultMap">
+        select station_code, sum(plan_discharge_number) as num
+        from tms_handover_plan
+        where wh_code = #{whCode}
+        and loading_no = #{loadingNo}
+        and station_code in
+        <foreach collection="stationCodes" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        GROUP BY station_code
+    </select>
+
+</mapper>

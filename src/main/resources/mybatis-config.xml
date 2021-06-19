@@ -37,6 +37,9 @@
 
 	<mappers>
 		<mapper resource="IEmployeerMapper.xml"/>
+		<mapper resource="HandoverPlanMapper.xml"/>
+		<mapper resource="TransportStationMapper.xml"/>
+		<mapper resource="LoadingMapper.xml"/>
 		<!--<package name="com.whz.mapperinterface"/>-->
 	</mappers>
 

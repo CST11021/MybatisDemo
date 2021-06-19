@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whz.mapperinterface.LoadingMapper">
+
+    <resultMap id="BaseResultMap" type="com.whz.loading.LoadingDO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="merchant_code" jdbcType="VARCHAR" property="merchantCode"/>
+        <result column="loading_no" jdbcType="VARCHAR" property="loadingNo"/>
+        <result column="sender_station_code" jdbcType="VARCHAR" property="senderStationCode"/>
+        <result column="trans_code" jdbcType="VARCHAR" property="transCode"/>
+        <result column="car_code" jdbcType="VARCHAR" property="carCode"/>
+        <result column="driver_code" jdbcType="VARCHAR" property="driverCode"/>
+        <result column="line_code" jdbcType="VARCHAR" property="lineCode"/>
+        <result column="dispatcher_code" jdbcType="VARCHAR" property="dispatcherCode"/>
+        <result column="plan_arrival_time" jdbcType="TIMESTAMP" property="planArrivalTime"/>
+        <result column="fact_arrival_time" jdbcType="TIMESTAMP" property="factArrivalTime"/>
+        <result column="deadline_time" jdbcType="TIMESTAMP" property="deadlineTime"/>
+        <result column="startoff_time" jdbcType="TIMESTAMP" property="startoffTime"/>
+        <result column="arrival_time" jdbcType="TIMESTAMP" property="arrivalTime"/>
+        <result column="temperature_type" jdbcType="VARCHAR" property="temperatureType"/>
+        <result column="generate_mode" jdbcType="VARCHAR" property="generateMode"/>
+        <result column="shift_code" jdbcType="VARCHAR" property="shiftCode"/>
+        <result column="state" jdbcType="VARCHAR" property="state"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="close_time" jdbcType="TIMESTAMP" property="closeTime"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="creator" jdbcType="VARCHAR" property="creator"/>
+        <result column="modifier" jdbcType="VARCHAR" property="modifier"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="plan_startoff_time" jdbcType="TIMESTAMP" property="planStartoffTime"/>
+        <result column="pallet_number" jdbcType="INTEGER" property="palletNumber"/>
+        <result column="roll_number" jdbcType="INTEGER" property="rollNumber"/>
+        <result column="payload_ratio" jdbcType="DECIMAL" property="payloadRatio"/>
+        <result column="arrival_ws_longitude" jdbcType="VARCHAR" property="arrivalWsLongitude"/>
+        <result column="arrival_ws_latitude" jdbcType="VARCHAR" property="arrivalWsLatitude"/>
+        <result column="startoff_longitude" jdbcType="VARCHAR" property="startoffLongitude"/>
+        <result column="startoff_latitude" jdbcType="VARCHAR" property="startoffLatitude"/>
+        <result column="shift_period_time" jdbcType="TIMESTAMP" property="shiftPeriodTime"/>
+        <result column="publish_state" jdbcType="VARCHAR" property="publishState"/>
+        <result column="attendance_state" jdbcType="VARCHAR" property="attendanceState"/>
+        <result column="billing_state" jdbcType="VARCHAR" property="billingState"/>
+        <result column="car_model_code" jdbcType="VARCHAR" property="carModelCode"/>
+        <result column="line_name" jdbcType="VARCHAR" property="lineName"/>
+        <result column="driver_phone" jdbcType="VARCHAR" property="driverPhone"/>
+        <result column="trans_plan_type" jdbcType="VARCHAR" property="transPlanType"/>
+        <result column="loading_name" jdbcType="VARCHAR" property="loadingName"/>
+        <result column="end_station_code" jdbcType="VARCHAR" property="endStationCode"/>
+        <result column="station_num" jdbcType="INTEGER" property="stationNum"/>
+        <result column="progress_percent" jdbcType="DECIMAL" property="progressPercent"/>
+        <result column="itinerary_verify_info" jdbcType="LONGVARCHAR" property="itineraryVerifyInfo"/>
+        <result column="audit_state" jdbcType="VARCHAR" property="auditState"/>
+        <result column="quote_type" jdbcType="VARCHAR" property="quoteType"/>
+        <result column="temporary_quote_amt" jdbcType="DECIMAL" property="temporaryQuoteAmt"/>
+        <result column="biz_nature_code" jdbcType="VARCHAR" property="bizNatureCode"/>
+        <result column="contract_no" jdbcType="VARCHAR" property="contractNo"/>
+        <result column="contract_version" jdbcType="VARCHAR" property="contractVersion"/>
+        <result column="receive_state" jdbcType="VARCHAR" property="receiveState"/>
+        <result column="receive_time" jdbcType="TIMESTAMP" property="receiveTime"/>
+        <result column="trans_name" jdbcType="VARCHAR" property="transName"/>
+        <result column="trans_short_name" jdbcType="VARCHAR" property="transShortName"/>
+        <result column="fact_car_model_code" jdbcType="VARCHAR" property="factCarModelCode"/>
+        <result column="fact_car_model_name" jdbcType="VARCHAR" property="factCarModelName"/>
+        <result column="plate_number" jdbcType="VARCHAR" property="plateNumber"/>
+        <result column="driver_name" jdbcType="VARCHAR" property="driverName"/>
+        <result column="standard_seal_num" jdbcType="INTEGER" property="standardSealNum"/>
+        <result column="loading_state" jdbcType="INTEGER" property="loadingState"/>
+        <result column="state_remark" jdbcType="VARCHAR" property="stateRemark"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="plan_car_model_name" jdbcType="VARCHAR" property="planCarModelName"/>
+        <result column="plan_temperature_type" jdbcType="VARCHAR" property="planTemperatureType"/>
+        <result column="plan_length" jdbcType="DECIMAL" property="planLength"/>
+        <result column="plan_width" jdbcType="DECIMAL" property="planWidth"/>
+        <result column="plan_height" jdbcType="DECIMAL" property="planHeight"/>
+        <result column="fact_temperature_type" jdbcType="VARCHAR" property="factTemperatureType"/>
+        <result column="fact_length" jdbcType="DECIMAL" property="factLength"/>
+        <result column="fact_width" jdbcType="DECIMAL" property="factWidth"/>
+        <result column="fact_height" jdbcType="DECIMAL" property="factHeight"/>
+        <result column="external_order_code" jdbcType="VARCHAR" property="externalOrderCode"/>
+        <result column="external_sys" jdbcType="VARCHAR" property="externalSys"/>
+        <result column="transport_type" jdbcType="VARCHAR" property="transportType"/>
+        <result column="dynamic_fields" jdbcType="LONGVARCHAR" property="dynamicFields"/>
+        <result column="loading_end_time" jdbcType="TIMESTAMP" property="loadingEndTime"/>
+        <result column="create_from" jdbcType="VARCHAR" property="createFrom"/>
+        <result column="delivery_state" jdbcType="VARCHAR" property="deliveryState"/>
+        <result column="plan_pick_number" jdbcType="BIGINT" property="planPickNumber"/>
+        <result column="actual_pick_number" jdbcType="BIGINT" property="actualPickNumber"/>
+        <result column="expect_discharge_number" jdbcType="BIGINT" property="expectDischargeNumber"/>
+        <result column="plan_discharge_number" jdbcType="BIGINT" property="planDischargeNumber"/>
+        <result column="actual_discharge_number" jdbcType="BIGINT" property="actualDischargeNumber"/>
+        <result column="order_num" jdbcType="INTEGER" property="orderNum"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+        id,
+        <include refid="base_column_list_without_id"></include>
+    </sql>
+
+    <sql id="base_column_list_without_id">
+        merchant_code,
+        loading_no,
+        sender_station_code,
+        trans_code,
+        car_code,
+        driver_code,
+        line_code,
+        dispatcher_code,
+        plan_arrival_time,
+        fact_arrival_time,
+        deadline_time,
+        startoff_time,
+        arrival_time,
+        temperature_type,
+        generate_mode,
+        shift_code,
+        state,
+        status,
+        close_time,
+        gmt_create,
+        gmt_modified,
+        creator,
+        modifier,
+        remark,
+        plan_startoff_time,
+        pallet_number,
+        roll_number,
+        payload_ratio,
+        arrival_ws_longitude,
+        arrival_ws_latitude,
+        startoff_longitude,
+        startoff_latitude,
+        shift_period_time,
+        publish_state,
+        attendance_state,
+        billing_state,
+        car_model_code,
+        line_name,
+        driver_phone,
+        trans_plan_type,
+        loading_name,
+        end_station_code,
+        station_num,
+        progress_percent,
+        itinerary_verify_info,
+        audit_state,
+        quote_type,
+        temporary_quote_amt,
+        biz_nature_code,
+        contract_no,
+        contract_version,
+        receive_state,
+        receive_time,
+        trans_name,
+        trans_short_name,
+        fact_car_model_code,
+        fact_car_model_name,
+        plate_number,
+        driver_name,
+        standard_seal_num,
+        loading_state,
+        state_remark,
+        version,
+        plan_car_model_name,
+        plan_temperature_type,
+        plan_length,
+        plan_width,
+        plan_height,
+        fact_temperature_type,
+        fact_length,
+        fact_width,
+        fact_height,
+        external_order_code,
+        external_sys,
+        transport_type,
+        dynamic_fields,
+        loading_end_time,
+        create_from,
+        delivery_state,
+        plan_pick_number,
+        actual_pick_number,
+        expect_discharge_number,
+        plan_discharge_number,
+        actual_discharge_number,
+        order_num
+    </sql>
+
+    <sql id="base_query">
+        <trim prefix="where" prefixOverrides="and |or">
+            <if test="merchantCode != null">
+                and merchant_code = #{merchantCode}
+            </if>
+            <if test="senderStationCode != null">
+                and sender_station_code = #{senderStationCode}
+            </if>
+            <if test="transCode != null">
+                and trans_code = #{transCode}
+            </if>
+            <if test="loadingNo != null">
+                and loading_no = #{loadingNo}
+            </if>
+            <if test="state != null">
+                and state = #{state}
+            </if>
+            <if test="driverCode != null">
+                and driver_code = #{driverCode}
+            </if>
+
+            <if test="carCode != null">
+                and car_code = #{carCode}
+            </if>
+        </trim>
+    </sql>
+
+    <select id="count" parameterType="map" resultType="int">
+        select count(1)
+        from tms_loading
+        <include refid="base_query"/>
+    </select>
+
+    <select id="select" parameterType="map" resultMap="BaseResultMap">
+        select <include refid="base_column_list"/>
+        from tms_loading
+        <include refid="base_query"/>
+
+    </select>
+
+    <insert id="insert" parameterType="com.whz.loading.LoadingDO">
+        INSERT INTO tms_loading (<include refid="base_column_list_without_id"/>)
+        VALUES (
+            #{merchantCode},
+            #{loadingNo},
+            #{senderStationCode},
+            #{transCode},
+            #{carCode},
+            #{driverCode},
+            #{lineCode},
+            #{dispatcherCode},
+            #{planArrivalTime},
+            #{factArrivalTime},
+            #{deadlineTime},
+            #{startoffTime},
+            #{arrivalTime},
+            #{temperatureType},
+            #{generateMode},
+            #{shiftCode},
+            #{state},
+            #{status},
+            #{closeTime},
+            #{gmtCreate},
+            #{gmtModified},
+            #{creator},
+            #{modifier},
+            #{remark},
+            #{planStartoffTime},
+            #{palletNumber},
+            #{rollNumber},
+            #{payloadRatio},
+            #{arrivalWsLongitude},
+            #{arrivalWsLatitude},
+            #{startoffLongitude},
+            #{startoffLatitude},
+            #{shiftPeriodTime},
+            #{publishState},
+            #{attendanceState},
+            #{billingState},
+            #{carModelCode},
+            #{lineName},
+            #{driverPhone},
+            #{transPlanType},
+            #{loadingName},
+            #{endStationCode},
+            #{stationNum},
+            #{progressPercent},
+            #{itineraryVerifyInfo},
+            #{auditState},
+            #{quoteType},
+            #{temporaryQuoteAmt},
+            #{bizNatureCode},
+            #{contractNo},
+            #{contractVersion},
+            #{receiveState},
+            #{receiveTime},
+            #{transName},
+            #{transShortName},
+            #{factCarModelCode},
+            #{factCarModelName},
+            #{plateNumber},
+            #{driverName},
+            #{standardSealNum},
+            #{loadingState},
+            #{stateRemark},
+            #{version},
+            #{planCarModelName},
+            #{planTemperatureType},
+            #{planLength},
+            #{planWidth},
+            #{planHeight},
+            #{factTemperatureType},
+            #{factLength},
+            #{factWidth},
+            #{factHeight},
+            #{externalOrderCode},
+            #{externalSys},
+            #{transportType},
+            #{dynamicFields},
+            #{loadingEndTime},
+            #{createFrom},
+            #{deliveryState},
+            #{planPickNumber},
+            #{actualPickNumber},
+            #{expectDischargeNumber},
+            #{planDischargeNumber},
+            #{actualDischargeNumber},
+            #{orderNum}
+        )
+    </insert>
+
+    <update id="updateByLoadingNoAndVersion" parameterType="com.whz.loading.LoadingDO">
+        UPDATE tms_loading
+        <set>
+            <if test="merchantCode != null">
+                merchant_code = #{merchantCode},
+            </if>
+            <if test="loadingNo != null">
+                loading_no = #{loadingNo},
+            </if>
+            <if test="senderStationCode != null">
+                sender_station_code = #{senderStationCode},
+            </if>
+            <if test="transCode != null">
+                trans_code = #{transCode},
+            </if>
+            <if test="carCode != null">
+                car_code = #{carCode},
+            </if>
+            <if test="driverCode != null">
+                driver_code = #{driverCode},
+            </if>
+            <if test="lineCode != null">
+                line_code = #{lineCode},
+            </if>
+            <if test="dispatcherCode != null">
+                dispatcher_code = #{dispatcherCode},
+            </if>
+            <if test="planArrivalTime != null">
+                plan_arrival_time = #{planArrivalTime},
+            </if>
+            <if test="factArrivalTime != null">
+                fact_arrival_time = #{factArrivalTime},
+            </if>
+            <if test="deadlineTime != null">
+                deadline_time = #{deadlineTime},
+            </if>
+            <if test="startoffTime != null">
+                startoff_time = #{startoffTime},
+            </if>
+            <if test="arrivalTime != null">
+                arrival_time = #{arrivalTime},
+            </if>
+            <if test="temperatureType != null">
+                temperature_type = #{temperatureType},
+            </if>
+            <if test="generateMode != null">
+                generate_mode = #{generateMode},
+            </if>
+            <if test="shiftCode != null">
+                shift_code = #{shiftCode},
+            </if>
+            <if test="state != null">
+                state = #{state},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="closeTime != null">
+                close_time = #{closeTime},
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified},
+            </if>
+            <if test="creator != null">
+                creator = #{creator},
+            </if>
+            <if test="modifier != null">
+                modifier = #{modifier},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="planStartoffTime != null">
+                plan_startoff_time = #{planStartoffTime},
+            </if>
+            <if test="palletNumber != null">
+                pallet_number = #{palletNumber},
+            </if>
+            <if test="rollNumber != null">
+                roll_number = #{rollNumber},
+            </if>
+            <if test="payloadRatio != null">
+                payload_ratio = #{payloadRatio},
+            </if>
+            <if test="arrivalWsLongitude != null">
+                arrival_ws_longitude = #{arrivalWsLongitude},
+            </if>
+            <if test="arrivalWsLatitude != null">
+                arrival_ws_latitude = #{arrivalWsLatitude},
+            </if>
+            <if test="startoffLongitude != null">
+                startoff_longitude = #{startoffLongitude},
+            </if>
+            <if test="startoffLatitude != null">
+                startoff_latitude = #{startoffLatitude},
+            </if>
+            <if test="shiftPeriodTime != null">
+                shift_period_time = #{shiftPeriodTime},
+            </if>
+            <if test="publishState != null">
+                publish_state = #{publishState},
+            </if>
+            <if test="attendanceState != null">
+                attendance_state = #{attendanceState},
+            </if>
+            <if test="billingState != null">
+                billing_state = #{billingState},
+            </if>
+            <if test="carModelCode != null">
+                car_model_code = #{carModelCode},
+            </if>
+            <if test="lineName != null">
+                line_name = #{lineName},
+            </if>
+            <if test="driverPhone != null">
+                driver_phone = #{driverPhone},
+            </if>
+            <if test="transPlanType != null">
+                trans_plan_type = #{transPlanType},
+            </if>
+            <if test="loadingName != null">
+                loading_name = #{loadingName},
+            </if>
+            <if test="endStationCode != null">
+                end_station_code = #{endStationCode},
+            </if>
+            <if test="stationNum != null">
+                station_num = #{stationNum},
+            </if>
+            <if test="progressPercent != null">
+                progress_percent = #{progressPercent},
+            </if>
+            <if test="itineraryVerifyInfo != null">
+                itinerary_verify_info = #{itineraryVerifyInfo},
+            </if>
+            <if test="auditState != null">
+                audit_state = #{auditState},
+            </if>
+            <if test="quoteType != null">
+                quote_type = #{quoteType},
+            </if>
+            <if test="temporaryQuoteAmt != null">
+                temporary_quote_amt = #{temporaryQuoteAmt},
+            </if>
+            <if test="bizNatureCode != null">
+                biz_nature_code = #{bizNatureCode},
+            </if>
+            <if test="contractNo != null">
+                contract_no = #{contractNo},
+            </if>
+            <if test="contractVersion != null">
+                contract_version = #{contractVersion},
+            </if>
+            <if test="receiveState != null">
+                receive_state = #{receiveState},
+            </if>
+            <if test="receiveTime != null">
+                receive_time = #{receiveTime},
+            </if>
+            <if test="transName != null">
+                trans_name = #{transName},
+            </if>
+            <if test="transShortName != null">
+                trans_short_name = #{transShortName},
+            </if>
+            <if test="factCarModelCode != null">
+                fact_car_model_code = #{factCarModelCode},
+            </if>
+            <if test="factCarModelName != null">
+                fact_car_model_name = #{factCarModelName},
+            </if>
+            <if test="plateNumber != null">
+                plate_number = #{plateNumber},
+            </if>
+            <if test="driverName != null">
+                driver_name = #{driverName},
+            </if>
+            <if test="standardSealNum != null">
+                standard_seal_num = #{standardSealNum},
+            </if>
+            <if test="loadingState != null">
+                loading_state = #{loadingState},
+            </if>
+            <if test="stateRemark != null">
+                state_remark = #{stateRemark},
+            </if>
+            <if test="planCarModelName != null">
+                plan_car_model_name = #{planCarModelName},
+            </if>
+            <if test="planTemperatureType != null">
+                plan_temperature_type = #{planTemperatureType},
+            </if>
+            <if test="planLength != null">
+                plan_length = #{planLength},
+            </if>
+            <if test="planWidth != null">
+                plan_width = #{planWidth},
+            </if>
+            <if test="planHeight != null">
+                plan_height = #{planHeight},
+            </if>
+            <if test="factTemperatureType != null">
+                fact_temperature_type = #{factTemperatureType},
+            </if>
+            <if test="factLength != null">
+                fact_length = #{factLength},
+            </if>
+            <if test="factWidth != null">
+                fact_width = #{factWidth},
+            </if>
+            <if test="factHeight != null">
+                fact_height = #{factHeight},
+            </if>
+            <if test="externalOrderCode != null">
+                external_order_code = #{externalOrderCode},
+            </if>
+            <if test="externalSys != null">
+                external_sys = #{externalSys},
+            </if>
+            <if test="transportType != null">
+                transport_type = #{transportType},
+            </if>
+            <if test="dynamicFields != null">
+                dynamic_fields = #{dynamicFields},
+            </if>
+            <if test="loadingEndTime != null">
+                loading_end_time = #{loadingEndTime},
+            </if>
+            <if test="createFrom != null">
+                create_from = #{createFrom},
+            </if>
+            <if test="deliveryState != null">
+                delivery_state = #{deliveryState},
+            </if>
+            <if test="planPickNumber != null">
+                plan_pick_number = #{planPickNumber},
+            </if>
+            <if test="actualPickNumber != null">
+                actual_pick_number = #{actualPickNumber},
+            </if>
+            <if test="expectDischargeNumber != null">
+                expect_discharge_number = #{expectDischargeNumber},
+            </if>
+            <if test="planDischargeNumber != null">
+                plan_discharge_number = #{planDischargeNumber},
+            </if>
+            <if test="actualDischargeNumber != null">
+                actual_discharge_number = #{actualDischargeNumber},
+            </if>
+            <if test="orderNum != null">
+                order_num = #{orderNum},
+            </if>
+            version = version + 1
+        </set>
+        WHERE
+        merchant_code = #{merchantCode}
+        AND
+        loading_no = #{loadingNo}
+        AND
+        version = #{version}
+    </update>
+
+</mapper>

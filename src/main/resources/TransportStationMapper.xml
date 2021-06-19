@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whz.mapperinterface.TransportStationMapper">
+
+    <resultMap id="BaseResultMap" type="com.whz.transport.TransportStationDO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="wh_code" jdbcType="VARCHAR" property="whCode"/>
+        <result column="loading_no" jdbcType="VARCHAR" property="loadingNo"/>
+        <result column="seq" jdbcType="INTEGER" property="seq"/>
+        <result column="start_station_code" jdbcType="VARCHAR" property="startStationCode"/>
+        <result column="end_station_code" jdbcType="VARCHAR" property="endStationCode"/>
+        <result column="start_station_name" jdbcType="VARCHAR" property="startStationName"/>
+        <result column="end_station_name" jdbcType="VARCHAR" property="endStationName"/>
+        <result column="longitude" jdbcType="VARCHAR" property="longitude"/>
+        <result column="latitude" jdbcType="VARCHAR" property="latitude"/>
+        <result column="startoff_longitude" jdbcType="VARCHAR" property="startoffLongitude"/>
+        <result column="startoff_latitude" jdbcType="VARCHAR" property="startoffLatitude"/>
+        <result column="arrival_time" jdbcType="TIMESTAMP" property="arrivalTime"/>
+        <result column="startoff_time" jdbcType="TIMESTAMP" property="startoffTime"/>
+        <result column="plan_arrival_time" jdbcType="TIMESTAMP" property="planArrivalTime"/>
+        <result column="plan_startoff_time" jdbcType="TIMESTAMP" property="planStartoffTime"/>
+        <result column="app_arrival_time" jdbcType="TIMESTAMP" property="appArrivalTime"/>
+        <result column="app_startoff_time" jdbcType="TIMESTAMP" property="appStartoffTime"/>
+        <result column="manual_arrival_time" jdbcType="TIMESTAMP" property="manualArrivalTime"/>
+        <result column="manual_startoff_time" jdbcType="TIMESTAMP" property="manualStartoffTime"/>
+        <result column="stick_duration" jdbcType="INTEGER" property="stickDuration"/>
+        <result column="arrival_fence" jdbcType="VARCHAR" property="arrivalFence"/>
+        <result column="startoff_arrival_fence" jdbcType="VARCHAR" property="startoffArrivalFence"/>
+        <result column="standard_service_time" jdbcType="INTEGER" property="standardServiceTime"/>
+        <result column="state" jdbcType="VARCHAR" property="state"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="creator" jdbcType="VARCHAR" property="creator"/>
+        <result column="modifier" jdbcType="VARCHAR" property="modifier"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="verification_state" jdbcType="VARCHAR" property="verificationState"/>
+        <result column="hand_over_type" jdbcType="VARCHAR" property="handOverType"/>
+        <result column="plan_pick_number" jdbcType="BIGINT" property="planPickNumber"/>
+        <result column="actual_pick_number" jdbcType="BIGINT" property="actualPickNumber"/>
+        <result column="expect_discharge_number" jdbcType="BIGINT" property="expectDischargeNumber"/>
+        <result column="plan_discharge_number" jdbcType="BIGINT" property="planDischargeNumber"/>
+        <result column="actual_discharge_number" jdbcType="BIGINT" property="actualDischargeNumber"/>
+        <result column="connection_time" jdbcType="TIMESTAMP" property="connectionTime"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+        id, <include refid="base_colum_list_without_id"/>
+    </sql>
+    <sql id="base_colum_list_without_id">
+        wh_code,
+        gmt_create,
+        gmt_modified,
+        loading_no,
+        seq,
+        start_station_code,
+        end_station_code,
+        start_station_name,
+        end_station_name,
+        longitude,
+        latitude,
+        startoff_longitude,
+        startoff_latitude,
+        arrival_time,
+        startoff_time,
+        plan_arrival_time,
+        plan_startoff_time,
+        app_arrival_time,
+        app_startoff_time,
+        manual_arrival_time,
+        manual_startoff_time,
+        stick_duration,
+        arrival_fence,
+        startoff_arrival_fence,
+        standard_service_time,
+        state,
+        status,
+        creator,
+        modifier,
+        remark,
+        verification_state,
+        hand_over_type,
+        plan_pick_number,
+        actual_pick_number,
+        expect_discharge_number,
+        plan_discharge_number,
+        actual_discharge_number,
+        connection_time
+    </sql>
+
+    <sql id="base_query">
+        <trim prefix="where" prefixOverrides="and |or">
+            <if test="whCode != null">
+                and wh_code = #{whCode}
+            </if>
+        </trim>
+    </sql>
+
+    <insert id="batchInsert"
+            parameterType="com.whz.transport.TransportStationDO">
+        insert into tms_transport_station(<include refid="base_colum_list_without_id"/>)
+        values
+        <foreach collection="doList" item="item" index="index" separator=",">
+            (
+            #{item.whCode},
+            now(),
+            now(),
+            #{item.loadingNo},
+            #{item.seq},
+            #{item.startStationCode},
+            #{item.endStationCode},
+            #{item.startStationName},
+            #{item.endStationName},
+            #{item.longitude},
+            #{item.latitude},
+            #{item.startoffLongitude},
+            #{item.startoffLatitude},
+            #{item.arrivalTime},
+            #{item.startoffTime},
+            #{item.planArrivalTime},
+            #{item.planStartoffTime},
+            #{item.appArrivalTime},
+            #{item.appStartoffTime},
+            #{item.manualArrivalTime},
+            #{item.manualStartoffTime},
+            #{item.stickDuration},
+            #{item.arrivalFence},
+            #{item.startoffArrivalFence},
+            #{item.standardServiceTime},
+            #{item.state},
+            #{item.status},
+            #{item.creator},
+            #{item.modifier},
+            #{item.remark},
+            #{item.verificationState},
+            #{item.handOverType},
+            #{item.planPickNumber},
+            #{item.actualPickNumber},
+            #{item.expectDischargeNumber},
+            #{item.planDischargeNumber},
+            #{item.actualDischargeNumber},
+            #{item.connectionTime}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateConnectionTime">
+        update tms_transport_station
+        set
+        connection_time = #{connectionTime},
+        gmt_modified = now()
+        where wh_code = #{whCode}
+        and loading_no = #{loadingNo}
+        and end_station_code = #{endStationCode}
+    </update>
+
+    <update id="updateState">
+        update tms_transport_station
+        set
+        state = #{state},
+        gmt_modified = now()
+        where wh_code = #{whCode}
+        and loading_no = #{loadingNo}
+        and end_station_code = #{endStationCode}
+    </update>
+
+    <update id="updateVerificationState">
+        update tms_transport_station
+        set
+        verification_state = #{verificationState},
+        gmt_modified = now()
+        where wh_code = #{whCode}
+        and loading_no = #{loadingNo}
+        and end_station_code = #{endStationCode}
+    </update>
+
+    <update id="updateByLoadingNoAndStationCode" parameterType="com.whz.transport.TransportStationDO">
+        update tms_transport_station
+        <set>
+            <if test="seq != null">
+                seq = #{seq},
+            </if>
+            <if test="startStationCode != null">
+                start_station_code = #{startStationCode},
+            </if>
+
+            <if test="endStationCode != null">
+                end_station_code = #{endStationCode},
+            </if>
+
+            <if test="startStationName != null">
+                start_station_name = #{startStationName},
+            </if>
+
+            <if test="endStationName != null">
+                end_station_name = #{endStationName},
+            </if>
+
+            <if test="longitude != null">
+                longitude = #{longitude},
+            </if>
+
+            <if test="latitude != null">
+                latitude = #{latitude},
+            </if>
+
+            <if test="startoffLongitude != null">
+                startoff_longitude = #{startoffLongitude},
+            </if>
+
+            <if test="startoffLatitude != null">
+                startoff_latitude = #{startoffLatitude},
+            </if>
+
+            <if test="arrivalTime != null">
+                arrival_time = #{arrivalTime},
+            </if>
+
+            <if test="startoffTime != null">
+                startoff_time = #{startoffTime},
+            </if>
+
+            <if test="planArrivalTime != null">
+                plan_arrival_time = #{planArrivalTime},
+            </if>
+
+            <if test="planStartoffTime != null">
+                plan_startoff_time = #{planStartoffTime},
+            </if>
+
+            <if test="appArrivalTime != null">
+                app_arrival_time = #{appArrivalTime},
+            </if>
+
+            <if test="appStartoffTime != null">
+                app_startoff_time = #{appStartoffTime},
+            </if>
+
+            <if test="manualArrivalTime != null">
+                manual_arrival_time = #{manualArrivalTime},
+            </if>
+
+            <if test="manualStartoffTime != null">
+                manual_startoff_time = #{manualStartoffTime},
+            </if>
+
+            <if test="stickDuration != null">
+                stick_duration = #{stickDuration},
+            </if>
+
+            <if test="arrivalFence != null">
+                arrival_fence = #{arrivalFence},
+            </if>
+
+            <if test="startoffArrivalFence != null">
+                startoff_arrival_fence = #{startoffArrivalFence},
+            </if>
+
+            <if test="standardServiceTime != null">
+                standard_service_time = #{standardServiceTime},
+            </if>
+
+            <if test="state != null">
+                state = #{state},
+            </if>
+
+            <if test="status != null">
+                status = #{status},
+            </if>
+
+            <if test="modifier != null">
+                modifier = #{modifier},
+            </if>
+
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+
+            <if test="verificationState != null">
+                verification_state = #{verificationState},
+            </if>
+            <if test="handOverType != null">
+                hand_over_type = #{handOverType},
+            </if>
+            <if test="planPickNumber != null">
+                plan_pick_number = #{planPickNumber},
+            </if>
+            <if test="actualPickNumber != null">
+                actual_pick_number = #{actualPickNumber},
+            </if>
+            <if test="expectDischargeNumber != null">
+                expect_discharge_number = #{expectDischargeNumber},
+            </if>
+            <if test="planDischargeNumber != null">
+                plan_discharge_number = #{planDischargeNumber},
+            </if>
+            <if test="actualDischargeNumber != null">
+                actual_discharge_number = #{actualDischargeNumber},
+            </if>
+            <if test="connectionTime != null">
+                connection_time = #{connectionTime},
+            </if>
+            gmt_modified = now()
+        </set>
+        where wh_code = #{whCode}
+        and loading_no = #{loadingNo}
+        and end_station_code = #{endStationCode}
+    </update>
+
+    <select id="getListByLoadingNo" resultMap="BaseResultMap">
+        select <include refid="base_column_list"/>
+        from tms_transport_station
+        where wh_code = #{whCode} and loading_no = #{loadingNo}
+    </select>
+
+    <select id="getTransportStation" resultMap="BaseResultMap">
+        select <include refid="base_column_list"/>
+        from tms_transport_station
+        where wh_code = #{whCode} and loading_no = #{loadingNo} and end_station_code = #{endStationCode}
+    </select>
+</mapper>
