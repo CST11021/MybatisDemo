@@ -100,14 +100,14 @@ public interface SqlSession extends Closeable {
     void clearCache();
 
     /**
-     * Retrieves current configuration
+     * 获取当前的mybatis全局配置
      *
      * @return
      */
     Configuration getConfiguration();
 
     /**
-     * 根据 type 获取Mapper接口
+     * 根据 type 获取Mapper接口实例
      *
      * @param type
      * @param <T>
@@ -116,7 +116,7 @@ public interface SqlSession extends Closeable {
     <T> T getMapper(Class<T> type);
 
     /**
-     * Retrieves inner database connection
+     * 获取一个数据库连接
      *
      * @return
      */

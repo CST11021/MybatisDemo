@@ -152,7 +152,7 @@ public class Configuration {
      */
     protected final Map<String, ParameterMap> parameterMaps = new StrictMap<ParameterMap>("Parameter Maps collection");
     /**
-     * 配置SQL的id，及对应的配置的KeyGenerator实例，key例如：com.whz.mapperinterface.IEmployeerMapper.addEmployeer!selectKey
+     * 配置SQL的id，及对应的配置的KeyGenerator实例，key例如：com.whz.mybatis.mapperinterface.IEmployeerMapper.addEmployeer!selectKey
      */
     protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<KeyGenerator>("Key Generators collection");
     /**
@@ -428,7 +428,7 @@ public class Configuration {
     /**
      * SQL id对应的key生成器
      *
-     * @param id                对应配置SQL的id，例如：com.whz.mapperinterface.IEmployeerMapper.addEmployeer!selectKey
+     * @param id                对应配置SQL的id，例如：com.whz.mybatis.IEmployeerMapper.addEmployeer!selectKey
      * @param keyGenerator      KeyGenerator实例
      */
     public void addKeyGenerator(String id, KeyGenerator keyGenerator) {

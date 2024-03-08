@@ -1,6 +1,6 @@
 package com.whz.mybatis.cache;
 
-import com.whz.entity.Employeer;
+import com.whz.mybatis.entity.Employeer;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;

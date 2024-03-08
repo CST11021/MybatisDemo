@@ -59,7 +59,7 @@ public class Employeer implements Serializable {
 	}
 	@Override
 	public String toString() {
-		return "com.whz.entity.Employeer [employeer_id=" + employeer_id + ", employeer_name="
+		return "com.whz.mybatis.Employeer [employeer_id=" + employeer_id + ", employeer_name="
 				+ employeer_name + ", employeer_age=" + employeer_age
 				+ ", employeer_department=" + employeer_department
 				+ ", employeer_worktype=" + employeer_worktype + "]";

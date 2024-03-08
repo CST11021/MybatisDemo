@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
-import com.whz.entity.Employeer;
 import org.apache.ibatis.lang.UsesJava7;
 import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.session.SqlSession;
@@ -78,8 +77,8 @@ public class MapperProxy<T> implements InvocationHandler, Serializable {
                 // mapper接口对应的 MapperProxyFactory 然后动态生成一个代理的实现类，并调用代理类的相应方法执行增删改查操作。
                 // 但是从java8开始，接口方法可以被default关键字修饰，如果是被default修饰的接口则调用相应的默认方法。
                 // 第一种：Employeer employeer = session.selectOne("findEmployeerByID", 5);
-                // 第二种：Employeer employeer = session.selectOne("com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
-                // 第三种：Employeer employeer = session.getMapper(com.whz.mapperinterface.IEmployeerMapper.class).findEmployeerByID(5);
+                // 第二种：Employeer employeer = session.selectOne("com.whz.mybatis.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
+                // 第三种：Employeer employeer = session.getMapper(com.whz.mybatis.mapperinterface.IEmployeerMapper.class).findEmployeerByID(5);
 
                 // 补充说明一下：其实第一、二种方法的执行效率会比第三种效率来得高，因为生成的代理对象最终还会调用第一、二种方法执行
                 return invokeDefaultMethod(proxy, method, args);

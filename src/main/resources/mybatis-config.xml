@@ -18,7 +18,7 @@
 	</settings>
 
 	<typeAliases>
-		<typeAlias type="com.whz.entity.Employeer" alias="alias_Employeer"/>
+		<typeAlias type="com.whz.mybatis.entity.Employeer" alias="alias_Employeer"/>
 	</typeAliases>
 
 	<environments default="development">
@@ -37,7 +37,7 @@
 
 	<mappers>
 		<mapper resource="IEmployeerMapper.xml"/>
-		<!--<package name="com.whz.mapperinterface"/>-->
+		<!--<package name="com.whz.mybatis.dao"/>-->
 	</mappers>
 
 </configuration>

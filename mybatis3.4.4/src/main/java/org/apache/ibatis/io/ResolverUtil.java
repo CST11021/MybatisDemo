@@ -200,12 +200,12 @@ public class ResolverUtil<T> {
      * 如果fqn对应的类是 test 对应的parent Class的实例，则将该类加入到matches
      *
      * @param test  封装一个Class，并提供一个指定的类型是否为该class的实例的方法
-     * @param fqn   fqn表示一个class类的路径，比如：com/whz/mapperinterface/com.whz.mapperinterface.IEmployeerMapper.class
+     * @param fqn   fqn表示一个class类的路径，比如：com/whz/mapperinterface/com.whz.mybatis.mapperinterface.IEmployeerMapper.class
      */
     @SuppressWarnings("unchecked")
     protected void addIfMatching(Test test, String fqn) {
         try {
-            // 比如：将com/whz/mapperinterface/com.whz.mapperinterface.IEmployeerMapper.class 转化为 com.whz.mapperinterface.IEmployeerMapper.class
+            // 比如：将com/whz/mapperinterface/com.whz.mybatis.IEmployeerMapper.class 转化为 com.whz.mybatis.IEmployeerMapper.class
             String externalName = fqn.substring(0, fqn.indexOf('.')).replace('/', '.');
             ClassLoader loader = getClassLoader();
             if (log.isDebugEnabled()) {

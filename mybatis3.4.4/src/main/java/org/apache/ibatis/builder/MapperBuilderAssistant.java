@@ -56,7 +56,7 @@ import org.apache.ibatis.type.TypeHandler;
  */
 public class MapperBuilderAssistant extends BaseBuilder {
 
-    /** 表示 <mapper namespace="xxx"> 配置的命名空间，例如：<mapper namespace="com.whz.mapperinterface.IEmployeerMapper"> */
+    /** 表示 <mapper namespace="xxx"> 配置的命名空间，例如：<mapper namespace="com.whz.mybatis.IEmployeerMapper"> */
     private String currentNamespace;
     /** 表示当前解析对应的配置资源，一般对应的配置文件：IEmployeerMapper.xml，也有可能是使用注解的接口类 */
     private String resource;

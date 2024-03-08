@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * 对应<parameterMap>标签，例如：
- * <parameterMap id="userParameterMap" type="com.whz.entity.User">
+ * <parameterMap id="userParameterMap" type="com.whz.mybatis.entity.User">
  *      <parameter property="age" jdbcType="int" typeHandler="INTEGER" javaType="int" resultMap="userResultMap" mode="" scale=""/>
  *      省略。。。
  * </parameterMap>

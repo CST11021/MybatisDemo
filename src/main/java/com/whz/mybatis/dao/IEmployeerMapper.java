@@ -1,8 +1,7 @@
-package com.whz.mapperinterface;
+package com.whz.mybatis.dao;
 
-import com.whz.entity.Employeer;
+import com.whz.mybatis.entity.Employeer;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 import java.util.Map;

@@ -160,7 +160,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     private void bindMapperForNamespace() {
         String namespace = builderAssistant.getCurrentNamespace();
         if (namespace != null) {
-            // namespace表示 <mapper namespace="xxx"> 配置的命名空间，这里对应的Mapper接口，例如：<mapper namespace="com.whz.mapperinterface.IEmployeerMapper">
+            // namespace表示 <mapper namespace="xxx"> 配置的命名空间，这里对应的Mapper接口，例如：<mapper namespace="com.whz.mybatis.mapperinterface.IEmployeerMapper">
             Class<?> boundType = null;
             try {
                 boundType = Resources.classForName(namespace);
@@ -200,7 +200,7 @@ public class XMLMapperBuilder extends BaseBuilder {
      */
     private void configurationElement(XNode context) {
         try {
-            // 例如：<mapper namespace="com.whz.mapperinterface.IEmployeerMapper"> 获取该配置的命名空间
+            // 例如：<mapper namespace="com.whz.mybatis.mapperinterface.IEmployeerMapper"> 获取该配置的命名空间
             String namespace = context.getStringAttribute("namespace");
             if (namespace == null || namespace.equals("")) {
                 throw new BuilderException("Mapper's namespace cannot be empty");
@@ -309,7 +309,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     /**
      * 解析<parameterMap>标签，例如：
-     * <parameterMap id="userParameterMap" type="com.whz.entity.User">
+     * <parameterMap id="userParameterMap" type="com.whz.mybatis.entity.User">
      *      <parameter property="age" jdbcType="int" typeHandler="INTEGER" javaType="int" resultMap="userResultMap" mode="" scale=""/>
      *      省略。。。
      * </parameterMap>

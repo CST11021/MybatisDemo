@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.whz.entity.Employeer;
 import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
 import org.apache.ibatis.executor.keygen.KeyGenerator;
@@ -44,10 +43,10 @@ public final class MappedStatement {
     /**
      * 表示该MappedStatement对应的id，这里使用方法名作为id，每个id对应一个MappedStatement应用，在解析过程中，同一个MappedStatement对象对应两个不同的id，如：
      * 1、key:findEmployeerByID
-     * 2、key:com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID
+     * 2、key:com.whz.mybatis.mapperinterface.IEmployeerMapper.findEmployeerByID
      * 这样就可以使用如下两个方式调用对应的Mapper接口
      * Employeer employeer = session.selectOne("findEmployeerByID", 5);
-     * Employeer employeer = session.selectOne("com.whz.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
+     * Employeer employeer = session.selectOne("com.whz.mybatis.mapperinterface.IEmployeerMapper.findEmployeerByID", 5);
      */
     private String id;
     /** 如果没有特别指定fetchSize，默认为null */
