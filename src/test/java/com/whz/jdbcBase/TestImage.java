@@ -9,10 +9,10 @@ import java.sql.*;
 create database Image;
 use Image;
 create table country (
-id int primary key auto_increment,
-name varchar(30),
-flag blob,
-description varchar(255)
+	id int primary key auto_increment,
+	name varchar(30),
+	flag blob,
+	description varchar(255)
 );*/
 public class TestImage {
     private static final String URL = "jdbcBase:mysql://localhost/Image?user=root&password=123456&useUnicode=true";

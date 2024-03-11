@@ -7,7 +7,7 @@
     Employeer employeer = (Employeer) session.selectOIEmployeerMapperpper.findEmployeerByID", id);
 	Employeer employeer = session.getMapcom.whz.mapperinterface.IEmployeerMapperpper.class).findEmployeerByID(id);
     -->
-<mapper namespace="com.whz.mybatis.mapperinterface.IEmployeerMapper">
+<mapper namespace="com.whz.mybatis.dao.IEmployeerMapper">
 
     <sql id="selectAllEmployeer">select * from `t_employeer`</sql>
 

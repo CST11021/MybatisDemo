@@ -269,10 +269,12 @@ public class Configuration {
         typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
         typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
 
+        // 数据源的实现
         typeAliasRegistry.registerAlias("JNDI", JndiDataSourceFactory.class);
         typeAliasRegistry.registerAlias("POOLED", PooledDataSourceFactory.class);
         typeAliasRegistry.registerAlias("UNPOOLED", UnpooledDataSourceFactory.class);
 
+        // 缓存的实现
         typeAliasRegistry.registerAlias("PERPETUAL", PerpetualCache.class);
         typeAliasRegistry.registerAlias("FIFO", FifoCache.class);
         typeAliasRegistry.registerAlias("LRU", LruCache.class);
@@ -284,6 +286,7 @@ public class Configuration {
         typeAliasRegistry.registerAlias("XML", XMLLanguageDriver.class);
         typeAliasRegistry.registerAlias("RAW", RawLanguageDriver.class);
 
+        // 日志的实现
         typeAliasRegistry.registerAlias("SLF4J", Slf4jImpl.class);
         typeAliasRegistry.registerAlias("COMMONS_LOGGING", JakartaCommonsLoggingImpl.class);
         typeAliasRegistry.registerAlias("LOG4J", Log4jImpl.class);
@@ -292,6 +295,7 @@ public class Configuration {
         typeAliasRegistry.registerAlias("STDOUT_LOGGING", StdOutImpl.class);
         typeAliasRegistry.registerAlias("NO_LOGGING", NoLoggingImpl.class);
 
+        // 动态代理的实现
         typeAliasRegistry.registerAlias("CGLIB", CglibProxyFactory.class);
         typeAliasRegistry.registerAlias("JAVASSIST", JavassistProxyFactory.class);
 

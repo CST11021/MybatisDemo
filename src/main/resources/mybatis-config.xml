@@ -36,8 +36,8 @@
 	</environments>
 
 	<mappers>
-		<mapper resource="IEmployeerMapper.xml"/>
-		<!--<package name="com.whz.mybatis.dao"/>-->
+		<!-- 配置一个个mapper.xml文件 -->
+		<mapper resource="mapper/IEmployeerMapper.xml"/>
 	</mappers>
 
 </configuration>

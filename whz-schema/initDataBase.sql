@@ -1,3 +1,6 @@
+create database whz_db_mybatis_demo_test;
+use whz_db_mybatis_demo_test;
+
 SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
